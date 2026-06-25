@@ -1,0 +1,4 @@
+Deck cree pour une defense TFE SaveFunds de 15 a 20 minutes.
+Contenu base sur les informations fournies par l'utilisateur et l'audit local du projet.
+Technologies: Spring Boot 3.4, Java 21, PostgreSQL, Vue 3/Vite, JWT, Flyway, Docker, GitHub Actions.
+Les valeurs des scenarios de demo sont des jeux de test pedagogiques proposes pendant la preparation.

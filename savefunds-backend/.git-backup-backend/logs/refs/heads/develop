@@ -1,0 +1,5 @@
+0000000000000000000000000000000000000000 610cf24d8cab8056b0ef988ab1df0fa9bd7a9d2b christian s.m <christian.sandjongmotio@hr-rail.be> 1779102743 +0200	branch: Created from HEAD
+610cf24d8cab8056b0ef988ab1df0fa9bd7a9d2b 338cecc48116c59a843c15dfbd334aa4604bb5cd christian s.m <christian.sandjongmotio@hr-rail.be> 1780845114 +0200	commit: j'ai corrigé le bug sur le resultat d'analyse
+338cecc48116c59a843c15dfbd334aa4604bb5cd 1ba3c48400cfbf994a39a16c7b7c2ebf5f76be89 christian s.m <christian.sandjongmotio@hr-rail.be> 1780845364 +0200	pull origin develop --rebase (finish): refs/heads/develop onto c4bdb41ca54bea0aeaf194b50b5790832d830150
+1ba3c48400cfbf994a39a16c7b7c2ebf5f76be89 9f339b267c110e0f793b0f510894b9b7f4ba033f christian s.m <christian.sandjongmotio@hr-rail.be> 1780852005 +0200	commit: fix: compte courant débiteur - date début + minimum 1 jour
+9f339b267c110e0f793b0f510894b9b7f4ba033f a3bbc68abbbce4df3d7e09591e4b304940ebf1b2 christian s.m <christian.sandjongmotio@hr-rail.be> 1781029296 +0200	commit: feat: recommandation globale contextuelle selon montant vs max prélevable

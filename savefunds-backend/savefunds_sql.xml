@@ -1,0 +1,304 @@
+<mxfile host="app.diagrams.net">
+    <diagram name="SaveFunds Database Schema" id="savefunds-db-final">
+        <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0" />
+                <mxCell id="1" parent="0" />
+
+                <!-- TABLE USERS -->
+                <mxCell id="table-users" value="&lt;b&gt;users&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="40" width="240" height="270" as="geometry" />
+                </mxCell>
+                <mxCell id="user-pk" value="🔑 id : BIGINT (PK, AUTO)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1" vertex="1" parent="table-users">
+                    <mxGeometry y="30" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f1" value="email : VARCHAR(255) UNIQUE" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="60" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f2" value="password_hash : VARCHAR(255)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="90" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f3" value="nom : VARCHAR(255)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="120" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f4" value="prenom : VARCHAR(255)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="150" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f5" value="email_verified : BOOLEAN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="180" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f6" value="role : ENUM (DIRIGEANT, ADMIN)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="210" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="user-f7" value="created_at : TIMESTAMP" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-users">
+                    <mxGeometry y="240" width="240" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- TABLE ENTREPRISES -->
+                <mxCell id="table-entreprises" value="&lt;b&gt;entreprises&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="40" width="300" height="420" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-pk" value="🔑 id : BIGINT (PK, AUTO)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="30" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-fk" value="🔗 user_id : BIGINT (FK)" style="text;strokeColor=none;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#d6b656;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="60" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f1" value="raison_sociale : VARCHAR(255)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="90" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f2" value="numero_entreprise : VARCHAR(50)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="120" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f3" value="forme_juridique : VARCHAR(255)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="150" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f4" value="secteur_activite : VARCHAR(255)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="180" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f5" value="chiffre_affaires_mensuel : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="210" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f6" value="charges_mensuelles : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="240" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f7" value="tresorerie : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="270" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f8" value="solde_compte_courant : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="300" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f9" value="statut : ENUM (StatutEntreprise)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="330" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f10" value="created_at : TIMESTAMP" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="360" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ent-f11" value="updated_at : TIMESTAMP" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-entreprises">
+                    <mxGeometry y="390" width="300" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- TABLE ANALYSES_PRELEVEMENT -->
+                <mxCell id="table-analyses" value="&lt;b&gt;analyses_prelevement&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="510" width="300" height="390" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-pk" value="🔑 id : BIGINT (PK, AUTO)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1" vertex="1" parent="table-analyses">
+                    <mxGeometry y="30" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-fk" value="🔗 entreprise_id : BIGINT (FK)" style="text;strokeColor=none;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#d6b656;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="60" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f1" value="montant : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="90" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f2" value="nature : ENUM (NaturePrelevement)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="120" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f3" value="justification : TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="150" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f4" value="statut : ENUM (StatutAnalyse)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="180" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f5" value="decision : ENUM (Decision)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="210" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f6" value="score_global : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="240" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f7" value="delai_remboursement_jours : INTEGER" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="270" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f8" value="recommandations : TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="300" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f9" value="created_at : TIMESTAMP" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="330" width="300" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="ana-f10" value="analysed_at : TIMESTAMP" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-analyses">
+                    <mxGeometry y="360" width="300" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- TABLE RESULTATS_ANALYSE -->
+                <mxCell id="table-resultats" value="&lt;b&gt;resultats_analyse&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+                    <mxGeometry x="740" y="510" width="320" height="540" as="geometry" />
+                </mxCell>
+                <mxCell id="res-pk" value="🔑 id : BIGINT (PK, AUTO)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1" vertex="1" parent="table-resultats">
+                    <mxGeometry y="30" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-fk" value="🔗 analyse_id : BIGINT (FK, UNIQUE)" style="text;strokeColor=none;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#d6b656;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="60" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f1" value="score_tresorerie : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="90" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f2" value="score_ratio_ca_charges : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="120" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f3" value="score_compte_courant : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="150" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f4" value="score_global : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="180" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f5" value="decision_tresorerie : ENUM (Decision)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="210" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f6" value="decision_ratio_ca_charges : ENUM" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="240" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f7" value="decision_compte_courant : ENUM" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="270" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f8" value="decision_globale : ENUM (NOT NULL)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="300" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f9" value="tresorerie_en_mois : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="330" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f10" value="ratio_ca_charges : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="360" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f11" value="duree_compte_courant_debiteur : INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="390" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f12" value="analyse_tresorerie : TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="420" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f13" value="analyse_ratio_ca_charges : TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="450" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="res-f14" value="analyse_compte_courant : TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-resultats">
+                    <mxGeometry y="480" width="320" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- TABLE SITUATIONS_FINANCIERES -->
+                <mxCell id="table-situations" value="&lt;b&gt;situations_financieres&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+                    <mxGeometry x="740" y="40" width="320" height="420" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-pk" value="🔑 id : BIGINT (PK, AUTO)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1" vertex="1" parent="table-situations">
+                    <mxGeometry y="30" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-fk" value="🔗 entreprise_id : BIGINT (FK)" style="text;strokeColor=none;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#d6b656;" vertex="1" parent="table-situations">
+                    <mxGeometry y="60" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f1" value="chiffre_affaires_mensuel : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="90" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f2" value="charges_mensuelles : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="120" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f3" value="tresorerie : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="150" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f4" value="solde_compte_courant : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="180" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f5" value="ratio_ca_charges : DECIMAL(5,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="210" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f6" value="tresorerie_en_mois : DECIMAL(19,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="240" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f7" value="duree_compte_courant_debiteur : INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="270" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f8" value="captured_at : TIMESTAMP" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="300" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f9" value="source : VARCHAR(20)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="330" width="320" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="sit-f10" value="notes : TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="table-situations">
+                    <mxGeometry y="360" width="320" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- RELATIONS -->
+
+                <!-- User -> Entreprise (1 to 1) -->
+                <mxCell id="rel1" value="" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERoneToOne;startArrow=ERmandOne;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="user-pk" target="ent-fk">
+                    <mxGeometry width="100" height="100" relative="1" as="geometry">
+                        <mxPoint x="280" y="100" as="sourcePoint" />
+                        <mxPoint x="360" y="100" as="targetPoint" />
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Entreprise -> Analyse (1 to N) -->
+                <mxCell id="rel2" value="" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmany;startArrow=ERmandOne;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="table-entreprises" target="table-analyses">
+                    <mxGeometry width="100" height="100" relative="1" as="geometry">
+                        <mxPoint x="510" y="460" as="sourcePoint" />
+                        <mxPoint x="510" y="510" as="targetPoint" />
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Analyse -> Resultat (1 to 1) -->
+                <mxCell id="rel3" value="" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERmandOne;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="ana-pk" target="res-fk">
+                    <mxGeometry width="100" height="100" relative="1" as="geometry">
+                        <mxPoint x="660" y="570" as="sourcePoint" />
+                        <mxPoint x="740" y="570" as="targetPoint" />
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Entreprise -> Situation (1 to N) -->
+                <mxCell id="rel4" value="" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmany;startArrow=ERmandOne;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="ent-pk" target="sit-fk">
+                    <mxGeometry width="100" height="100" relative="1" as="geometry">
+                        <mxPoint x="660" y="100" as="sourcePoint" />
+                        <mxPoint x="740" y="100" as="targetPoint" />
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- LÉGENDE -->
+                <mxCell id="legend-box" value="&lt;b&gt;LÉGENDE&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="360" width="240" height="240" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-1" value="🔑 = Clé primaire (PK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="legend-box">
+                    <mxGeometry y="30" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-2" value="🔗 = Clé étrangère (FK)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="legend-box">
+                    <mxGeometry y="60" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-3" value="Relations simples (Long)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="legend-box">
+                    <mxGeometry y="90" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-4" value="Pas de @ManyToOne" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="legend-box">
+                    <mxGeometry y="120" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-5" value="🔵 users - Authentification" style="text;strokeColor=none;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#6c8ebf;" vertex="1" parent="legend-box">
+                    <mxGeometry y="150" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-6" value="🟢 entreprises - Profils" style="text;strokeColor=none;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#82b366;" vertex="1" parent="legend-box">
+                    <mxGeometry y="180" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="legend-7" value="🟣 situations - Historique" style="text;strokeColor=none;fillColor=#e1d5e7;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;strokeColor=#9673a6;" vertex="1" parent="legend-box">
+                    <mxGeometry y="210" width="240" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- ENUMS BOX -->
+                <mxCell id="enums-box" value="&lt;b&gt;ENUMS&lt;/b&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="650" width="240" height="240" as="geometry" />
+                </mxCell>
+                <mxCell id="enum-1" value="Decision: VERT/ORANGE/ROUGE" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="enums-box">
+                    <mxGeometry y="30" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="enum-2" value="Role: DIRIGEANT/ADMIN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="enums-box">
+                    <mxGeometry y="60" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="enum-3" value="NaturePrelevement: 4 valeurs" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="enums-box">
+                    <mxGeometry y="90" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="enum-4" value="StatutAnalyse: 7 valeurs" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="enums-box">
+                    <mxGeometry y="120" width="240" height="30" as="geometry" />
+                </mxCell>
+                <mxCell id="enum-5" value="StatutEntreprise: 5 valeurs" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="enums-box">
+                    <mxGeometry y="150" width="240" height="30" as="geometry" />
+                </mxCell>
+
+                <!-- TITRE -->
+                <mxCell id="title" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;SaveFunds - Schéma Base de Données COMPLET&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Spring Boot 3.3.6 | PostgreSQL / H2 | JPA Entities&lt;br&gt;5 Tables | Relations Simples (Long FK) | 5 Enums&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="1100" width="720" height="80" as="geometry" />
+                </mxCell>
+
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

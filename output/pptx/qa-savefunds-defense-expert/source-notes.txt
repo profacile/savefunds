@@ -1,0 +1,4 @@
+Deck expert créé pour une défense TFE SaveFunds de 15 à 20 minutes.
+Contenu basé sur le projet local SaveFunds, les informations utilisateur et les corrections réalisées dans le backend/frontend.
+Le frontend du projet local est Vue/Vite, même si certains documents initiaux mentionnaient Angular.
+Les références BNB/IRE/CIR92/CSA sont présentées comme cadre métier de vigilance, pas comme consultation juridique exhaustive.

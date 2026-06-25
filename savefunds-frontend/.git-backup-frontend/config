@@ -1,0 +1,16 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "savefunds-frontend"]
+	url = https://github.com/profacile/savefunds-frontend.git
+	fetch = +refs/heads/*:refs/remotes/savefunds-frontend/*
+[branch "develop"]
+	remote = savefunds-frontend
+	merge = refs/heads/develop
+[branch "main"]
+	remote = savefunds-frontend
+	merge = refs/heads/main

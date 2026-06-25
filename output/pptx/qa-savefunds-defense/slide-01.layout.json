@@ -1,0 +1,382 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/m1v27n",
+    "id": "m1v27n",
+    "slide": 1,
+    "layoutId": "9f6b25fd-2e38-4871-a255-dc0264ee7e70",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "d1e27a4d-08e7-4087-ad51-c7b98fb92426",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#081427",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "9f6b25fd-2e38-4871-a255-dc0264ee7e70",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "d1e27a4d-08e7-4087-ad51-c7b98fb92426",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "d1e27a4d-08e7-4087-ad51-c7b98fb92426",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rqd4vmtw",
+      "id": "1",
+      "name": "accent",
+      "bbox": [
+        0,
+        0,
+        18,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#0EA5E9",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kb6xkf6d",
+      "id": "2",
+      "name": "brand",
+      "bbox": [
+        72,
+        62,
+        260,
+        34
+      ],
+      "geometry": "rect",
+      "text": "SAVEFUNDS",
+      "textPreview": "SAVEFUNDS",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Aptos",
+        "color": "#0EA5E9",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SAVEFUNDS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SAVEFUNDS",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Aptos",
+            "color": "#0EA5E9",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "SAVEFUNDS",
+              "fontSize": 16,
+              "typeface": "Aptos",
+              "color": "#0EA5E9",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9w3m94fu",
+      "id": "3",
+      "name": "main-title",
+      "bbox": [
+        72,
+        178,
+        900,
+        160
+      ],
+      "geometry": "rect",
+      "text": "Solution d'aide a la decision pour les retraits financiers en PME",
+      "textPreview": "Solution d'aide a la decision pour les retraits financiers en PME",
+      "resolvedFontSize": 48,
+      "resolvedTextStyle": {
+        "fontSize": 48,
+        "typeface": "Aptos",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Solution d'aide a la decision pour les"
+          },
+          {
+            "index": 2,
+            "text": "retraits financiers en PME"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Solution d'aide a la decision pour les retraits financiers en PME",
+          "resolvedTextStyle": {
+            "fontSize": 48,
+            "typeface": "Aptos",
+            "color": "#FFFFFF",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Solution d'aide a la decision pour les retraits financiers en PME",
+              "fontSize": 48,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2t83itgf",
+      "id": "4",
+      "name": "subtitle",
+      "bbox": [
+        76,
+        358,
+        820,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Defense TFE - application full-stack Spring Boot / Vue / PostgreSQL",
+      "textPreview": "Defense TFE - application full-stack Spring Boot / Vue / PostgreSQL",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Aptos",
+        "color": "#C7D2FE",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Defense TFE - application full-stack Spring Boot / Vue / PostgreSQL"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Defense TFE - application full-stack Spring Boot / Vue / PostgreSQL",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Aptos",
+            "color": "#C7D2FE"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Defense TFE - application full-stack Spring Boot / Vue / PostgreSQL",
+              "fontSize": 24,
+              "typeface": "Aptos",
+              "color": "#C7D2FE"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1w7mp0",
+      "id": "5",
+      "name": "author",
+      "bbox": [
+        76,
+        575,
+        600,
+        78
+      ],
+      "geometry": "rect",
+      "text": "Steve Djomatchoua Monthe\nBachelier en informatique - HEPL\nAnnee academique 2025-2026",
+      "textPreview": "Steve Djomatchoua Monthe | Bachelier en informatique - HEPL | Annee academique 2025-2026",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Aptos",
+        "color": "#D7DEE9",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Steve Djomatchoua Monthe"
+          },
+          {
+            "index": 2,
+            "text": "Bachelier en informatique - HEPL"
+          },
+          {
+            "index": 3,
+            "text": "Annee academique 2025-2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Steve Djomatchoua Monthe",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Aptos",
+            "color": "#D7DEE9"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Steve Djomatchoua Monthe",
+              "fontSize": 16,
+              "typeface": "Aptos",
+              "color": "#D7DEE9"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "Bachelier en informatique - HEPL",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Aptos",
+            "color": "#D7DEE9"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Bachelier en informatique - HEPL",
+              "fontSize": 16,
+              "typeface": "Aptos",
+              "color": "#D7DEE9"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "Annee academique 2025-2026",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Aptos",
+            "color": "#D7DEE9"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Annee academique 2025-2026",
+              "fontSize": 16,
+              "typeface": "Aptos",
+              "color": "#D7DEE9"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

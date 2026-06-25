@@ -1,0 +1,5 @@
+date,description,amount,balance
+2026-06-01,Client facture 001,5000,12000
+2026-06-05,Loyer,-1200,10800
+2026-06-10,TVA,-2500,8300
+2026-06-15,Fournisseur,-900,7400

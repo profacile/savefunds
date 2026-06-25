@@ -1,0 +1,376 @@
+{"kind":"deck","id":"pr/c9kknt","name":"Deck"}
+{"kind":"layout","layoutId":"daf530fd-ecd2-4e72-af7f-e6a514cad56f","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"2d0cb05e-e164-44eb-9fe1-6cd3adf3bfb9","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/srktih","slide":1,"title":"SAVEFUNDS","textShapes":4}
+{"kind":"shape","id":"sh/re1w7mp0","slide":1,"name":"accent","bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":1,"name":"brand","text":"SAVEFUNDS","textPreview":"SAVEFUNDS","textChars":9,"textLines":1,"bbox":[72,62,260,34]}
+{"kind":"textbox","id":"sh/9knih4by","slide":1,"name":"main-title","text":"Solution d'aide à la décision pour les retraits financiers en PME","textPreview":"Solution d'aide à la décision pour les retraits financiers en PME","textChars":65,"textLines":1,"bbox":[72,178,900,160]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":1,"name":"subtitle","text":"Défense TFE - application full-stack Spring Boot / Vue / PostgreSQL","textPreview":"Défense TFE - application full-stack Spring Boot / Vue / PostgreSQL","textChars":67,"textLines":1,"bbox":[76,358,820,48]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":1,"name":"author","text":"Steve Djomatchoua Monthe\nBachelier en informatique - HEPL\nAnnee academique 2025-2026","textPreview":"Steve Djomatchoua Monthe | Bachelier en informatique - HEPL | Annee academique 2025-2026","textChars":84,"textLines":3,"bbox":[76,575,600,78]}
+{"kind":"notes","id":"nt/srktih","slide":1,"text":""}
+{"kind":"slide","id":"sl/s4a4mz","slide":2,"title":"01 - Fil conducteur","textShapes":11}
+{"kind":"shape","id":"sh/hgn29gr2","slide":2,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":2,"name":"section","text":"01 - Fil conducteur","textPreview":"01 - Fil conducteur","textChars":19,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":2,"name":"title","text":"Message directeur de la défense","textPreview":"Message directeur de la défense","textChars":31,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/s36hcrmh","slide":2,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":2,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":2,"name":"footer-page","text":"2/18","textPreview":"2/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":2,"name":"key-message","text":"SaveFunds transforme une question floue - puis-je retirer cet argent sans fragiliser ma société ? - en décision argumentée.","textPreview":"SaveFunds transforme une question floue - puis-je retirer cet argent sans fragiliser ma société ? - en décision argumentée.","textChars":123,"textLines":1,"bbox":[90,170,980,76]}
+{"kind":"shape","id":"sh/s72x4nap","slide":2,"name":"card","bbox":[96,295,315,180]}
+{"kind":"shape","id":"sh/lszqtcj6","slide":2,"name":"card-accent","bbox":[96,295,6,180]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":2,"name":"card-title","text":"Metier","textPreview":"Metier","textChars":6,"textLines":1,"bbox":[118,313,273,32]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":2,"name":"card-body","text":"Aider le dirigeant de PME/SRL a anticiper le risque de trésorerie.","textPreview":"Aider le dirigeant de PME/SRL a anticiper le risque de trésorerie.","textChars":66,"textLines":1,"bbox":[118,353,273,108]}
+{"kind":"shape","id":"sh/zupwb2hw","slide":2,"name":"card","bbox":[482,295,315,180]}
+{"kind":"shape","id":"sh/a9w3m94f","slide":2,"name":"card-accent","bbox":[482,295,6,180]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":2,"name":"card-title","text":"Technique","textPreview":"Technique","textChars":9,"textLines":1,"bbox":[504,313,273,32]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":2,"name":"card-body","text":"Structurer une API REST securisee autour d'une logique financière claire.","textPreview":"Structurer une API REST securisee autour d'une logique financière claire.","textChars":73,"textLines":1,"bbox":[504,353,273,108]}
+{"kind":"shape","id":"sh/z61032ls","slide":2,"name":"card","bbox":[868,295,315,180]}
+{"kind":"shape","id":"sh/al87ed8b","slide":2,"name":"card-accent","bbox":[868,295,6,180]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":2,"name":"card-title","text":"Défense","textPreview":"Défense","textChars":7,"textLines":1,"bbox":[890,313,273,32]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":2,"name":"card-body","text":"Montrer les calculs, le workflow et les choix de mise en production.","textPreview":"Montrer les calculs, le workflow et les choix de mise en production.","textChars":68,"textLines":1,"bbox":[890,353,273,108]}
+{"kind":"notes","id":"nt/s4a4mz","slide":2,"text":""}
+{"kind":"slide","id":"sl/y9sy4e","slide":3,"title":"02 - Introduction","textShapes":9}
+{"kind":"shape","id":"sh/h0fepkzu","slide":3,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":3,"name":"section","text":"02 - Introduction","textPreview":"02 - Introduction","textChars":17,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":3,"name":"title","text":"Contexte du stage et contribution","textPreview":"Contexte du stage et contribution","textChars":33,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/orytsvu9","slide":3,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":3,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":3,"name":"footer-page","text":"3/18","textPreview":"3/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/z61032ls","slide":3,"name":"card","bbox":[80,165,500,220]}
+{"kind":"shape","id":"sh/oza1gvy9","slide":3,"name":"card-accent","bbox":[80,165,6,220]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":3,"name":"card-title","text":"PROFACILE SRL","textPreview":"PROFACILE SRL","textChars":13,"textLines":1,"bbox":[102,183,458,32]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":3,"name":"card-body","text":"Développement de solutions web et accompagnement numérique de clients avec des besoins métier spécifiques.","textPreview":"Développement de solutions web et accompagnement numérique de clients avec des besoins métier spécifiques.","textChars":106,"textLines":1,"bbox":[102,223,458,148]}
+{"kind":"shape","id":"sh/svu9knih","slide":3,"name":"card","bbox":[700,165,430,220]}
+{"kind":"shape","id":"sh/za1gvy90","slide":3,"name":"card-accent","bbox":[700,165,6,220]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":3,"name":"card-title","text":"Mon rôle","textPreview":"Mon rôle","textChars":8,"textLines":1,"bbox":[722,183,388,32]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":3,"name":"card-body","text":"Backend Spring Boot\nAPI REST\nLogique métier financière\nTests et validation","textPreview":"Backend Spring Boot | API REST | Logique métier financière | Tests et validation","textChars":74,"textLines":4,"bbox":[722,223,388,148]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":3,"name":"collab","text":"Projet mene avec deux stagiaires : separation backend / frontend, collaboration par Git et validation progressive du MVP.","textPreview":"Projet mene avec deux stagiaires : separation backend / frontend, collaboration par Git et validation progressive du MVP.","textChars":121,"textLines":1,"bbox":[100,455,1000,65]}
+{"kind":"notes","id":"nt/y9sy4e","slide":3,"text":""}
+{"kind":"slide","id":"sl/7u098t","slide":4,"title":"03 - Problématique","textShapes":11}
+{"kind":"shape","id":"sh/val87ed8","slide":4,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":4,"name":"section","text":"03 - Problématique","textPreview":"03 - Problématique","textChars":18,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":4,"name":"title","text":"Probleme métier identifie","textPreview":"Probleme métier identifie","textChars":25,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":4,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/vixczed8","slide":4,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":4,"name":"footer-page","text":"4/18","textPreview":"4/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":4,"name":"problem","text":"Un dirigeant peut effectuer un retrait personnel sans voir immédiatement l'impact sur la trésorerie, les charges futures et le compte courant.","textPreview":"Un dirigeant peut effectuer un retrait personnel sans voir immédiatement l'impact sur la trésorerie, les charges futures et le compte cou...","textChars":142,"textLines":1,"bbox":[80,158,960,80]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":4,"name":"card","bbox":[90,295,300,170]}
+{"kind":"shape","id":"sh/vu9knih4","slide":4,"name":"card-accent","bbox":[90,295,6,170]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":4,"name":"card-title","text":"Visibilité faible","textPreview":"Visibilité faible","textChars":17,"textLines":1,"bbox":[112,313,258,32]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":4,"name":"card-body","text":"Les données sont souvent dispersées ou analysées trop tard.","textPreview":"Les données sont souvent dispersées ou analysées trop tard.","textChars":59,"textLines":1,"bbox":[112,353,258,98]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":4,"name":"card","bbox":[490,295,300,170]}
+{"kind":"shape","id":"sh/sji5snel","slide":4,"name":"card-accent","bbox":[490,295,6,170]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":4,"name":"card-title","text":"Risque financier","textPreview":"Risque financier","textChars":16,"textLines":1,"bbox":[512,313,258,32]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":4,"name":"card-body","text":"Un retrait peut réduire la réserve nécessaire aux charges.","textPreview":"Un retrait peut réduire la réserve nécessaire aux charges.","textChars":58,"textLines":1,"bbox":[512,353,258,98]}
+{"kind":"shape","id":"sh/lszqtcj6","slide":4,"name":"card","bbox":[890,295,300,170]}
+{"kind":"shape","id":"sh/s72x4nap","slide":4,"name":"card-accent","bbox":[890,295,6,170]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":4,"name":"card-title","text":"Besoin de décision","textPreview":"Besoin de décision","textChars":18,"textLines":1,"bbox":[912,313,258,32]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":4,"name":"card-body","text":"Le dirigeant veut une réponse simple, mais justifiée.","textPreview":"Le dirigeant veut une réponse simple, mais justifiée.","textChars":53,"textLines":1,"bbox":[912,353,258,98]}
+{"kind":"notes","id":"nt/7u098t","slide":4,"text":""}
+{"kind":"slide","id":"sl/puwi4f","slide":5,"title":"04 - Solution","textShapes":16}
+{"kind":"shape","id":"sh/d8bat47y","slide":5,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":5,"name":"section","text":"04 - Solution","textPreview":"04 - Solution","textChars":13,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":5,"name":"title","text":"Solution proposee : SaveFunds","textPreview":"Solution proposee : SaveFunds","textChars":29,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/kf6dcbul","slide":5,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/d0z61032","slide":5,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":5,"name":"footer-page","text":"5/18","textPreview":"5/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":5,"name":"solution","text":"L'application produit une décision tricolore à partir de quatre indicateurs financiers.","textPreview":"L'application produit une décision tricolore à partir de quatre indicateurs financiers.","textChars":87,"textLines":1,"bbox":[84,154,900,50]}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":5,"name":"pill","bbox":[126,260,160,44]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":5,"name":"pill-text","text":"VERT","textPreview":"VERT","textChars":4,"textLines":1,"bbox":[136,271,140,22]}
+{"kind":"shape","id":"sh/p0bi9s36","slide":5,"name":"pill","bbox":[336,260,160,44]}
+{"kind":"textbox","id":"sh/0fepkzup","slide":5,"name":"pill-text","text":"ORANGE","textPreview":"ORANGE","textChars":6,"textLines":1,"bbox":[346,271,140,22]}
+{"kind":"shape","id":"sh/bulwval8","slide":5,"name":"pill","bbox":[570,260,160,44]}
+{"kind":"textbox","id":"sh/i9s36hcr","slide":5,"name":"pill-text","text":"ROUGE","textPreview":"ROUGE","textChars":5,"textLines":1,"bbox":[580,271,140,22]}
+{"kind":"shape","id":"sh/tovahoza","slide":5,"name":"flow-line","bbox":[162,405,820,4]}
+{"kind":"shape","id":"sh/032lszqt","slide":5,"name":"flow-dot","bbox":[110,377,60,60]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":5,"name":"flow-number","text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[110,394,60,22]}
+{"kind":"textbox","id":"sh/ixczed8v","slide":5,"name":"flow-label","text":"Données","textPreview":"Données","textChars":7,"textLines":1,"bbox":[60,455,160,32]}
+{"kind":"shape","id":"sh/tcj6tova","slide":5,"name":"flow-dot","bbox":[380,377,60,60]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":5,"name":"flow-number","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[380,394,60,22]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":5,"name":"flow-label","text":"Calculs","textPreview":"Calculs","textChars":7,"textLines":1,"bbox":[330,455,160,32]}
+{"kind":"shape","id":"sh/90je9cvi","slide":5,"name":"flow-dot","bbox":[650,377,60,60]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":5,"name":"flow-number","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[650,394,60,22]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":5,"name":"flow-label","text":"Décision","textPreview":"Décision","textChars":8,"textLines":1,"bbox":[600,455,160,32]}
+{"kind":"shape","id":"sh/g7adsji5","slide":5,"name":"flow-dot","bbox":[920,377,60,60]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":5,"name":"flow-number","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[920,394,60,22]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":5,"name":"flow-label","text":"Recommandations","textPreview":"Recommandations","textChars":15,"textLines":1,"bbox":[870,455,160,32]}
+{"kind":"notes","id":"nt/puwi4f","slide":5,"text":""}
+{"kind":"slide","id":"sl/qwrs1t","slide":6,"title":"05 - Workflow","textShapes":16}
+{"kind":"shape","id":"sh/4byhgn29","slide":6,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":6,"name":"section","text":"05 - Workflow","textPreview":"05 - Workflow","textChars":13,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":6,"name":"title","text":"Parcours utilisateur montre pendant la demo","textPreview":"Parcours utilisateur montre pendant la demo","textChars":43,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/t83itgfm","slide":6,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":6,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":6,"name":"footer-page","text":"6/18","textPreview":"6/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":6,"name":"step-num","bbox":[95,155,58,58]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":6,"name":"step-n","text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[95,170,58,24]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":6,"name":"step-title","text":"Connexion","textPreview":"Connexion","textChars":9,"textLines":1,"bbox":[180,158,320,30]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":6,"name":"step-body","text":"Le dirigeant s'authentifie et obtient un token JWT.","textPreview":"Le dirigeant s'authentifie et obtient un token JWT.","textChars":51,"textLines":1,"bbox":[180,195,760,34]}
+{"kind":"shape","id":"sh/7qpg3ex0","slide":6,"name":"step-num","bbox":[95,260,58,58]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":6,"name":"step-n","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[95,275,58,24]}
+{"kind":"textbox","id":"sh/pwb2hwfy","slide":6,"name":"step-title","text":"Entreprise","textPreview":"Entreprise","textChars":10,"textLines":1,"bbox":[180,263,320,30]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":6,"name":"step-body","text":"Il encode les données financières de la société.","textPreview":"Il encode les données financières de la société.","textChars":48,"textLines":1,"bbox":[180,300,760,34]}
+{"kind":"shape","id":"sh/7y1kre1w","slide":6,"name":"step-num","bbox":[95,365,58,58]}
+{"kind":"textbox","id":"sh/wjudg7ad","slide":6,"name":"step-n","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[95,380,58,24]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":6,"name":"step-title","text":"Analyse","textPreview":"Analyse","textChars":7,"textLines":1,"bbox":[180,368,320,30]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":6,"name":"step-body","text":"Il indique le montant souhaité et lance le calcul.","textPreview":"Il indique le montant souhaité et lance le calcul.","textChars":50,"textLines":1,"bbox":[180,405,760,34]}
+{"kind":"shape","id":"sh/72x4nap4","slide":6,"name":"step-num","bbox":[95,470,58,58]}
+{"kind":"textbox","id":"sh/ji5snelo","slide":6,"name":"step-n","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[95,485,58,24]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":6,"name":"step-title","text":"Résultat","textPreview":"Résultat","textChars":8,"textLines":1,"bbox":[180,473,320,30]}
+{"kind":"textbox","id":"sh/1kre1w7m","slide":6,"name":"step-body","text":"Il reçoit une couleur, des scores et des recommandations.","textPreview":"Il reçoit une couleur, des scores et des recommandations.","textChars":57,"textLines":1,"bbox":[180,510,760,34]}
+{"kind":"notes","id":"nt/qwrs1t","slide":6,"text":""}
+{"kind":"slide","id":"sl/ju3mz4","slide":7,"title":"06 - Données","textShapes":14}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":7,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":7,"name":"section","text":"06 - Données","textPreview":"06 - Données","textChars":12,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":7,"name":"title","text":"Données collectees pour l'analyse","textPreview":"Données collectees pour l'analyse","textChars":33,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/2p8nqxs7","slide":7,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":7,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":7,"name":"footer-page","text":"7/18","textPreview":"7/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":7,"name":"row","bbox":[120,155,1040,54]}
+{"kind":"textbox","id":"sh/2t83itgf","slide":7,"name":"data-name","text":"Chiffre d'affaires mensuel","textPreview":"Chiffre d'affaires mensuel","textChars":26,"textLines":1,"bbox":[150,169,420,24]}
+{"kind":"textbox","id":"sh/re1w7mp0","slide":7,"name":"data-why","text":"Capacite d'activite moyenne","textPreview":"Capacite d'activite moyenne","textChars":27,"textLines":1,"bbox":[610,169,480,24]}
+{"kind":"shape","id":"sh/bulwval8","slide":7,"name":"row","bbox":[120,227,1040,54]}
+{"kind":"textbox","id":"sh/i9s36hcr","slide":7,"name":"data-name","text":"Charges mensuelles","textPreview":"Charges mensuelles","textChars":18,"textLines":1,"bbox":[150,241,420,24]}
+{"kind":"textbox","id":"sh/p0bi9s36","slide":7,"name":"data-why","text":"Base du besoin de trésorerie","textPreview":"Base du besoin de trésorerie","textChars":28,"textLines":1,"bbox":[610,241,480,24]}
+{"kind":"shape","id":"sh/0fepkzup","slide":7,"name":"row","bbox":[120,299,1040,54]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":7,"name":"data-name","text":"Trésorerie disponible","textPreview":"Trésorerie disponible","textChars":21,"textLines":1,"bbox":[150,313,420,24]}
+{"kind":"textbox","id":"sh/ixczed8v","slide":7,"name":"data-why","text":"Liquidité en banque","textPreview":"Liquidité en banque","textChars":19,"textLines":1,"bbox":[610,313,480,24]}
+{"kind":"shape","id":"sh/tovahoza","slide":7,"name":"row","bbox":[120,371,1040,54]}
+{"kind":"textbox","id":"sh/032lszqt","slide":7,"name":"data-name","text":"Solde du compte courant","textPreview":"Solde du compte courant","textChars":23,"textLines":1,"bbox":[150,385,420,24]}
+{"kind":"textbox","id":"sh/b6xkf6dc","slide":7,"name":"data-why","text":"Risque debiteur dirigeant","textPreview":"Risque debiteur dirigeant","textChars":25,"textLines":1,"bbox":[610,385,480,24]}
+{"kind":"shape","id":"sh/il0rqd4v","slide":7,"name":"row","bbox":[120,443,1040,54]}
+{"kind":"textbox","id":"sh/ulwval87","slide":7,"name":"data-name","text":"Montant souhaité","textPreview":"Montant souhaité","textChars":16,"textLines":1,"bbox":[150,457,420,24]}
+{"kind":"textbox","id":"sh/j6tovaho","slide":7,"name":"data-why","text":"Retrait demandé par le dirigeant","textPreview":"Retrait demandé par le dirigeant","textChars":32,"textLines":1,"bbox":[610,457,480,24]}
+{"kind":"notes","id":"nt/ju3mz4","slide":7,"text":""}
+{"kind":"slide","id":"sl/mt3cnm","slide":8,"title":"07 - Calculs","textShapes":12}
+{"kind":"shape","id":"sh/gvy90je9","slide":8,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":8,"name":"section","text":"07 - Calculs","textPreview":"07 - Calculs","textChars":12,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":8,"name":"title","text":"Les quatre indicateurs techniques","textPreview":"Les quatre indicateurs techniques","textChars":33,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/94fu18jq","slide":8,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":8,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":8,"name":"footer-page","text":"8/18","textPreview":"8/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":8,"name":"card","bbox":[72,160,535,145]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":8,"name":"card-accent","bbox":[72,160,6,145]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":8,"name":"card-title","text":"1. Couverture de trésorerie","textPreview":"1. Couverture de trésorerie","textChars":27,"textLines":1,"bbox":[94,178,493,32]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":8,"name":"card-body","text":"trésorerie / charges mensuelles","textPreview":"trésorerie / charges mensuelles","textChars":31,"textLines":1,"bbox":[94,218,493,73]}
+{"kind":"shape","id":"sh/ra5gbq1o","slide":8,"name":"card","bbox":[672,160,535,145]}
+{"kind":"shape","id":"sh/gvy90je9","slide":8,"name":"card-accent","bbox":[672,160,6,145]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":8,"name":"card-title","text":"2. Ratio CA / charges","textPreview":"2. Ratio CA / charges","textChars":21,"textLines":1,"bbox":[694,178,493,32]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":8,"name":"card-body","text":"chiffre d'affaires mensuel / charges mensuelles","textPreview":"chiffre d'affaires mensuel / charges mensuelles","textChars":47,"textLines":1,"bbox":[694,218,493,73]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":8,"name":"card","bbox":[72,360,535,145]}
+{"kind":"shape","id":"sh/kjm1cfa9","slide":8,"name":"card-accent","bbox":[72,360,6,145]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":8,"name":"card-title","text":"3. Durée compte courant débiteur","textPreview":"3. Durée compte courant débiteur","textChars":32,"textLines":1,"bbox":[94,378,493,32]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":8,"name":"card-body","text":"nombre de jours avec solde dirigeant négatif","textPreview":"nombre de jours avec solde dirigeant négatif","textChars":44,"textLines":1,"bbox":[94,418,493,73]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":8,"name":"card","bbox":[672,360,535,145]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":8,"name":"card-accent","bbox":[672,360,6,145]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":8,"name":"card-title","text":"4. Montant maximum prélevable","textPreview":"4. Montant maximum prélevable","textChars":29,"textLines":1,"bbox":[694,378,493,32]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":8,"name":"card-body","text":"trésorerie - reserve de sécurité de 3 mois","textPreview":"trésorerie - reserve de sécurité de 3 mois","textChars":42,"textLines":1,"bbox":[694,418,493,73]}
+{"kind":"notes","id":"nt/mt3cnm","slide":8,"text":""}
+{"kind":"slide","id":"sl/cswlhl","slide":9,"title":"08 - Exemple chiffre","textShapes":12}
+{"kind":"shape","id":"sh/lkjm1cfa","slide":9,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":9,"name":"section","text":"08 - Exemple chiffre","textPreview":"08 - Exemple chiffre","textChars":20,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":9,"name":"title","text":"Exemple de calcul explique au jury","textPreview":"Exemple de calcul explique au jury","textChars":34,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/sneloj2t","slide":9,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":9,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":9,"name":"footer-page","text":"9/18","textPreview":"9/18","textChars":4,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"textbox","id":"sh/32lszqtc","slide":9,"name":"data","text":"Données : CA 10 000 EUR - charges 2 000 EUR - trésorerie 7 500 EUR - retrait demande 2 000 EUR","textPreview":"Données : CA 10 000 EUR - charges 2 000 EUR - trésorerie 7 500 EUR - retrait demande 2 000 EUR","textChars":94,"textLines":1,"bbox":[76,145,1100,36]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":9,"name":"card","bbox":[82,220,340,165]}
+{"kind":"shape","id":"sh/lwval87e","slide":9,"name":"card-accent","bbox":[82,220,6,165]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":9,"name":"card-title","text":"Trésorerie","textPreview":"Trésorerie","textChars":10,"textLines":1,"bbox":[104,238,298,32]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":9,"name":"card-body","text":"7 500 / 2 000 = 3,75 mois\n=> VERT","textPreview":"7 500 / 2 000 = 3,75 mois | => VERT","textChars":33,"textLines":2,"bbox":[104,278,298,93]}
+{"kind":"shape","id":"sh/zidonyd0","slide":9,"name":"card","bbox":[470,220,340,165]}
+{"kind":"shape","id":"sh/a1gvy90j","slide":9,"name":"card-accent","bbox":[470,220,6,165]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":9,"name":"card-title","text":"Ratio CA/charges","textPreview":"Ratio CA/charges","textChars":16,"textLines":1,"bbox":[492,238,298,32]}
+{"kind":"textbox","id":"sh/svu9knih","slide":9,"name":"card-body","text":"10 000 / 2 000 = 5\n=> VERT","textPreview":"10 000 / 2 000 = 5 | => VERT","textChars":26,"textLines":2,"bbox":[492,278,298,93]}
+{"kind":"shape","id":"sh/za1gvy90","slide":9,"name":"card","bbox":[858,220,340,165]}
+{"kind":"shape","id":"sh/ap4r65wj","slide":9,"name":"card-accent","bbox":[858,220,6,165]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":9,"name":"card-title","text":"Montant max","textPreview":"Montant max","textChars":11,"textLines":1,"bbox":[880,238,298,32]}
+{"kind":"textbox","id":"sh/sji5snel","slide":9,"name":"card-body","text":"7 500 - (2 000 x 3) = 1 500 EUR","textPreview":"7 500 - (2 000 x 3) = 1 500 EUR","textChars":31,"textLines":1,"bbox":[880,278,298,93]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":9,"name":"result","text":"Le retrait demande est de 2 000 EUR alors que le maximum calculé est 1 500 EUR : le critère montant devient ROUGE.","textPreview":"Le retrait demande est de 2 000 EUR alors que le maximum calculé est 1 500 EUR : le critère montant devient ROUGE.","textChars":114,"textLines":1,"bbox":[110,465,1000,64]}
+{"kind":"notes","id":"nt/cswlhl","slide":9,"text":""}
+{"kind":"slide","id":"sl/0nvp87","slide":10,"title":"09 - Grille","textShapes":30}
+{"kind":"shape","id":"sh/p0bi9s36","slide":10,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/i9s36hcr","slide":10,"name":"section","text":"09 - Grille","textPreview":"09 - Grille","textChars":11,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/bulwval8","slide":10,"name":"title","text":"Grille tricolore et décision globale","textPreview":"Grille tricolore et décision globale","textChars":36,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/032lszqt","slide":10,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/tovahoza","slide":10,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/ixczed8v","slide":10,"name":"footer-page","text":"10/18","textPreview":"10/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":10,"name":"head","text":"Critere","textPreview":"Critere","textChars":7,"textLines":1,"bbox":[80,155,240,26]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":10,"name":"head","text":"VERT","textPreview":"VERT","textChars":4,"textLines":1,"bbox":[360,155,190,26]}
+{"kind":"textbox","id":"sh/tcj6tova","slide":10,"name":"head","text":"ORANGE","textPreview":"ORANGE","textChars":6,"textLines":1,"bbox":[590,155,190,26]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":10,"name":"head","text":"ROUGE","textPreview":"ROUGE","textChars":5,"textLines":1,"bbox":[820,155,190,26]}
+{"kind":"textbox","id":"sh/obm58z25","slide":10,"name":"head","text":"Sens","textPreview":"Sens","textChars":4,"textLines":1,"bbox":[1050,155,190,26]}
+{"kind":"shape","id":"sh/zqtcj6to","slide":10,"name":"row-bg","bbox":[60,200,1150,54]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":10,"name":"cell","text":"Trésorerie","textPreview":"Trésorerie","textChars":10,"textLines":1,"bbox":[80,214,240,24]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":10,"name":"cell","text":">= 3 mois","textPreview":">= 3 mois","textChars":9,"textLines":1,"bbox":[360,214,190,24]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":10,"name":"cell","text":"1 à 3 mois","textPreview":"1 à 3 mois","textChars":10,"textLines":1,"bbox":[590,214,190,24]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":10,"name":"cell","text":"< 1 mois","textPreview":"< 1 mois","textChars":8,"textLines":1,"bbox":[820,214,190,24]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":10,"name":"cell","text":"Réserve","textPreview":"Réserve","textChars":7,"textLines":1,"bbox":[1050,214,190,24]}
+{"kind":"shape","id":"sh/hcrmhk3q","slide":10,"name":"row-bg","bbox":[60,270,1150,54]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":10,"name":"cell","text":"CA / charges","textPreview":"CA / charges","textChars":12,"textLines":1,"bbox":[80,284,240,24]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":10,"name":"cell","text":">= 1,3","textPreview":">= 1,3","textChars":6,"textLines":1,"bbox":[360,284,190,24]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":10,"name":"cell","text":"1,0 a 1,3","textPreview":"1,0 a 1,3","textChars":9,"textLines":1,"bbox":[590,284,190,24]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":10,"name":"cell","text":"< 1,0","textPreview":"< 1,0","textChars":5,"textLines":1,"bbox":[820,284,190,24]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":10,"name":"cell","text":"Rentabilite","textPreview":"Rentabilite","textChars":11,"textLines":1,"bbox":[1050,284,190,24]}
+{"kind":"shape","id":"sh/onyd0z61","slide":10,"name":"row-bg","bbox":[60,340,1150,54]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":10,"name":"cell","text":"Compte courant","textPreview":"Compte courant","textChars":14,"textLines":1,"bbox":[80,354,240,24]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":10,"name":"cell","text":"0 jour","textPreview":"0 jour","textChars":6,"textLines":1,"bbox":[360,354,190,24]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":10,"name":"cell","text":"1 a 30 j","textPreview":"1 a 30 j","textChars":8,"textLines":1,"bbox":[590,354,190,24]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":10,"name":"cell","text":"> 30 j","textPreview":"> 30 j","textChars":6,"textLines":1,"bbox":[820,354,190,24]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":10,"name":"cell","text":"Risque","textPreview":"Risque","textChars":6,"textLines":1,"bbox":[1050,354,190,24]}
+{"kind":"shape","id":"sh/32lszqtc","slide":10,"name":"row-bg","bbox":[60,410,1150,54]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":10,"name":"cell","text":"Montant","textPreview":"Montant","textChars":7,"textLines":1,"bbox":[80,424,240,24]}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":10,"name":"cell","text":"<= 75 % max","textPreview":"<= 75 % max","textChars":11,"textLines":1,"bbox":[360,424,190,24]}
+{"kind":"textbox","id":"sh/sneloj2t","slide":10,"name":"cell","text":"75-100 %","textPreview":"75-100 %","textChars":8,"textLines":1,"bbox":[590,424,190,24]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":10,"name":"cell","text":"> max","textPreview":"> max","textChars":5,"textLines":1,"bbox":[820,424,190,24]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":10,"name":"cell","text":"Liquidité","textPreview":"Liquidité","textChars":9,"textLines":1,"bbox":[1050,424,190,24]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":10,"name":"weakest","text":"Règle simple : si un seul indicateur est rouge, la décision globale est rouge.","textPreview":"Règle simple : si un seul indicateur est rouge, la décision globale est rouge.","textChars":78,"textLines":1,"bbox":[92,545,1030,40]}
+{"kind":"notes","id":"nt/0nvp87","slide":10,"text":""}
+{"kind":"slide","id":"sl/ijdr2k","slide":11,"title":"10 - Backend","textShapes":14}
+{"kind":"shape","id":"sh/wjudg7ad","slide":11,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":11,"name":"section","text":"10 - Backend","textPreview":"10 - Backend","textChars":12,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":11,"name":"title","text":"Architecture technique","textPreview":"Architecture technique","textChars":22,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":11,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":11,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":11,"name":"footer-page","text":"11/18","textPreview":"11/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/i5sneloj","slide":11,"name":"arch-box","bbox":[80,250,175,90]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":11,"name":"arch-label","text":"Controller","textPreview":"Controller","textChars":10,"textLines":1,"bbox":[92,278,150,30]}
+{"kind":"textbox","id":"sh/0z61032l","slide":11,"name":"arrow","text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[265,277,40,30]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":11,"name":"arch-box","bbox":[310,250,175,90]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":11,"name":"arch-label","text":"DTO / Mapper","textPreview":"DTO / Mapper","textChars":12,"textLines":1,"bbox":[322,278,150,30]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":11,"name":"arrow","text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[495,277,40,30]}
+{"kind":"shape","id":"sh/xczed8v6","slide":11,"name":"arch-box","bbox":[540,250,175,90]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":11,"name":"arch-label","text":"Service métier","textPreview":"Service métier","textChars":14,"textLines":1,"bbox":[552,278,150,30]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":11,"name":"arrow","text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[725,277,40,30]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":11,"name":"arch-box","bbox":[770,250,175,90]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":11,"name":"arch-label","text":"Repository","textPreview":"Repository","textChars":10,"textLines":1,"bbox":[782,278,150,30]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":11,"name":"arrow","text":">","textPreview":">","textChars":1,"textLines":1,"bbox":[955,277,40,30]}
+{"kind":"shape","id":"sh/fmlkjm1c","slide":11,"name":"arch-box","bbox":[1000,250,175,90]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":11,"name":"arch-label","text":"PostgreSQL","textPreview":"PostgreSQL","textChars":10,"textLines":1,"bbox":[1012,278,150,30]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":11,"name":"architecture-note","text":"Le service concentre la logique financière : il évite de disperser les calculs dans les contrôleurs ou dans le frontend.","textPreview":"Le service concentre la logique financière : il évite de disperser les calculs dans les contrôleurs ou dans le frontend.","textChars":120,"textLines":1,"bbox":[115,430,1010,58]}
+{"kind":"notes","id":"nt/ijdr2k","slide":11,"text":""}
+{"kind":"slide","id":"sl/depr6c","slide":12,"title":"11 - Securite","textShapes":11}
+{"kind":"shape","id":"sh/cbulwval","slide":12,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/nqxs72x4","slide":12,"name":"section","text":"11 - Securite","textPreview":"11 - Securite","textChars":13,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/u54zidon","slide":12,"name":"title","text":"Securite et separation des responsabilites","textPreview":"Securite et separation des responsabilites","textChars":42,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/5kb6xkf6","slide":12,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/czed8v6p","slide":12,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":12,"name":"footer-page","text":"12/18","textPreview":"12/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/ytsvu9kn","slide":12,"name":"card","bbox":[82,165,340,180]}
+{"kind":"shape","id":"sh/58z25kb6","slide":12,"name":"card-accent","bbox":[82,165,6,180]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":12,"name":"card-title","text":"JWT","textPreview":"JWT","textChars":3,"textLines":1,"bbox":[104,183,298,32]}
+{"kind":"textbox","id":"sh/u54zidon","slide":12,"name":"card-body","text":"Authentification sans session serveur et protection des endpoints.","textPreview":"Authentification sans session serveur et protection des endpoints.","textChars":66,"textLines":1,"bbox":[104,223,298,108]}
+{"kind":"shape","id":"sh/nqxs72x4","slide":12,"name":"card","bbox":[470,165,340,180]}
+{"kind":"shape","id":"sh/cbulwval","slide":12,"name":"card-accent","bbox":[470,165,6,180]}
+{"kind":"textbox","id":"sh/5sneloj2","slide":12,"name":"card-title","text":"Ownership","textPreview":"Ownership","textChars":9,"textLines":1,"bbox":[492,183,298,32]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":12,"name":"card-body","text":"Un utilisateur ne peut pas manipuler les entreprises ou analyses d'un autre compte.","textPreview":"Un utilisateur ne peut pas manipuler les entreprises ou analyses d'un autre compte.","textChars":83,"textLines":1,"bbox":[492,223,298,108]}
+{"kind":"shape","id":"sh/neloj2t8","slide":12,"name":"card","bbox":[858,165,340,180]}
+{"kind":"shape","id":"sh/czed8v6p","slide":12,"name":"card-accent","bbox":[858,165,6,180]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":12,"name":"card-title","text":"Validation","textPreview":"Validation","textChars":10,"textLines":1,"bbox":[880,183,298,32]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":12,"name":"card-body","text":"DTO, services et tests limitent les erreurs dans les flux critiques.","textPreview":"DTO, services et tests limitent les erreurs dans les flux critiques.","textChars":68,"textLines":1,"bbox":[880,223,298,108]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":12,"name":"security-note","text":"Point important pour la défense : la sécurité n'est pas seulement l'écran de login, c'est aussi le contrôle d'accès côté backend.","textPreview":"Point important pour la défense : la sécurité n'est pas seulement l'écran de login, c'est aussi le contrôle d'accès côté backend.","textChars":129,"textLines":1,"bbox":[100,450,1000,66]}
+{"kind":"notes","id":"nt/depr6c","slide":12,"text":""}
+{"kind":"slide","id":"sl/dj2g29","slide":13,"title":"12 - Production","textShapes":11}
+{"kind":"shape","id":"sh/q1orytsv","slide":13,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":13,"name":"section","text":"12 - Production","textPreview":"12 - Production","textChars":15,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":13,"name":"title","text":"Base de données et préparation production","textPreview":"Base de données et préparation production","textChars":41,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/je9cvixc","slide":13,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":13,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":13,"name":"footer-page","text":"13/18","textPreview":"13/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/8z25kb6x","slide":13,"name":"card","bbox":[92,170,315,200]}
+{"kind":"shape","id":"sh/fa9w3m94","slide":13,"name":"card-accent","bbox":[92,170,6,200]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":13,"name":"card-title","text":"PostgreSQL","textPreview":"PostgreSQL","textChars":10,"textLines":1,"bbox":[114,188,273,32]}
+{"kind":"textbox","id":"sh/wjudg7ad","slide":13,"name":"card-body","text":"Base relationnelle pour conserver utilisateurs, entreprises, analyses et resultats.","textPreview":"Base relationnelle pour conserver utilisateurs, entreprises, analyses et resultats.","textChars":83,"textLines":1,"bbox":[114,228,273,128]}
+{"kind":"shape","id":"sh/p4r65wju","slide":13,"name":"card","bbox":[482,170,315,200]}
+{"kind":"shape","id":"sh/ed8v6psf","slide":13,"name":"card-accent","bbox":[482,170,6,200]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":13,"name":"card-title","text":"Flyway","textPreview":"Flyway","textChars":6,"textLines":1,"bbox":[504,188,273,32]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":13,"name":"card-body","text":"Le schema est versionne par migrations SQL rejouables.","textPreview":"Le schema est versionne par migrations SQL rejouables.","textChars":54,"textLines":1,"bbox":[504,228,273,128]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":13,"name":"card","bbox":[872,170,315,200]}
+{"kind":"shape","id":"sh/i5sneloj","slide":13,"name":"card-accent","bbox":[872,170,6,200]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":13,"name":"card-title","text":"CI / Docker","textPreview":"CI / Docker","textChars":11,"textLines":1,"bbox":[894,188,273,32]}
+{"kind":"textbox","id":"sh/0z61032l","slide":13,"name":"card-body","text":"Tests automatises et environnement local reproductible.","textPreview":"Tests automatises et environnement local reproductible.","textChars":55,"textLines":1,"bbox":[894,228,273,128]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":13,"name":"prod-note","text":"Je ne détaille pas toute la mise en production : je montre surtout que l'application est préparée pour être configurée hors du code.","textPreview":"Je ne détaille pas toute la mise en production : je montre surtout que l'application est préparée pour être configurée hors du code.","textChars":132,"textLines":1,"bbox":[100,460,1000,58]}
+{"kind":"notes","id":"nt/dj2g29","slide":13,"text":""}
+{"kind":"slide","id":"sl/bcdyim","slide":14,"title":"13 - Demo","textShapes":9}
+{"kind":"shape","id":"sh/cvixczed","slide":14,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":14,"name":"section","text":"13 - Demo","textPreview":"13 - Demo","textChars":9,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":14,"name":"title","text":"Demo fonctionnelle conseillee","textPreview":"Demo fonctionnelle conseillee","textChars":29,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/54zidony","slide":14,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/cj6tovah","slide":14,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":14,"name":"footer-page","text":"14/18","textPreview":"14/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/udg7adsj","slide":14,"name":"demo-step","bbox":[155,150,880,52]}
+{"kind":"textbox","id":"sh/1032lszq","slide":14,"name":"demo-text","text":"1. Connexion utilisateur","textPreview":"1. Connexion utilisateur","textChars":24,"textLines":1,"bbox":[190,164,760,24]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":14,"name":"demo-step","bbox":[155,225,880,52]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":14,"name":"demo-text","text":"2. Création ou sélection d'une entreprise","textPreview":"2. Création ou sélection d'une entreprise","textChars":41,"textLines":1,"bbox":[190,239,760,24]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":14,"name":"demo-step","bbox":[155,300,880,52]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":14,"name":"demo-text","text":"3. Encodage des données financières","textPreview":"3. Encodage des données financières","textChars":35,"textLines":1,"bbox":[190,314,760,24]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":14,"name":"demo-step","bbox":[155,375,880,52]}
+{"kind":"textbox","id":"sh/2t83itgf","slide":14,"name":"demo-text","text":"4. Demande de retrait","textPreview":"4. Demande de retrait","textChars":21,"textLines":1,"bbox":[190,389,760,24]}
+{"kind":"shape","id":"sh/re1w7mp0","slide":14,"name":"demo-step","bbox":[155,450,880,52]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":14,"name":"demo-text","text":"5. Lecture de la décision et des recommandations","textPreview":"5. Lecture de la décision et des recommandations","textChars":48,"textLines":1,"bbox":[190,464,760,24]}
+{"kind":"notes","id":"nt/bcdyim","slide":14,"text":""}
+{"kind":"slide","id":"sl/a4q6hj","slide":15,"title":"14 - Tests demo","textShapes":11}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":15,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":15,"name":"section","text":"14 - Tests demo","textPreview":"14 - Tests demo","textChars":15,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":15,"name":"title","text":"Trois scenarios a tester devant le jury","textPreview":"Trois scenarios a tester devant le jury","textChars":39,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/vahoza1g","slide":15,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":15,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":15,"name":"footer-page","text":"15/18","textPreview":"15/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/ovahoza1","slide":15,"name":"card","bbox":[82,165,340,215]}
+{"kind":"shape","id":"sh/vmtwra5g","slide":15,"name":"card-accent","bbox":[82,165,6,215]}
+{"kind":"textbox","id":"sh/61032lsz","slide":15,"name":"card-title","text":"Scénario vert","textPreview":"Scénario vert","textChars":13,"textLines":1,"bbox":[104,183,298,32]}
+{"kind":"textbox","id":"sh/wval87ed","slide":15,"name":"card-body","text":"CA 50 000\nCharges 30 000\nTrésorerie 120 000\nRetrait 10 000","textPreview":"CA 50 000 | Charges 30 000 | Trésorerie 120 000 | Retrait 10 000","textChars":58,"textLines":4,"bbox":[104,223,298,143]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":15,"name":"card","bbox":[470,165,340,215]}
+{"kind":"shape","id":"sh/epkzupwb","slide":15,"name":"card-accent","bbox":[470,165,6,215]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":15,"name":"card-title","text":"Scénario orange","textPreview":"Scénario orange","textChars":15,"textLines":1,"bbox":[492,183,298,32]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":15,"name":"card-body","text":"CA 36 000\nCharges 30 000\nTrésorerie 60 000\nRetrait 5 000","textPreview":"CA 36 000 | Charges 30 000 | Trésorerie 60 000 | Retrait 5 000","textChars":56,"textLines":4,"bbox":[492,223,298,143]}
+{"kind":"shape","id":"sh/psfil0rq","slide":15,"name":"card","bbox":[858,165,340,215]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":15,"name":"card-accent","bbox":[858,165,6,215]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":15,"name":"card-title","text":"Scénario rouge","textPreview":"Scénario rouge","textChars":14,"textLines":1,"bbox":[880,183,298,32]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":15,"name":"card-body","text":"CA 25 000\nCharges 30 000\nTrésorerie 20 000\nRetrait 5 000","textPreview":"CA 25 000 | Charges 30 000 | Trésorerie 20 000 | Retrait 5 000","textChars":56,"textLines":4,"bbox":[880,223,298,143]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":15,"name":"test-note","text":"Ces trois cas montrent que le systeme ne donne pas toujours la meme couleur : il reagit aux montants et aux ratios.","textPreview":"Ces trois cas montrent que le systeme ne donne pas toujours la meme couleur : il reagit aux montants et aux ratios.","textChars":115,"textLines":1,"bbox":[100,470,1000,56]}
+{"kind":"notes","id":"nt/a4q6hj","slide":15,"text":""}
+{"kind":"slide","id":"sl/e1nvw4","slide":16,"title":"15 - Validation","textShapes":11}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":16,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":16,"name":"section","text":"15 - Validation","textPreview":"15 - Validation","textChars":15,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":16,"name":"title","text":"Qualite logicielle","textPreview":"Qualite logicielle","textChars":18,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/w7mp0bi9","slide":16,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":16,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":16,"name":"footer-page","text":"16/18","textPreview":"16/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/7mp0bi9s","slide":16,"name":"card","bbox":[90,165,315,180]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":16,"name":"card-accent","bbox":[90,165,6,180]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":16,"name":"card-title","text":"Tests backend","textPreview":"Tests backend","textChars":13,"textLines":1,"bbox":[112,183,273,32]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":16,"name":"card-body","text":"Tests unitaires et integration Spring Boot sur les services et contrôleurs.","textPreview":"Tests unitaires et integration Spring Boot sur les services et contrôleurs.","textChars":75,"textLines":1,"bbox":[112,223,273,108]}
+{"kind":"shape","id":"sh/oza1gvy9","slide":16,"name":"card","bbox":[482,165,315,180]}
+{"kind":"shape","id":"sh/zed8v6ps","slide":16,"name":"card-accent","bbox":[482,165,6,180]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":16,"name":"card-title","text":"Build frontend","textPreview":"Build frontend","textChars":14,"textLines":1,"bbox":[504,183,273,32]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":16,"name":"card-body","text":"Verification TypeScript et build Vite avant livraison.","textPreview":"Verification TypeScript et build Vite avant livraison.","textChars":54,"textLines":1,"bbox":[504,223,273,108]}
+{"kind":"shape","id":"sh/obm58z25","slide":16,"name":"card","bbox":[872,165,315,180]}
+{"kind":"shape","id":"sh/zqtcj6to","slide":16,"name":"card-accent","bbox":[872,165,6,180]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":16,"name":"card-title","text":"GitHub Actions","textPreview":"GitHub Actions","textChars":14,"textLines":1,"bbox":[894,183,273,32]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":16,"name":"card-body","text":"CI séparée pour backend et frontend dans leurs propres repos.","textPreview":"CI séparée pour backend et frontend dans leurs propres repos.","textChars":61,"textLines":1,"bbox":[894,223,273,108]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":16,"name":"quality-note","text":"Objectif : detecter les regressions avant une demonstration ou une mise en production.","textPreview":"Objectif : detecter les regressions avant une demonstration ou une mise en production.","textChars":86,"textLines":1,"bbox":[120,450,940,48]}
+{"kind":"notes","id":"nt/e1nvw4","slide":16,"text":""}
+{"kind":"slide","id":"sl/tz0cjj","slide":17,"title":"16 - Perspectives","textShapes":8}
+{"kind":"shape","id":"sh/r65wjudg","slide":17,"name":"top-band","bbox":[0,0,1280,16]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":17,"name":"section","text":"16 - Perspectives","textPreview":"16 - Perspectives","textChars":17,"textLines":1,"bbox":[72,40,330,24]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":17,"name":"title","text":"Limites actuelles et évolutions","textPreview":"Limites actuelles et évolutions","textChars":31,"textLines":1,"bbox":[72,72,900,58]}
+{"kind":"shape","id":"sh/yxobm58z","slide":17,"name":"footer-line","bbox":[56,660,1168,1]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":17,"name":"footer-title","text":"SaveFunds - Défense TFE","textPreview":"SaveFunds - Défense TFE","textChars":23,"textLines":1,"bbox":[56,674,420,24]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":17,"name":"footer-page","text":"17/18","textPreview":"17/18","textChars":5,"textLines":1,"bbox":[1135,674,90,24]}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":17,"name":"card","bbox":[100,165,460,275]}
+{"kind":"shape","id":"sh/y1kre1w7","slide":17,"name":"card-accent","bbox":[100,165,6,275]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":17,"name":"card-title","text":"Limites du MVP","textPreview":"Limites du MVP","textChars":14,"textLines":1,"bbox":[122,183,418,32]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":17,"name":"card-body","text":"Saisie manuelle des données\nSeuils identiques pour toutes les entreprises\nAnalyse basée sur une situation ponctuelle","textPreview":"Saisie manuelle des données | Seuils identiques pour toutes les entreprises | Analyse basée sur une situation ponctuelle","textChars":116,"textLines":3,"bbox":[122,223,418,203]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":17,"name":"card","bbox":[720,165,460,275]}
+{"kind":"shape","id":"sh/xczed8v6","slide":17,"name":"card-accent","bbox":[720,165,6,275]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":17,"name":"card-title","text":"Évolutions possibles","textPreview":"Évolutions possibles","textChars":20,"textLines":1,"bbox":[742,183,418,32]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":17,"name":"card-body","text":"Connexion bancaire ou comptable\nHistorique détaille des analyses\nAlertes automatiques\nExports PDF","textPreview":"Connexion bancaire ou comptable | Historique détaille des analyses | Alertes automatiques | Exports PDF","textChars":97,"textLines":4,"bbox":[742,223,418,203]}
+{"kind":"notes","id":"nt/tz0cjj","slide":17,"text":""}
+{"kind":"slide","id":"sl/040qn3","slide":18,"title":"Conclusion","textShapes":4}
+{"kind":"shape","id":"sh/61032lsz","slide":18,"name":"accent","bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":18,"name":"title","text":"Conclusion","textPreview":"Conclusion","textChars":10,"textLines":1,"bbox":[80,86,720,60]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":18,"name":"conclusion","text":"SaveFunds est un MVP fonctionnel qui relie un besoin métier concret, une logique financière explicable et une architecture backend structurée.","textPreview":"SaveFunds est un MVP fonctionnel qui relie un besoin métier concret, une logique financière explicable et une architecture backend struct...","textChars":142,"textLines":1,"bbox":[82,185,980,96]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":18,"name":"questions","text":"Questions ?","textPreview":"Questions ?","textChars":11,"textLines":1,"bbox":[82,420,500,70]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":18,"name":"thanks","text":"Merci pour votre attention","textPreview":"Merci pour votre attention","textChars":26,"textLines":1,"bbox":[86,500,520,38]}
+{"kind":"notes","id":"nt/040qn3","slide":18,"text":""}
