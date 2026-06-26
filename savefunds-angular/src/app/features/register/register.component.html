@@ -1,0 +1,80 @@
+<main class="login-page">
+  <section class="brand-panel">
+    <div class="brand-content">
+      <img src="/assets/logo-savefunds.jpeg" alt="SaveFunds" class="logo-main">
+      <h1>SaveFunds</h1>
+      <p class="tagline">Votre vigilance financiere intelligente<br>pour PME/SRL belges</p>
+
+      <div class="features">
+        <div class="feature-item"><span class="dot green"></span>Compte dirigeant securise par JWT</div>
+        <div class="feature-item"><span class="dot orange"></span>Isolation stricte par entreprise</div>
+        <div class="feature-item"><span class="dot blue"></span>Tracabilite des actions sensibles</div>
+      </div>
+
+      <div class="powered-by">
+        <span>Propulse par</span>
+        <img src="/assets/logo-profacile.jpeg" alt="Profacile" class="logo-profacile">
+      </div>
+    </div>
+  </section>
+
+  <section class="form-panel">
+    <div class="form-card">
+      <h2>Creer un compte</h2>
+      <p class="subtitle">Inscrivez un dirigeant et accedez directement au cockpit SaveFunds</p>
+
+      <form (ngSubmit)="submit()" #form="ngForm" class="login-form">
+        <div class="name-grid">
+          <div class="auth-field">
+            <label for="prenom">Prenom</label>
+            <input id="prenom" name="prenom" [(ngModel)]="prenom" required minlength="2">
+          </div>
+
+          <div class="auth-field">
+            <label for="nom">Nom</label>
+            <input id="nom" name="nom" [(ngModel)]="nom" required minlength="2">
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="email">Adresse email</label>
+          <input id="email" name="email" type="email" [(ngModel)]="email" required autocomplete="email">
+        </div>
+
+        <div class="auth-field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" [(ngModel)]="password" required minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="role-choice">
+          <label class="role-card" [class.selected]="role === 'DIRIGEANT'">
+            <input type="radio" name="role" value="DIRIGEANT" [(ngModel)]="role">
+            <span>Dirigeant</span>
+            <small>Je gere ma propre SRL/PME</small>
+          </label>
+
+          <label class="role-card" [class.selected]="role === 'COMPTABLE'">
+            <input type="radio" name="role" value="COMPTABLE" [(ngModel)]="role">
+            <span>Comptable</span>
+            <small>Je suis plusieurs clients</small>
+          </label>
+        </div>
+
+        @if (error()) {
+          <p class="error-box">{{ error() }}</p>
+        }
+
+        <button class="auth-submit" type="submit" [disabled]="form.invalid || loading()">
+          {{ loading() ? 'Creation en cours...' : 'Creer le compte ->' }}
+        </button>
+
+        <div class="divider"><span>ou</span></div>
+
+        <p class="register-link">
+          Deja inscrit ?
+          <a routerLink="/login">Se connecter</a>
+        </p>
+      </form>
+    </div>
+  </section>
+</main>

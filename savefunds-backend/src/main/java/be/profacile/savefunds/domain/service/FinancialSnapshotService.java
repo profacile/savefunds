@@ -12,5 +12,7 @@ public interface FinancialSnapshotService {
 
     FinancialSnapshot importSnapshot(Long entrepriseId, MultipartFile file, FinancialSnapshotSource source, Long userId);
 
+    FinancialSnapshot createExternalSnapshot(Long entrepriseId, FinancialSnapshotSource source, Long userId);
+
     Optional<FinancialSnapshot> findLatest(Long entrepriseId);
 }

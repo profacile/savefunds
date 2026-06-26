@@ -1,0 +1,427 @@
+<main class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span>SF</span>
+      <div>
+        <strong>SaveFunds</strong>
+        <small>Financial vigilance</small>
+      </div>
+    </div>
+
+    <nav>
+      <button type="button" [class.active]="currentView() === 'PORTFOLIO'" (click)="setView('PORTFOLIO')">{{ isAccountant() ? 'Portefeuille' : 'Cockpit' }}</button>
+      <button type="button" [class.active]="currentView() === 'PROFILE'" (click)="setView('PROFILE')">Profil</button>
+      @if (!isAccountant()) {
+        <button type="button" [class.active]="currentView() === 'INGESTION'" (click)="setView('INGESTION')">Ingestion</button>
+        <button type="button" [class.active]="currentView() === 'SIMULATION'" (click)="setView('SIMULATION')">Simulation</button>
+      }
+      <button type="button" [class.active]="currentView() === 'AUDIT'" (click)="setView('AUDIT')">Audit</button>
+    </nav>
+
+    <button class="logout" type="button" (click)="auth.logout()">Deconnexion</button>
+  </aside>
+
+  <section class="workspace">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">{{ isAccountant() ? 'Espace comptable' : 'PME / SRL belge' }}</p>
+        <h1>{{ isAccountant() ? 'Portefeuille clients' : 'Copilote de tresorerie' }}</h1>
+      </div>
+      <div class="user-chip">
+        <span class="avatar-chip">
+          @if (profilePhoto()) {
+            <img [src]="profilePhoto() || ''" alt="">
+          } @else {
+            {{ userInitials() }}
+          }
+        </span>
+        <div>
+          <strong>{{ auth.currentUser()?.prenom }} {{ auth.currentUser()?.nom }}</strong>
+          <small>{{ roleLabel() }} - {{ auth.currentUser()?.email }}</small>
+        </div>
+      </div>
+    </header>
+
+    @if (loading()) {
+      <p class="notice">{{ loading() }}</p>
+    }
+    @if (error()) {
+      <p class="notice error">{{ error() }}</p>
+    }
+
+    @if (currentView() === 'PROFILE') {
+      <section class="profile-grid">
+        <article class="panel profile-card">
+          <div class="profile-photo">
+            @if (profilePhoto()) {
+              <img [src]="profilePhoto() || ''" alt="">
+            } @else {
+              <span>{{ userInitials() }}</span>
+            }
+          </div>
+          <div>
+            <p class="eyebrow">Profil {{ roleLabel() }}</p>
+            <h2>{{ auth.currentUser()?.prenom }} {{ auth.currentUser()?.nom }}</h2>
+            <p class="muted">{{ auth.currentUser()?.email }}</p>
+          </div>
+          <div class="profile-actions">
+            <label class="btn btn-primary">
+              Ajouter une photo
+              <input type="file" accept="image/*" (change)="onProfilePhotoSelected($event)">
+            </label>
+            <button class="btn btn-ghost" type="button" (click)="removeProfilePhoto()">Retirer</button>
+          </div>
+        </article>
+
+        <article class="panel profile-details">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Responsabilites</p>
+              <h2>{{ isAccountant() ? 'Pilotage portefeuille' : 'Pilotage entreprise' }}</h2>
+            </div>
+          </div>
+          @if (isAccountant()) {
+            <div class="profile-responsibilities">
+              <span>Surveiller les clients a risque et les donnees obsoletes</span>
+              <span>Valider ou conditionner les demandes de retrait et paiement</span>
+              <span>Conserver une trace des notes internes et decisions</span>
+            </div>
+          } @else {
+            <div class="profile-responsibilities">
+              <span>Importer les donnees BNB, banque ou bilan</span>
+              <span>Simuler un retrait avant de le realiser</span>
+              <span>Partager une situation lisible avec le comptable</span>
+            </div>
+          }
+        </article>
+      </section>
+    } @else if (isAccountant() && currentView() === 'PORTFOLIO') {
+      <section class="accountant-summary-grid">
+        <article class="metric-card">
+          <small>Clients suivis</small>
+          <strong>{{ accountantStats().total }}</strong>
+          <span>Portefeuille actif</span>
+        </article>
+        <article class="metric-card card-vert">
+          <small>Au vert</small>
+          <strong>{{ accountantStats().green }}</strong>
+          <span>Situation saine</span>
+        </article>
+        <article class="metric-card card-orange">
+          <small>A surveiller</small>
+          <strong>{{ accountantStats().orange }}</strong>
+          <span>Risque modere</span>
+        </article>
+        <article class="metric-card card-rouge">
+          <small>Prioritaires</small>
+          <strong>{{ accountantStats().red }}</strong>
+          <span>Action requise</span>
+        </article>
+      </section>
+
+      <section class="accountant-grid">
+        <article class="panel clients-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Surveillance</p>
+              <h2>Clients a traiter</h2>
+            </div>
+          </div>
+
+          <div class="accountant-filters">
+            <button type="button" [class.active]="accountantFilter() === 'ALL'" (click)="setAccountantFilter('ALL')">Tous</button>
+            <button type="button" [class.active]="accountantFilter() === 'ALERTS'" (click)="setAccountantFilter('ALERTS')">Alertes</button>
+            <button type="button" [class.active]="accountantFilter() === 'VALIDATIONS'" (click)="setAccountantFilter('VALIDATIONS')">Validations</button>
+            <button type="button" [class.active]="accountantFilter() === 'DUE_SOON'" (click)="setAccountantFilter('DUE_SOON')">Echeances 14j</button>
+            <button type="button" [class.active]="accountantFilter() === 'STALE_DATA'" (click)="setAccountantFilter('STALE_DATA')">Donnees anciennes</button>
+          </div>
+
+          <div class="client-table">
+            <div class="client-row table-head">
+              <span>Client</span>
+              <span>Score</span>
+              <span>Statut</span>
+              <span>Echeance</span>
+              <span>Tendance</span>
+              <span>Donnees</span>
+              <span>Validations</span>
+            </div>
+            @for (client of filteredAccountantClients(); track client.companyNumber) {
+              <button class="client-row" type="button" [class.selected]="selectedClient()?.companyNumber === client.companyNumber" (click)="selectClient(client)">
+                <span>
+                  <strong>{{ client.name }}</strong>
+                  <small>{{ client.companyNumber }}</small>
+                </span>
+                <span class="risk-score">{{ client.riskScore }}/10</span>
+                <span class="status-pill decision-{{ client.status }}">{{ client.status }}</span>
+                <span>
+                  <strong>{{ client.nextObligation }}</strong>
+                  <small>Dans {{ daysUntil(client.nextObligationDate) }} jours</small>
+                </span>
+                <span class="trend trend-{{ client.trend }}">{{ trendLabel(client.trend) }}</span>
+                <span class="freshness" [class.stale]="client.dataAgeDays > 30">{{ client.dataAgeDays }} j</span>
+                <span>
+                  <strong class="validation-badge" [class.empty]="client.validationCount === 0">{{ client.validationCount }}</strong>
+                  <small>{{ client.pendingValidation }}</small>
+                </span>
+              </button>
+            }
+          </div>
+        </article>
+
+        <article class="panel client-detail-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Dossier client</p>
+              <h2>{{ selectedClient()?.name }}</h2>
+              <span class="dossier-status">{{ selectedClient()?.dossierStatus }}</span>
+            </div>
+            <span class="status-pill decision-{{ selectedClient()?.status }}">{{ selectedClient()?.status }}</span>
+          </div>
+
+          <div class="detail-metrics">
+            <div>
+              <small>Score de risque</small>
+              <strong>{{ selectedClient()?.riskScore }}/10</strong>
+            </div>
+            <div>
+              <small>Tresorerie</small>
+              <strong>{{ money(selectedClient()?.cash) }}</strong>
+            </div>
+            <div>
+              <small>Couverture</small>
+              <strong>{{ selectedClient()?.coverageMonths }} mois</strong>
+            </div>
+            <div>
+              <small>Compte courant</small>
+              <strong>{{ selectedClient()?.currentAccountDays }} jours</strong>
+            </div>
+            <div>
+              <small>Prochaine echeance</small>
+              <strong>{{ selectedClient()?.nextObligation }} - {{ daysUntil(selectedClient()?.nextObligationDate || '') }} jours</strong>
+            </div>
+          </div>
+
+          <div class="validation-box">
+            <small>Demande en attente</small>
+            <strong>{{ selectedClient()?.pendingValidation }}</strong>
+            <p>Le comptable verifie la source, le risque fiscal, l'echeance a venir et la tresorerie avant de valider ou reporter l'operation.</p>
+          </div>
+
+          <div class="accountant-actions">
+            <button class="btn btn-primary" type="button">Valider</button>
+            <button class="btn btn-secondary" type="button">Valider sous condition</button>
+            <button class="btn btn-ghost" type="button">Demander correction</button>
+            <button class="btn btn-ghost" type="button">Reporter</button>
+          </div>
+
+          <div class="internal-note">
+            <small>Note interne comptable</small>
+            <p>{{ selectedClient()?.internalNote }}</p>
+          </div>
+
+          <div class="activity-feed">
+            <small>Activite recente</small>
+            @for (item of selectedClient()?.activity || []; track item) {
+              <span>{{ item }}</span>
+            }
+          </div>
+
+          <div class="source-note">
+            <span>Derniere source : {{ selectedClient()?.lastSource }}</span>
+            <span>{{ selectedClient()?.lastUpdate }}</span>
+          </div>
+        </article>
+
+        <article class="panel audit-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Flux comptable</p>
+              <h2>Alertes recentes</h2>
+            </div>
+          </div>
+          <div class="accountant-alerts">
+            <div><strong>Atelier Verhaegen SRL</strong><span>Compte courant debiteur depuis 48 jours.</span></div>
+            <div><strong>Studio Delta SRL</strong><span>Couverture tresorerie sous 1,5 mois.</span></div>
+            <div><strong>MecaNord SRL</strong><span>Depense exceptionnelle a valider avant paiement.</span></div>
+          </div>
+        </article>
+      </section>
+    } @else if (isAccountant() && currentView() === 'AUDIT') {
+      <section class="panel audit-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Flux comptable</p>
+            <h2>Alertes et validations recentes</h2>
+          </div>
+        </div>
+        <div class="accountant-alerts">
+          <div><strong>Atelier Verhaegen SRL</strong><span>Compte courant debiteur depuis 48 jours.</span></div>
+          <div><strong>Studio Delta SRL</strong><span>Validation sous condition recommandee.</span></div>
+          <div><strong>MecaNord SRL</strong><span>Donnees bancaires a rafraichir avant avis comptable.</span></div>
+        </div>
+      </section>
+    } @else if (!enterprise()) {
+      <section class="setup-panel">
+        <div>
+          <p class="eyebrow">Premiere etape</p>
+          <h2>Creer l'entreprise de demonstration</h2>
+          <p class="muted">Ces donnees servent de base. Les snapshots BNB, banque et bilan viendront ensuite remplacer l'encodage manuel.</p>
+        </div>
+
+        <form class="setup-grid" (ngSubmit)="createEnterprise()">
+          <div class="field"><label>Raison sociale</label><input name="raisonSociale" [(ngModel)]="enterpriseForm.raisonSociale"></div>
+          <div class="field"><label>Numero d'entreprise</label><input name="numeroEntreprise" [(ngModel)]="enterpriseForm.numeroEntreprise"></div>
+          <div class="field"><label>Forme juridique</label><input name="formeJuridique" [(ngModel)]="enterpriseForm.formeJuridique"></div>
+          <div class="field"><label>Secteur</label><input name="secteurActivite" [(ngModel)]="enterpriseForm.secteurActivite"></div>
+          <div class="field"><label>Tresorerie</label><input name="tresorerie" type="number" [(ngModel)]="enterpriseForm.tresorerie"></div>
+          <div class="field"><label>Charges mensuelles</label><input name="chargesMensuelles" type="number" [(ngModel)]="enterpriseForm.chargesMensuelles"></div>
+          <button class="btn btn-primary" type="submit">Creer l'entreprise</button>
+        </form>
+      </section>
+    } @else {
+      <section class="summary-grid">
+        <article class="metric-card">
+          <small>Entreprise</small>
+          <strong>{{ enterprise()?.raisonSociale }}</strong>
+          <span>{{ enterprise()?.numeroEntreprise }}</span>
+        </article>
+        <article class="metric-card">
+          <small>Tresorerie actuelle</small>
+          <strong>{{ money(snapshot()?.tresorerie || enterprise()?.tresorerie) }}</strong>
+          <span>{{ coverage() | number:'1.1-1' }} mois de charges</span>
+        </article>
+        <article class="metric-card">
+          <small>Compte courant</small>
+          <strong>{{ money(snapshot()?.soldeCompteCourant || enterprise()?.soldeCompteCourant) }}</strong>
+          <span>{{ snapshot()?.dureeCompteCourantDebiteur || 0 }} jours debiteur</span>
+        </article>
+        <article class="metric-card">
+          <small>Source active</small>
+          <strong>{{ sourceLabel(snapshot()?.source || 'Aucune') }}</strong>
+          <span>Confiance {{ snapshot()?.confidenceScore || 0 }}%</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        @if (currentView() === 'PORTFOLIO' || currentView() === 'INGESTION') {
+        <article class="panel ingestion-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Ingestion</p>
+              <h2>Recuperer les donnees</h2>
+            </div>
+          </div>
+
+          <div class="source-actions">
+            <button class="source-button" type="button" (click)="ingest('mock-bnb')">
+              <span>BNB</span>
+              <strong>Comptes annuels</strong>
+              <small>Mock via numero d'entreprise</small>
+            </button>
+            <button class="source-button" type="button" (click)="ingest('mock-bank')">
+              <span>PSD2</span>
+              <strong>Banque</strong>
+              <small>Mock solde et mouvements</small>
+            </button>
+            <button class="source-button" type="button" (click)="ingest('mock-balance-sheet')">
+              <span>PDF</span>
+              <strong>Bilan</strong>
+              <small>Mock parser document</small>
+            </button>
+          </div>
+
+          @if (snapshot()) {
+            <div class="snapshot-box">
+              <div>
+                <small>Snapshot #{{ snapshot()?.id }}</small>
+                <strong>{{ sourceLabel(snapshot()?.source || '') }}</strong>
+              </div>
+              <p>{{ snapshot()?.rawMetadata }}</p>
+              @for (warning of snapshot()?.warnings || []; track warning) {
+                <span class="warning">{{ warning }}</span>
+              }
+            </div>
+          }
+        </article>
+        }
+
+        @if (currentView() === 'PORTFOLIO' || currentView() === 'SIMULATION') {
+        <article class="panel decision-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Decision</p>
+              <h2>Simuler un retrait</h2>
+            </div>
+            @if (result()) {
+              <span class="status-pill decision-{{ result()?.globalDecision }}">{{ result()?.globalDecision }}</span>
+            }
+          </div>
+
+          <div class="simulation-form">
+            <div class="field">
+              <label>Type de decision</label>
+              <select name="decisionType" [(ngModel)]="decisionType">
+                <option value="RETRAIT_DIRIGEANT">Retrait dirigeant</option>
+                <option value="PAIEMENT_FOURNISSEUR">Paiement fournisseur</option>
+                <option value="DEPENSE_EXCEPTIONNELLE">Depense exceptionnelle</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Montant demande</label>
+              <input name="withdrawalAmount" type="number" [(ngModel)]="withdrawalAmount">
+            </div>
+            <button class="btn btn-primary" type="button" [disabled]="!snapshot()" (click)="simulate()">Analyser</button>
+          </div>
+
+          @if (result()) {
+            <div class="result-grid">
+              <div><small>Avant</small><strong>{{ money(result()?.cashBefore) }}</strong></div>
+              <div><small>Apres</small><strong>{{ money(result()?.cashAfter) }}</strong></div>
+              <div><small>Max recommande</small><strong>{{ money(result()?.maxRecommendedAmount) }}</strong></div>
+            </div>
+
+            <p class="decision-text">{{ result()?.globalExplanation }}</p>
+
+            <div class="indicator-list">
+              @for (indicator of result()?.indicators || []; track indicator.code) {
+                <div class="indicator-row">
+                  <span class="status-pill decision-{{ indicator.decision }}">{{ indicator.decision }}</span>
+                  <div>
+                    <strong>{{ indicator.label }}</strong>
+                    <small>{{ indicator.explanation }}</small>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </article>
+        }
+
+        @if (currentView() === 'PORTFOLIO' || currentView() === 'AUDIT') {
+        <article class="panel audit-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Securite</p>
+              <h2>Journal d'audit</h2>
+            </div>
+            <button class="btn btn-ghost" type="button" (click)="refreshAudit()">Rafraichir</button>
+          </div>
+
+          <div class="audit-list">
+            @for (log of auditLogs(); track log.id) {
+              <div class="audit-row">
+                <time>{{ log.createdAt | date:'short' }}</time>
+                <strong>{{ log.action }}</strong>
+                <span>{{ log.details }}</span>
+              </div>
+            } @empty {
+              <p class="muted">Aucune action auditee pour l'instant.</p>
+            }
+          </div>
+        </article>
+        }
+      </section>
+    }
+  </section>
+</main>

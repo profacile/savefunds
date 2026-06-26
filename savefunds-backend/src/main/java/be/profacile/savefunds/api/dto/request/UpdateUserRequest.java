@@ -32,6 +32,10 @@ public class UpdateUserRequest {
     private Boolean emailVerified;
 
     @Schema(description = "Rôle de l'utilisateur", example = "DIRIGEANT",
-            allowableValues = {"DIRIGEANT", "ADMIN"})
+            allowableValues = {"DIRIGEANT", "COMPTABLE", "ADMIN"})
     private Role role;
+
+    @Size(max = 1_000_000, message = "La photo de profil est trop volumineuse")
+    @Schema(description = "Photo de profil encodee en data URL")
+    private String photoUrl;
 }

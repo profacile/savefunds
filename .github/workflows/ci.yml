@@ -41,3 +41,21 @@ jobs:
         run: npm run build-only
         env:
           VITE_API_BASE_URL: http://localhost:8080
+
+  angular-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: savefunds-angular
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+      - name: Install Angular dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Angular frontend
+        run: pnpm exec ng build

@@ -23,6 +23,22 @@ VigilanceEngine
 Decision tricolore + recommandations
 ```
 
+Les sources externes plus lourdes sont representees par des providers mockes :
+
+```text
+BNB / Banque PSD2 / Bilan PDF-XLSX
+        |
+        v
+ExternalFinancialDataProvider
+        |
+        v
+FinancialSnapshot
+```
+
+Cette separation permet de montrer l'architecture cible sans bloquer le MVP
+sur des acces externes, des consentements bancaires ou des formats PDF
+heterogenes.
+
 ## Formats MVP
 
 ### 1. CSV bancaire normalise
@@ -84,6 +100,29 @@ POST /api/v1/entreprises/{entrepriseId}/financial-snapshots/import-accounting-cs
 Content-Type: multipart/form-data
 ```
 
+### 3. Sources externes mockees
+
+Ces endpoints creent un `FinancialSnapshot` a partir de providers mockes.
+Ils servent a demontrer le flux metier attendu avant integration reelle :
+
+```http
+POST /api/v1/entreprises/{entrepriseId}/financial-snapshots/mock-bnb
+POST /api/v1/entreprises/{entrepriseId}/financial-snapshots/mock-bank
+POST /api/v1/entreprises/{entrepriseId}/financial-snapshots/mock-balance-sheet
+```
+
+Ce qui est mocke aujourd'hui :
+
+| Source | Objectif production | Travail restant |
+| --- | --- | --- |
+| `BNB_API` | Recuperer les comptes annuels via numero d'entreprise | identifier l'API/source officielle, gerer disponibilite et delais de publication |
+| `BANK_API` | Lire solde et mouvements via PSD2/Open Banking | consentement explicite, OAuth bancaire, connecteur par banque ou agregateur |
+| `BALANCE_SHEET_DOCUMENT` | Parser un bilan PDF/XLSX fourni par l'utilisateur | extraction document, mapping PCMN, ecran de validation humaine |
+
+Les reponses contiennent volontairement des `warnings` et un
+`confidenceScore` pour indiquer qu'une donnee automatisee doit pouvoir etre
+verifiee avant decision.
+
 ## Simulation de decision
 
 Une fois un `FinancialSnapshot` cree, le backend peut simuler une decision :
@@ -110,6 +149,26 @@ Le moteur retourne :
 - indicateurs individuels ;
 - decision globale ;
 - recommandations.
+
+## Audit et tracabilite
+
+Les actions sensibles sont journalisees dans `audit_logs` :
+
+- creation d'un snapshot manuel ;
+- import d'un CSV bancaire ;
+- import d'un CSV comptable ;
+- simulation d'une decision financiere ;
+- consultation du journal d'audit.
+
+Chaque entree contient l'utilisateur, l'entreprise, l'action, le resultat,
+la ressource concernee et la date. Cela permet d'expliquer au jury que
+SaveFunds ne manipule pas des donnees financieres critiques sans trace.
+
+Endpoint de consultation :
+
+```http
+GET /api/v1/entreprises/{entrepriseId}/audit-logs
+```
 
 ## Limites assumees
 

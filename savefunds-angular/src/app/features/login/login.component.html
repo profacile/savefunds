@@ -1,0 +1,56 @@
+<main class="login-page">
+  <section class="brand-panel">
+    <div class="brand-content">
+      <img src="/assets/logo-savefunds.jpeg" alt="SaveFunds" class="logo-main">
+      <h1>SaveFunds</h1>
+      <p class="tagline">Votre vigilance financiere intelligente<br>pour PME/SRL belges</p>
+
+      <div class="features">
+        <div class="feature-item"><span class="dot green"></span>Surveillance de tresorerie en temps reel</div>
+        <div class="feature-item"><span class="dot orange"></span>Alertes tricolores VERT / ORANGE / ROUGE</div>
+        <div class="feature-item"><span class="dot blue"></span>Analyse automatique de vos indicateurs</div>
+      </div>
+
+      <div class="powered-by">
+        <span>Propulse par</span>
+        <img src="/assets/logo-profacile.jpeg" alt="Profacile" class="logo-profacile">
+      </div>
+    </div>
+  </section>
+
+  <section class="form-panel">
+    <div class="form-card">
+      <h2>Bonjour !</h2>
+      <p class="subtitle">Connectez-vous a votre espace SaveFunds</p>
+
+      <form (ngSubmit)="submit()" #form="ngForm" class="login-form">
+        <div class="auth-field">
+          <label for="email">Adresse email</label>
+          <input id="email" name="email" type="email" [(ngModel)]="email" required autocomplete="email">
+        </div>
+
+        <div class="auth-field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" [(ngModel)]="password" required autocomplete="current-password">
+        </div>
+
+        <a class="forgot-link" routerLink="/forgot-password">Mot de passe oublie ?</a>
+
+        @if (error()) {
+          <p class="error-box">{{ error() }}</p>
+        }
+
+        <button class="auth-submit" type="submit" [disabled]="form.invalid || loading()">
+          {{ loading() ? 'Connexion en cours...' : 'Se connecter ->' }}
+        </button>
+
+        <div class="divider"><span>ou</span></div>
+
+        <p class="register-link">
+          Pas encore de compte ?
+          <a routerLink="/register">Creer un compte</a>
+        </p>
+      </form>
+    </div>
+  </section>
+</main>

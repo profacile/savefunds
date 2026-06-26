@@ -1,0 +1,137 @@
+:root {
+  --sf-blue-900: #0f2d6b;
+  --sf-blue-700: #1a4fa0;
+  --sf-green-700: #0d7a3e;
+  --sf-green-600: #16a34a;
+  --sf-orange-600: #ea580c;
+  --sf-red-600: #dc2626;
+  --sf-slate-950: #0f172a;
+  --sf-slate-800: #1e293b;
+  --sf-slate-600: #475569;
+  --sf-slate-500: #64748b;
+  --sf-slate-300: #cbd5e1;
+  --sf-slate-200: #e2e8f0;
+  --sf-slate-100: #f1f5f9;
+  --sf-slate-50: #f8fafc;
+  --sf-white: #ffffff;
+  --sf-radius: 8px;
+  --sf-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--sf-slate-100);
+  color: var(--sf-slate-800);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+.btn {
+  min-height: 42px;
+  border-radius: 7px;
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--sf-blue-700), var(--sf-green-700));
+  color: var(--sf-white);
+  box-shadow: 0 10px 24px rgba(26, 79, 160, 0.24);
+}
+
+.btn-ghost {
+  background: var(--sf-white);
+  color: var(--sf-blue-700);
+  border: 1px solid var(--sf-slate-200);
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--sf-slate-200);
+  border-radius: 7px;
+  padding: 0 12px;
+  background: var(--sf-white);
+  color: var(--sf-slate-950);
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--sf-blue-700);
+  outline: 3px solid rgba(26, 79, 160, 0.12);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.decision-VERT,
+.decision-GREEN {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.decision-ORANGE {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.decision-ROUGE,
+.decision-RED {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.muted {
+  color: var(--sf-slate-500);
+}
+
+.error {
+  color: var(--sf-red-600);
+  font-size: 0.9rem;
+}

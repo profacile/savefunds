@@ -3,6 +3,7 @@ package be.profacile.savefunds.domain.service.impl;
 import be.profacile.savefunds.api.dto.request.LoginRequest;
 import be.profacile.savefunds.api.dto.request.RegisterRequest;
 import be.profacile.savefunds.api.dto.response.AuthResponse;
+import be.profacile.savefunds.api.dto.response.MessageResponse;
 import be.profacile.savefunds.api.dto.response.UserResponse;
 import be.profacile.savefunds.domain.entity.User;
 import be.profacile.savefunds.domain.enums.Role;
@@ -47,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
         user.setNom(request.getNom());
         user.setPrenom(request.getPrenom());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.DIRIGEANT);
+        user.setRole(resolvePublicRegistrationRole(request.getRole()));
         user.setEmailVerified(false);
 
         User saved = userRepository.save(user);
@@ -60,7 +61,8 @@ public class AuthServiceImpl implements AuthService {
                 saved.getNom(),
                 saved.getPrenom(),
                 saved.getRole(),
-                saved.getEmailVerified()
+                saved.getEmailVerified(),
+                saved.getPhotoUrl()
         );
 
         return new AuthResponse(token, userResponse);
@@ -90,9 +92,30 @@ public class AuthServiceImpl implements AuthService {
                 user.getNom(),
                 user.getPrenom(),
                 user.getRole(),
-                user.getEmailVerified()
+                user.getEmailVerified(),
+                user.getPhotoUrl()
         );
 
         return new AuthResponse(token, userResponse);
+    }
+
+    @Override
+    public MessageResponse requestPasswordReset(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            // MVP: integration email a brancher plus tard.
+            // Ne pas retourner d'information differente pour eviter l'enumeration des comptes.
+        });
+
+        return new MessageResponse("Si un compte existe pour cet email, un lien de reinitialisation sera envoye.");
+    }
+
+    private Role resolvePublicRegistrationRole(Role requestedRole) {
+        if (requestedRole == null) {
+            return Role.DIRIGEANT;
+        }
+        if (requestedRole == Role.ADMIN) {
+            throw new IllegalArgumentException("Le role ADMIN ne peut pas etre cree depuis l'inscription publique");
+        }
+        return requestedRole;
     }
 }

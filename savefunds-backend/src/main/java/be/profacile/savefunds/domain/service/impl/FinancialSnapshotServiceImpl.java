@@ -12,6 +12,7 @@ import be.profacile.savefunds.domain.repository.FinancialSnapshotRepository;
 import be.profacile.savefunds.domain.repository.ImportJobRepository;
 import be.profacile.savefunds.domain.service.FinancialSnapshotService;
 import be.profacile.savefunds.domain.service.financial.ExtractedFinancialData;
+import be.profacile.savefunds.domain.service.financial.ExternalFinancialDataProvider;
 import be.profacile.savefunds.domain.service.financial.FinancialDataExtractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
     private final FinancialSnapshotRepository snapshotRepository;
     private final ImportJobRepository importJobRepository;
     private final List<FinancialDataExtractor> extractors;
+    private final List<ExternalFinancialDataProvider> externalProviders;
 
     @Override
     @Transactional
@@ -81,6 +83,43 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
             importJob.setSnapshot(snapshot);
             importJob.setStatus(data.getMissingFields().isEmpty() ? ImportJobStatus.PARSED : ImportJobStatus.PARTIAL);
             importJob.setSummary("Snapshot cree avec " + data.getMissingFields().size() + " champ(s) manquant(s)");
+            importJobRepository.save(importJob);
+
+            return snapshot;
+        } catch (RuntimeException ex) {
+            importJob.setStatus(ImportJobStatus.FAILED);
+            importJob.setErrorMessage(ex.getMessage());
+            importJobRepository.save(importJob);
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional
+    public FinancialSnapshot createExternalSnapshot(Long entrepriseId, FinancialSnapshotSource source, Long userId) {
+        Entreprise entreprise = getEntreprise(entrepriseId);
+        ExternalFinancialDataProvider provider = externalProviders.stream()
+                .filter(candidate -> candidate.source() == source)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Aucun provider externe disponible pour la source " + source));
+
+        ImportJob importJob = new ImportJob();
+        importJob.setEntreprise(entreprise);
+        importJob.setSource(source);
+        importJob.setStatus(ImportJobStatus.UPLOADED);
+        importJob.setFileName(provider.providerName());
+        importJob.setParserVersion(provider.providerVersion());
+        importJob.setCreatedByUserId(userId);
+        importJob = importJobRepository.save(importJob);
+
+        try {
+            ExtractedFinancialData data = provider.fetch(entreprise);
+            FinancialSnapshot snapshot = toSnapshot(entreprise, source, provider.providerName(), data);
+            snapshot = snapshotRepository.save(snapshot);
+
+            importJob.setSnapshot(snapshot);
+            importJob.setStatus(data.getMissingFields().isEmpty() ? ImportJobStatus.PARSED : ImportJobStatus.PARTIAL);
+            importJob.setSummary("Snapshot mock externe cree via " + provider.providerName());
             importJobRepository.save(importJob);
 
             return snapshot;

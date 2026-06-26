@@ -1,5 +1,6 @@
 package be.profacile.savefunds.api.dto.request;
 
+import be.profacile.savefunds.domain.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -32,4 +33,6 @@ public class RegisterRequest {
     @NotBlank(message = "Le prénom est obligatoire")
     @Size(min = 2, max = 100, message = "Le prénom doit contenir entre 2 et 100 caractères")
     private String prenom;
+
+    private Role role = Role.DIRIGEANT;
 }

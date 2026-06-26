@@ -44,8 +44,12 @@ Endpoints principaux:
 POST /api/v1/entreprises/{id}/financial-snapshots/manual
 POST /api/v1/entreprises/{id}/financial-snapshots/import-bank-csv
 POST /api/v1/entreprises/{id}/financial-snapshots/import-accounting-csv
+POST /api/v1/entreprises/{id}/financial-snapshots/mock-bnb
+POST /api/v1/entreprises/{id}/financial-snapshots/mock-bank
+POST /api/v1/entreprises/{id}/financial-snapshots/mock-balance-sheet
 GET  /api/v1/entreprises/{id}/financial-snapshots/latest
 POST /api/v1/entreprises/{id}/financial-snapshots/simulate
+GET  /api/v1/entreprises/{id}/audit-logs
 ```
 
 Formats d'exemple:
@@ -56,6 +60,22 @@ Formats d'exemple:
 Documentation detaillee:
 
 - `../docs/BACKEND_FINANCIAL_INGESTION.md`
+
+Les endpoints `mock-*` documentent l'architecture cible pour BNB, PSD2 et
+parsing de bilan. Ils sont volontairement separes des imports CSV afin de
+pouvoir remplacer les providers mockes par de vrais connecteurs sans changer
+le moteur de vigilance.
+
+## Securite et tracabilite
+
+Les endpoints metier sont proteges par JWT et verifies par ownership :
+un dirigeant ne peut consulter que les donnees de son entreprise.
+
+Les operations sensibles sont historisees dans `audit_logs` :
+
+- creation/import d'un snapshot financier ;
+- simulation d'une decision ;
+- consultation du journal d'audit.
 
 ## Production
 

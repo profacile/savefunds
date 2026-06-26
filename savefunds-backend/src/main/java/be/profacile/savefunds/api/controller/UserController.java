@@ -6,7 +6,9 @@ import be.profacile.savefunds.api.dto.response.UserResponse;
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.api.mapper.UserMapper;
 import be.profacile.savefunds.domain.entity.User;
+import be.profacile.savefunds.domain.enums.Role;
 import be.profacile.savefunds.domain.service.UserService;
+import be.profacile.savefunds.security.service.CurrentUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,23 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * Controller de gestion des utilisateurs.
- *
- * Note : La création d'utilisateur est gérée par AuthController (/api/auth/register).
- * Ce controller gère le profil et l'administration des comptes existants.
- *
- * Endpoints:
- * - GET  /api/v1/users          : Lister tous les utilisateurs (ADMIN)
- * - GET  /api/v1/users/{id}     : Récupérer un utilisateur
- * - PUT  /api/v1/users/{id}     : Mettre à jour le profil
- * - DELETE /api/v1/users/{id}   : Supprimer un compte
- */
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -40,90 +30,75 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final CurrentUserService currentUserService;
 
-    /**
-     * Lister tous les utilisateurs.
-     * Usage réservé à l'administration.
-     */
+    @GetMapping("/me")
+    @Operation(summary = "Recuperer le profil connecte",
+            description = "Retourne l'utilisateur associe au token JWT courant")
+    public ResponseEntity<UserResponse> me() {
+        return ResponseEntity.ok(userMapper.toResponse(currentUserService.getCurrentUser()));
+    }
+
     @GetMapping
     @Operation(summary = "Lister tous les utilisateurs",
-            description = "Récupère la liste complète des utilisateurs (usage admin)")
+            description = "Reserve aux administrateurs")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès")
+            @ApiResponse(responseCode = "200", description = "Liste recuperee avec succes"),
+            @ApiResponse(responseCode = "403", description = "Acces reserve aux administrateurs")
     })
     public ResponseEntity<List<UserResponse>> listerUtilisateurs() {
+        assertAdmin();
         List<UserResponse> responses = userService.findAll()
                 .stream()
                 .map(userMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Récupérer un utilisateur par son ID.
-     */
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer un utilisateur",
-            description = "Récupère les détails d'un utilisateur par son ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Utilisateur récupéré avec succès"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+    @Operation(summary = "Recuperer un utilisateur",
+            description = "Un utilisateur peut consulter son profil. Un admin peut consulter tous les profils.")
     public ResponseEntity<UserResponse> recupererUtilisateur(
             @Parameter(description = "ID de l'utilisateur")
             @PathVariable Long id) {
 
+        assertSelfOrAdmin(id);
         User user = userService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Utilisateur non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouve avec l'ID: " + id));
 
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
-    /**
-     * Récupérer un utilisateur par son email.
-     */
     @GetMapping("/email/{email}")
-    @Operation(summary = "Récupérer un utilisateur par email",
-            description = "Récupère un utilisateur via son adresse email")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Utilisateur récupéré avec succès"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+    @Operation(summary = "Recuperer un utilisateur par email",
+            description = "Un utilisateur peut consulter son profil. Un admin peut consulter tous les profils.")
     public ResponseEntity<UserResponse> recupererParEmail(
             @Parameter(description = "Email de l'utilisateur")
             @PathVariable String email) {
 
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Utilisateur non trouvé avec l'email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouve avec l'email: " + email));
+        assertSelfOrAdmin(user.getId());
 
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
-    /**
-     * Mettre à jour le profil d'un utilisateur.
-     * L'email n'est pas modifiable.
-     */
     @PutMapping("/{id}")
-    @Operation(summary = "Mettre à jour un utilisateur",
-            description = "Modifie les informations d'un utilisateur (nom, prénom, rôle). L'email n'est pas modifiable.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Utilisateur mis à jour avec succès"),
-            @ApiResponse(responseCode = "400", description = "Données invalides"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+    @Operation(summary = "Mettre a jour un utilisateur",
+            description = "Un utilisateur peut modifier son nom/prenom. Seul un admin peut modifier le role ou la verification email.")
     public ResponseEntity<UserResponse> mettreAJourUtilisateur(
             @Parameter(description = "ID de l'utilisateur")
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {
 
-        User existing = userService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Utilisateur non trouvé avec l'ID: " + id));
+        assertSelfOrAdmin(id);
+        if (!isAdmin() && (request.getRole() != null || request.getEmailVerified() != null)) {
+            throw new AccessDeniedException("Seul un administrateur peut modifier le role ou la verification email");
+        }
 
-        // Appliquer les modifications via le mapper (champs protégés ignorés)
+        User existing = userService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouve avec l'ID: " + id));
         userMapper.updateFromRequest(request, existing);
 
         User updated = userService.update(id, existing);
@@ -131,31 +106,45 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(updated));
     }
 
-    /**
-     * Supprimer un compte utilisateur.
-     */
     @DeleteMapping("/{id}")
     @Operation(summary = "Supprimer un utilisateur",
-            description = "Supprime définitivement un compte utilisateur")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Utilisateur supprimé avec succès"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+            description = "Reserve aux administrateurs")
     public ResponseEntity<Void> supprimerUtilisateur(
             @Parameter(description = "ID de l'utilisateur")
             @PathVariable Long id) {
 
+        assertAdmin();
         userService.delete(id);
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/password")
-    @Operation(summary = "Changer le mot de passe")
+    @Operation(summary = "Changer le mot de passe",
+            description = "Un utilisateur peut changer son propre mot de passe. Un admin peut aussi declencher l'operation.")
     public ResponseEntity<Void> changerMotDePasse(
             @PathVariable Long id,
             @Valid @RequestBody ChangePasswordRequest request) {
+        assertSelfOrAdmin(id);
         userService.changePassword(id, request.getAncienMotDePasse(), request.getNouveauMotDePasse());
         return ResponseEntity.noContent().build();
+    }
+
+    private void assertSelfOrAdmin(Long userId) {
+        User current = currentUserService.getCurrentUser();
+        if (current.getRole() == Role.ADMIN || current.getId().equals(userId)) {
+            return;
+        }
+        throw new AccessDeniedException("Acces refuse a cet utilisateur");
+    }
+
+    private void assertAdmin() {
+        if (!isAdmin()) {
+            throw new AccessDeniedException("Acces reserve aux administrateurs");
+        }
+    }
+
+    private boolean isAdmin() {
+        return currentUserService.getCurrentUser().getRole() == Role.ADMIN;
     }
 }

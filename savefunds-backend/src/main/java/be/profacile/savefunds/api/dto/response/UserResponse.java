@@ -36,7 +36,7 @@ public class UserResponse {
     private String prenom;
 
     /**
-     * Rôle (DIRIGEANT / ADMIN)
+     * Rôle (DIRIGEANT / COMPTABLE / ADMIN)
      */
     private Role role;
 
@@ -44,4 +44,9 @@ public class UserResponse {
      * Email vérifié ou non
      */
     private Boolean emailVerified;
+
+    /**
+     * Photo de profil encodee ou URL externe
+     */
+    private String photoUrl;
 }

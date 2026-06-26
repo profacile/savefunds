@@ -37,6 +37,9 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.DIRIGEANT;
 
+    @Column(name = "photo_url", columnDefinition = "TEXT")
+    private String photoUrl;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }
