@@ -38,9 +38,17 @@ public class EntrepriseServiceImpl implements EntrepriseService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Entreprise> findByUserId(Long userId) {
-        log.debug("Recherche de l'entreprise pour userId : {}", userId);
+        log.debug("Recherche de la derniere entreprise pour userId : {}", userId);
 
-        return entrepriseRepository.findByUserId(userId);
+        return entrepriseRepository.findFirstByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Entreprise> findAllByUserId(Long userId) {
+        log.debug("Recherche des entreprises pour userId : {}", userId);
+
+        return entrepriseRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @Override
@@ -74,10 +82,12 @@ public class EntrepriseServiceImpl implements EntrepriseService {
         }
 
         // Validation métier : un userId ne peut avoir qu'une seule entreprise
-        Optional<Entreprise> existing = entrepriseRepository.findByUserId(entreprise.getUserId());
-        if (existing.isPresent()) {
+        if (entrepriseRepository.existsByUserIdAndNumeroEntreprise(
+                entreprise.getUserId(),
+                entreprise.getNumeroEntreprise()
+        )) {
             throw new IllegalArgumentException(
-                    "L'utilisateur possède déjà une entreprise (ID : " + existing.get().getId() + ")"
+                    "Cette entreprise est deja rattachee a cet utilisateur"
             );
         }
 

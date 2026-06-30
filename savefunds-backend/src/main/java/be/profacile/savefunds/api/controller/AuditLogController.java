@@ -4,9 +4,6 @@ import be.profacile.savefunds.api.dto.response.AuditLogResponse;
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.api.mapper.AuditLogApiMapper;
 import be.profacile.savefunds.domain.entity.Entreprise;
-import be.profacile.savefunds.domain.entity.User;
-import be.profacile.savefunds.domain.enums.AuditAction;
-import be.profacile.savefunds.domain.enums.AuditOutcome;
 import be.profacile.savefunds.domain.service.AuditLogService;
 import be.profacile.savefunds.domain.service.EntrepriseService;
 import be.profacile.savefunds.security.service.CurrentUserService;
@@ -34,17 +31,6 @@ public class AuditLogController {
     @Operation(summary = "Consulter les 50 dernieres actions auditees d'une entreprise")
     public ResponseEntity<List<AuditLogResponse>> findLastAuditLogs(@PathVariable Long entrepriseId) {
         assertOwnsEntreprise(entrepriseId);
-        User user = currentUserService.getCurrentUser();
-
-        auditLogService.record(
-                user,
-                entrepriseId,
-                AuditAction.AUDIT_LOG_VIEWED,
-                AuditOutcome.SUCCESS,
-                "AUDIT_LOG",
-                null,
-                "Consultation des journaux d'audit"
-        );
 
         List<AuditLogResponse> responses = auditLogService.findLastForEntreprise(entrepriseId)
                 .stream()

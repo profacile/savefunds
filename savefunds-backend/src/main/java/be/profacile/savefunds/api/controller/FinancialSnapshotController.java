@@ -2,16 +2,20 @@ package be.profacile.savefunds.api.controller;
 
 import be.profacile.savefunds.api.dto.request.CreateManualFinancialSnapshotRequest;
 import be.profacile.savefunds.api.dto.request.SimulateFinancialDecisionRequest;
+import be.profacile.savefunds.api.dto.response.BankTransactionResponse;
 import be.profacile.savefunds.api.dto.response.FinancialSnapshotResponse;
 import be.profacile.savefunds.api.dto.response.VigilanceResultResponse;
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
+import be.profacile.savefunds.api.mapper.BankTransactionApiMapper;
 import be.profacile.savefunds.api.mapper.FinancialSnapshotApiMapper;
+import be.profacile.savefunds.domain.entity.BankTransaction;
 import be.profacile.savefunds.domain.entity.Entreprise;
 import be.profacile.savefunds.domain.entity.FinancialSnapshot;
 import be.profacile.savefunds.domain.enums.AuditAction;
 import be.profacile.savefunds.domain.enums.AuditOutcome;
 import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 import be.profacile.savefunds.domain.service.AuditLogService;
+import be.profacile.savefunds.domain.service.BankTransactionService;
 import be.profacile.savefunds.domain.service.EntrepriseService;
 import be.profacile.savefunds.domain.service.FinancialSnapshotService;
 import be.profacile.savefunds.domain.service.VigilanceEngine;
@@ -26,6 +30,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/entreprises/{entrepriseId}/financial-snapshots")
 @RequiredArgsConstructor
@@ -37,7 +43,9 @@ public class FinancialSnapshotController {
     private final VigilanceEngine vigilanceEngine;
     private final CurrentUserService currentUserService;
     private final FinancialSnapshotApiMapper snapshotMapper;
+    private final BankTransactionApiMapper bankTransactionApiMapper;
     private final AuditLogService auditLogService;
+    private final BankTransactionService bankTransactionService;
 
     @PostMapping("/manual")
     @Operation(summary = "Creer un snapshot financier manuel")
@@ -70,6 +78,7 @@ public class FinancialSnapshotController {
                 FinancialSnapshotSource.BANK_CSV,
                 currentUserService.getCurrentUserId()
         );
+        List<BankTransaction> transactions = bankTransactionService.importAndClassify(entrepriseId, snapshot, file);
         auditLogService.record(
                 currentUserService.getCurrentUser(),
                 entrepriseId,
@@ -77,9 +86,19 @@ public class FinancialSnapshotController {
                 AuditOutcome.SUCCESS,
                 "FINANCIAL_SNAPSHOT",
                 snapshot.getId(),
-                "Import bancaire CSV: " + file.getOriginalFilename()
+                "Import bancaire CSV: " + file.getOriginalFilename() + " transactions=" + transactions.size()
         );
         return ResponseEntity.ok(snapshotMapper.toResponse(snapshot));
+    }
+
+    @GetMapping("/bank-transactions")
+    @Operation(summary = "Lister les transactions bancaires classees")
+    public ResponseEntity<List<BankTransactionResponse>> bankTransactions(@PathVariable Long entrepriseId) {
+        assertOwnsEntreprise(entrepriseId);
+        List<BankTransactionResponse> transactions = bankTransactionService.findByEntreprise(entrepriseId).stream()
+                .map(bankTransactionApiMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(transactions);
     }
 
     @PostMapping(value = "/import-accounting-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -104,16 +123,6 @@ public class FinancialSnapshotController {
                 "Import comptable CSV: " + file.getOriginalFilename()
         );
         return ResponseEntity.ok(snapshotMapper.toResponse(snapshot));
-    }
-
-    @PostMapping("/mock-bnb")
-    @Operation(summary = "Creer un snapshot depuis une simulation d'appel BNB")
-    public ResponseEntity<FinancialSnapshotResponse> createMockBnbSnapshot(@PathVariable Long entrepriseId) {
-        return createMockExternalSnapshot(
-                entrepriseId,
-                FinancialSnapshotSource.BNB_API,
-                "Simulation connecteur BNB"
-        );
     }
 
     @PostMapping("/mock-bank")
@@ -145,14 +154,36 @@ public class FinancialSnapshotController {
         return ResponseEntity.ok(snapshotMapper.toResponse(snapshot));
     }
 
+    @GetMapping
+    @Operation(summary = "Lister les snapshots financiers d'une entreprise")
+    public ResponseEntity<List<FinancialSnapshotResponse>> snapshots(@PathVariable Long entrepriseId) {
+        assertOwnsEntreprise(entrepriseId);
+        List<FinancialSnapshotResponse> snapshots = snapshotService.findAll(entrepriseId).stream()
+                .map(snapshotMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(snapshots);
+    }
+
+    @GetMapping("/consolidated")
+    @Operation(summary = "Construire la situation financiere consolidee selon la hierarchie SaveFunds")
+    public ResponseEntity<FinancialSnapshotResponse> consolidatedSnapshot(@PathVariable Long entrepriseId) {
+        assertOwnsEntreprise(entrepriseId);
+        FinancialSnapshot snapshot = snapshotService.buildConsolidatedSnapshot(entrepriseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Aucune source financiere disponible pour cette entreprise"));
+        return ResponseEntity.ok(snapshotMapper.toResponse(snapshot));
+    }
+
     @PostMapping("/simulate")
     @Operation(summary = "Simuler une decision financiere sur le dernier snapshot")
     public ResponseEntity<VigilanceResultResponse> simulateDecision(
             @PathVariable Long entrepriseId,
             @Valid @RequestBody SimulateFinancialDecisionRequest request) {
         assertOwnsEntreprise(entrepriseId);
-        FinancialSnapshot snapshot = snapshotService.findLatest(entrepriseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Aucun snapshot financier disponible pour simuler une decision"));
+        FinancialSnapshot snapshot = request.getForcedSource() == null
+                ? snapshotService.buildConsolidatedSnapshot(entrepriseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Aucune source financiere disponible pour simuler une decision"))
+                : snapshotService.findLatestBySource(entrepriseId, request.getForcedSource())
+                .orElseThrow(() -> new ResourceNotFoundException("Aucune source " + request.getForcedSource() + " disponible pour cette entreprise"));
         VigilanceResultResponse result = vigilanceEngine.simulate(snapshot, request);
         auditLogService.record(
                 currentUserService.getCurrentUser(),
@@ -162,6 +193,7 @@ public class FinancialSnapshotController {
                 "FINANCIAL_SNAPSHOT",
                 snapshot.getId(),
                 "Simulation " + request.getType() + " montant=" + request.getAmount()
+                        + " source=" + (request.getForcedSource() == null ? "AUTO_HIERARCHY" : request.getForcedSource())
                         + " decision=" + result.getGlobalDecision()
         );
         return ResponseEntity.ok(result);

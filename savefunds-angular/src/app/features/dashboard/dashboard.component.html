@@ -1,7 +1,7 @@
 <main class="app-shell">
   <aside class="sidebar">
     <div class="brand">
-      <span>SF</span>
+      <span class="brand-logo"><img src="/assets/logo-savefunds.jpeg" alt="SaveFunds"></span>
       <div>
         <strong>SaveFunds</strong>
         <small>Financial vigilance</small>
@@ -9,13 +9,15 @@
     </div>
 
     <nav>
-      <button type="button" [class.active]="currentView() === 'PORTFOLIO'" (click)="setView('PORTFOLIO')">{{ isAccountant() ? 'Portefeuille' : 'Cockpit' }}</button>
-      <button type="button" [class.active]="currentView() === 'PROFILE'" (click)="setView('PROFILE')">Profil</button>
       @if (!isAccountant()) {
-        <button type="button" [class.active]="currentView() === 'INGESTION'" (click)="setView('INGESTION')">Ingestion</button>
-        <button type="button" [class.active]="currentView() === 'SIMULATION'" (click)="setView('SIMULATION')">Simulation</button>
+        <button type="button" [class.active]="currentView() === 'PROFILE'" (click)="setView('PROFILE')">Mon profil</button>
+        <button type="button" [class.active]="currentView() === 'DETAIL'" [disabled]="!enterprise()" (click)="setView('DETAIL')">Fiche entreprise</button>
+        <button type="button" [class.active]="currentView() === 'SOURCES'" (click)="setView('SOURCES')">Sources financieres</button>
+      } @else {
+        <button type="button" [class.active]="currentView() === 'PROFILE'" (click)="setView('PROFILE')">Mon profil</button>
+        <button type="button" [class.active]="currentView() === 'DASHBOARD'" (click)="setView('DASHBOARD')">Dashboard</button>
+        <button type="button" [class.active]="currentView() === 'AUDIT'" (click)="setView('AUDIT')">Audit</button>
       }
-      <button type="button" [class.active]="currentView() === 'AUDIT'" (click)="setView('AUDIT')">Audit</button>
     </nav>
 
     <button class="logout" type="button" (click)="auth.logout()">Deconnexion</button>
@@ -25,7 +27,7 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">{{ isAccountant() ? 'Espace comptable' : 'PME / SRL belge' }}</p>
-        <h1>{{ isAccountant() ? 'Portefeuille clients' : 'Copilote de tresorerie' }}</h1>
+        <h1>{{ viewTitle() }}</h1>
       </div>
       <div class="user-chip">
         <span class="avatar-chip">
@@ -95,7 +97,145 @@
           }
         </article>
       </section>
-    } @else if (isAccountant() && currentView() === 'PORTFOLIO') {
+      @if (!isAccountant()) {
+        <section class="companies-home profile-companies">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Portefeuille dirigeant</p>
+              <h2>Mes entreprises</h2>
+            </div>
+          </div>
+
+          <div class="companies-grid">
+            @for (item of enterprises(); track item.id) {
+              <button class="company-tile" type="button" (click)="selectEnterprise(item)">
+                <span class="company-photo">
+                  @if (enterpriseLogo(item)) {
+                    <img [src]="enterpriseLogo(item) || ''" alt="">
+                  } @else {
+                    {{ enterpriseInitial(item) }}
+                  }
+                </span>
+                <span class="status-pill decision-{{ enterpriseCardDecision(item) }}">{{ enterpriseCardStatus(item) }}</span>
+                <strong>{{ displayEnterpriseName(item) }}</strong>
+                <small>Numero d'entreprise : {{ item.numeroEntreprise }}</small>
+                <span>{{ item.formeJuridique || 'Forme juridique a verifier' }}</span>
+                <em>{{ item.secteurActivite || 'Description a completer depuis la BCE / BNB' }}</em>
+                <span class="company-actions">
+                  <label class="mini-action" (click)="$event.stopPropagation()">
+                    Logo / photo
+                    <input type="file" accept="image/*" (change)="onEnterpriseLogoSelected($event, item)">
+                  </label>
+                  <span class="mini-action" role="button" tabindex="0" (click)="startEditEnterprise($event, item)">Modifier</span>
+                  <span class="mini-action danger" role="button" tabindex="0" (click)="deleteEnterprise($event, item)">Supprimer</span>
+                </span>
+              </button>
+            }
+
+            <button class="company-tile add-tile" type="button" (click)="openAddEnterprise()">
+              <span class="add-symbol">
+                @if (pendingEnterpriseLogo()) {
+                  <img [src]="pendingEnterpriseLogo() || ''" alt="">
+                } @else {
+                  +
+                }
+              </span>
+              <strong>Ajouter une entreprise</strong>
+              <small>Recherche BCE puis confirmation</small>
+            </button>
+          </div>
+
+          @if (editingEnterpriseId()) {
+            <section class="setup-panel edit-company-panel">
+              <div>
+                <p class="eyebrow">Modifier l'entreprise</p>
+                <h2>{{ enterpriseEditForm.raisonSociale || 'Entreprise' }}</h2>
+                <p class="muted">Le dirigeant peut corriger les informations de rattachement. Les donnees financieres restent gerees dans Sources financieres.</p>
+              </div>
+
+              <div class="setup-grid">
+                <div class="field">
+                  <label>Raison sociale</label>
+                  <input name="editRaisonSociale" [(ngModel)]="enterpriseEditForm.raisonSociale">
+                </div>
+                <div class="field">
+                  <label>Numero d'entreprise</label>
+                  <input name="editNumeroEntreprise" [(ngModel)]="enterpriseEditForm.numeroEntreprise">
+                </div>
+                <div class="field">
+                  <label>Forme juridique</label>
+                  <input name="editFormeJuridique" [(ngModel)]="enterpriseEditForm.formeJuridique">
+                </div>
+                <div class="field">
+                  <label>Secteur / activite</label>
+                  <input name="editSecteurActivite" [(ngModel)]="enterpriseEditForm.secteurActivite">
+                </div>
+              </div>
+
+              <div class="edit-company-actions">
+                <button class="btn btn-primary" type="button" (click)="updateEnterprise()">Enregistrer</button>
+                <button class="btn btn-ghost" type="button" (click)="cancelEditEnterprise()">Annuler</button>
+                @if (enterprise()) {
+                  <button class="btn btn-ghost" type="button" (click)="removeEnterpriseLogo(enterprise()!)">Retirer le logo</button>
+                }
+              </div>
+            </section>
+          }
+
+          @if (showAddEnterprise()) {
+            <section class="setup-panel add-company-panel">
+              <div>
+                <p class="eyebrow">Ajouter une entreprise</p>
+                <h2>Retrouver l'entreprise via la BCE</h2>
+                <p class="muted">Le dirigeant recherche son entreprise officielle, verifie le statut actif, puis confirme le rattachement dans SaveFunds.</p>
+              </div>
+
+              <div class="enterprise-logo-upload">
+                <span class="company-photo">
+                  @if (pendingEnterpriseLogo()) {
+                    <img [src]="pendingEnterpriseLogo() || ''" alt="">
+                  } @else {
+                    +
+                  }
+                </span>
+                <label class="btn btn-ghost">
+                  Ajouter un logo ou une photo
+                  <input type="file" accept="image/*" (change)="onPendingEnterpriseLogoSelected($event)">
+                </label>
+              </div>
+
+              <div class="registry-search">
+                <div class="field">
+                  <label>Nom, numero BCE ou commune</label>
+                  <input [ngModel]="registryQuery()" (ngModelChange)="registryQuery.set($event)" placeholder="Profacile, BE 0123.456.789, Bruxelles">
+                </div>
+                <button class="btn btn-primary" type="button" (click)="searchRegistry()">Rechercher BCE</button>
+              </div>
+
+              @if (registrySearchMessage()) {
+                <p class="registry-message" [class.empty]="!registryResults().length">{{ registrySearchMessage() }}</p>
+              }
+
+              @if (registryResults().length) {
+                <div class="registry-results">
+                  @for (company of registryResults(); track company.enterpriseNumber) {
+                    <button class="registry-card" type="button" [class.selected]="selectedRegistryCompany()?.enterpriseNumber === company.enterpriseNumber" (click)="selectRegistryCompany(company)">
+                      <span class="status-pill" [class.decision-VERT]="company.active" [class.decision-ROUGE]="!company.active">{{ company.status }}</span>
+                      <strong>{{ company.name }}</strong>
+                      <small>{{ company.enterpriseNumber }} - {{ company.legalForm }}</small>
+                      <span>{{ company.address }}, {{ company.postalCode }} {{ company.city }}</span>
+                      <span>{{ company.naceCode }} - {{ company.activityLabel }}</span>
+                      <em>Source : {{ company.source }}</em>
+                    </button>
+                  }
+                </div>
+                <button class="btn btn-primary confirm-registry" type="button" [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">Confirmer cette entreprise</button>
+              }
+            </section>
+          }
+        </section>
+      }
+    } @else if (isAccountant() && currentView() === 'DASHBOARD') {
       <section class="accountant-summary-grid">
         <article class="metric-card">
           <small>Clients suivis</small>
@@ -255,6 +395,19 @@
             <h2>Alertes et validations recentes</h2>
           </div>
         </div>
+        <div class="bce-import-box">
+          <div>
+            <strong>Base BCE Open Data</strong>
+            <span>Importer un extrait CSV gratuit pour alimenter la recherche d'entreprise SaveFunds.</span>
+          </div>
+          <label class="btn btn-primary">
+            Importer CSV BCE
+            <input type="file" accept=".csv,text/csv" (change)="onBceOpenDataSelected($event)">
+          </label>
+          @if (bceImportMessage()) {
+            <p>{{ bceImportMessage() }}</p>
+          }
+        </div>
         <div class="accountant-alerts">
           <div><strong>Atelier Verhaegen SRL</strong><span>Compte courant debiteur depuis 48 jours.</span></div>
           <div><strong>Studio Delta SRL</strong><span>Validation sous condition recommandee.</span></div>
@@ -265,88 +418,258 @@
       <section class="setup-panel">
         <div>
           <p class="eyebrow">Premiere etape</p>
-          <h2>Creer l'entreprise de demonstration</h2>
-          <p class="muted">Ces donnees servent de base. Les snapshots BNB, banque et bilan viendront ensuite remplacer l'encodage manuel.</p>
+          <h2>Retrouver l'entreprise via la BCE</h2>
+          <p class="muted">Le dirigeant recherche son entreprise officielle, verifie le statut actif, puis confirme le rattachement dans SaveFunds.</p>
         </div>
 
-        <form class="setup-grid" (ngSubmit)="createEnterprise()">
-          <div class="field"><label>Raison sociale</label><input name="raisonSociale" [(ngModel)]="enterpriseForm.raisonSociale"></div>
-          <div class="field"><label>Numero d'entreprise</label><input name="numeroEntreprise" [(ngModel)]="enterpriseForm.numeroEntreprise"></div>
-          <div class="field"><label>Forme juridique</label><input name="formeJuridique" [(ngModel)]="enterpriseForm.formeJuridique"></div>
-          <div class="field"><label>Secteur</label><input name="secteurActivite" [(ngModel)]="enterpriseForm.secteurActivite"></div>
-          <div class="field"><label>Tresorerie</label><input name="tresorerie" type="number" [(ngModel)]="enterpriseForm.tresorerie"></div>
-          <div class="field"><label>Charges mensuelles</label><input name="chargesMensuelles" type="number" [(ngModel)]="enterpriseForm.chargesMensuelles"></div>
-          <button class="btn btn-primary" type="submit">Creer l'entreprise</button>
-        </form>
+        <div class="registry-search">
+          <div class="field">
+            <label>Nom, numero BCE ou commune</label>
+            <input [ngModel]="registryQuery()" (ngModelChange)="registryQuery.set($event)" placeholder="Profacile, BE 0123.456.789, Bruxelles">
+          </div>
+          <button class="btn btn-primary" type="button" (click)="searchRegistry()">Rechercher BCE</button>
+        </div>
+
+        @if (registrySearchMessage()) {
+          <p class="registry-message" [class.empty]="!registryResults().length">{{ registrySearchMessage() }}</p>
+        }
+
+        @if (registryResults().length) {
+          <div class="registry-results">
+            @for (company of registryResults(); track company.enterpriseNumber) {
+              <button class="registry-card" type="button" [class.selected]="selectedRegistryCompany()?.enterpriseNumber === company.enterpriseNumber" (click)="selectRegistryCompany(company)">
+                <span class="status-pill" [class.decision-VERT]="company.active" [class.decision-ROUGE]="!company.active">{{ company.status }}</span>
+                <strong>{{ company.name }}</strong>
+                <small>{{ company.enterpriseNumber }} - {{ company.legalForm }}</small>
+                <span>{{ company.address }}, {{ company.postalCode }} {{ company.city }}</span>
+                <span>{{ company.naceCode }} - {{ company.activityLabel }}</span>
+                <em>Source : {{ company.source }}</em>
+              </button>
+            }
+          </div>
+          <button class="btn btn-primary confirm-registry" type="button" [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">Confirmer cette entreprise</button>
+        }
+
+        <div class="registry-next-step">
+          <strong>Etape suivante</strong>
+          <span>Les donnees financieres ne sont pas encodees ici. Elles seront recuperees ensuite depuis la BNB, un bilan comptable provisoire valide par le comptable, ou une source bancaire.</span>
+        </div>
       </section>
     } @else {
       <section class="summary-grid">
         <article class="metric-card">
-          <small>Entreprise</small>
-          <strong>{{ enterprise()?.raisonSociale }}</strong>
-          <span>{{ enterprise()?.numeroEntreprise }}</span>
+          <small>Nom de l'entreprise</small>
+          <strong>{{ displayEnterpriseName(enterprise()) }}</strong>
+          <span>Numero d'entreprise : {{ enterprise()?.numeroEntreprise }}</span>
         </article>
         <article class="metric-card">
           <small>Tresorerie actuelle</small>
-          <strong>{{ money(snapshot()?.tresorerie || enterprise()?.tresorerie) }}</strong>
+          <strong>{{ money(displayedSnapshot()?.tresorerie || enterprise()?.tresorerie) }}</strong>
           <span>{{ coverage() | number:'1.1-1' }} mois de charges</span>
         </article>
         <article class="metric-card">
           <small>Compte courant</small>
-          <strong>{{ money(snapshot()?.soldeCompteCourant || enterprise()?.soldeCompteCourant) }}</strong>
-          <span>{{ snapshot()?.dureeCompteCourantDebiteur || 0 }} jours debiteur</span>
+          <strong>{{ money(displayedSnapshot()?.soldeCompteCourant || enterprise()?.soldeCompteCourant) }}</strong>
+          <span>{{ displayedSnapshot()?.dureeCompteCourantDebiteur || 0 }} jours debiteur</span>
         </article>
         <article class="metric-card">
-          <small>Source active</small>
-          <strong>{{ sourceLabel(snapshot()?.source || 'Aucune') }}</strong>
-          <span>Confiance {{ snapshot()?.confidenceScore || 0 }}%</span>
+          <small>Sources actives</small>
+          <strong>{{ activeSourceSummary() }}</strong>
+          <span>Confiance consolidee {{ snapshot()?.confidenceScore || 0 }}%</span>
         </article>
       </section>
 
+      @if (currentView() === 'DETAIL') {
+        <section class="panel source-selector-panel">
+          <div>
+            <p class="eyebrow">Source active</p>
+            <h2>{{ selectedSource() === 'AUTO' ? 'Automatique SaveFunds' : sourceLabel(selectedSource()) }}</h2>
+            <p class="muted">Les donnees et la simulation suivent la source choisie. Les sources absentes sont desactivees.</p>
+          </div>
+          <div class="source-select-grid">
+            @for (source of availableSources(); track source.value) {
+              <button type="button" [class.selected]="selectedSource() === source.value" [disabled]="!source.available" (click)="selectFinancialSource(source.value)">
+                <strong>{{ source.label }}</strong>
+                <small>{{ source.available ? 'Disponible' : 'Aucune donnee disponible' }}</small>
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel indicators-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Indicateurs consolides</p>
+                <h2>Calcul selon la hierarchie SaveFunds</h2>
+              </div>
+            </div>
+
+            @if (!snapshots().length) {
+              <div class="empty-state">
+                <strong>Importez une source financiere pour commencer</strong>
+                <span>BNB, bilan provisoire ou extrait bancaire. Le dashboard calculera ensuite les indicateurs automatiquement.</span>
+                <button class="btn btn-primary" type="button" (click)="setView('SOURCES')">Aller aux sources financieres</button>
+              </div>
+            } @else {
+              <div class="indicator-source-table">
+                <div class="indicator-source-row table-head">
+                  <span>Indicateur</span>
+                  <span>Valeur</span>
+                  <span>Source utilisee</span>
+                  <span>Confiance</span>
+                </div>
+                <div class="indicator-source-row">
+                  <strong>Tresorerie</strong>
+                  <span>{{ money(displayedSnapshot()?.tresorerie) }}</span>
+                  <small [class.warning-text]="sourceIndicators().tresorerie.warning">{{ sourceIndicators().tresorerie.label }} {{ sourceIndicators().tresorerie.date }}</small>
+                  <span>{{ sourceIndicators().tresorerie.confidence }}%</span>
+                </div>
+                <div class="indicator-source-row">
+                  <strong>CA mensuel</strong>
+                  <span>{{ money(displayedSnapshot()?.chiffreAffairesMensuel) }}</span>
+                  <small [class.warning-text]="sourceIndicators().revenue.warning">{{ sourceIndicators().revenue.label }} {{ sourceIndicators().revenue.date }}</small>
+                  <span>{{ sourceIndicators().revenue.confidence }}%</span>
+                </div>
+                <div class="indicator-source-row">
+                  <strong>Charges</strong>
+                  <span>{{ money(displayedSnapshot()?.chargesMensuelles) }}</span>
+                  <small [class.warning-text]="sourceIndicators().expenses.warning">{{ sourceIndicators().expenses.label }} {{ sourceIndicators().expenses.date }}</small>
+                  <span>{{ sourceIndicators().expenses.confidence }}%</span>
+                </div>
+                <div class="indicator-source-row">
+                  <strong>CC dirigeant</strong>
+                  <span>{{ displayedSnapshot()?.dureeCompteCourantDebiteur || 0 }} jour(s)</span>
+                  <small [class.warning-text]="sourceIndicators().currentAccount.warning">{{ sourceIndicators().currentAccount.label }} {{ sourceIndicators().currentAccount.date }}</small>
+                  <span>{{ sourceIndicators().currentAccount.confidence }}%</span>
+                </div>
+              </div>
+
+              <div class="active-sources">
+                <button type="button" [class.available]="sourceIndicators().tresorerie.available" [disabled]="!sourceIndicators().tresorerie.available" title="Source utilisee automatiquement selon la hierarchie">Tresorerie: {{ sourceIndicators().tresorerie.label }}</button>
+                <button type="button" [class.available]="sourceIndicators().revenue.available" [disabled]="!sourceIndicators().revenue.available" title="Source utilisee automatiquement selon la hierarchie">CA: {{ sourceIndicators().revenue.label }}</button>
+                <button type="button" [class.available]="sourceIndicators().expenses.available" [disabled]="!sourceIndicators().expenses.available" title="Source utilisee automatiquement selon la hierarchie">Charges: {{ sourceIndicators().expenses.label }}</button>
+                <button type="button" [class.available]="sourceIndicators().currentAccount.available" [disabled]="!sourceIndicators().currentAccount.available" title="Source utilisee automatiquement selon la hierarchie">CC: {{ sourceIndicators().currentAccount.label }}</button>
+              </div>
+            }
+          </article>
+        </section>
+      }
+
       <section class="content-grid">
-        @if (currentView() === 'PORTFOLIO' || currentView() === 'INGESTION') {
+        @if (currentView() === 'SOURCES') {
         <article class="panel ingestion-panel">
           <div class="panel-head">
             <div>
-              <p class="eyebrow">Ingestion</p>
+              <p class="eyebrow">Sources financieres</p>
               <h2>Recuperer les donnees</h2>
             </div>
           </div>
 
           <div class="source-actions">
-            <button class="source-button" type="button" (click)="ingest('mock-bnb')">
+            <button class="source-button" type="button" [class.selected]="sourceTab() === 'BNB'" (click)="sourceTab.set('BNB')">
               <span>BNB</span>
-              <strong>Comptes annuels</strong>
-              <small>Mock via numero d'entreprise</small>
+              <strong>Comptes annuels officiels</strong>
+              <small>{{ sourceStatusLabel('BNB_API') }}</small>
             </button>
-            <button class="source-button" type="button" (click)="ingest('mock-bank')">
-              <span>PSD2</span>
-              <strong>Banque</strong>
-              <small>Mock solde et mouvements</small>
-            </button>
-            <button class="source-button" type="button" (click)="ingest('mock-balance-sheet')">
+            <button class="source-button" type="button" [class.selected]="sourceTab() === 'BALANCE'" (click)="sourceTab.set('BALANCE')">
               <span>PDF</span>
-              <strong>Bilan</strong>
-              <small>Mock parser document</small>
+              <strong>Bilan provisoire</strong>
+              <small>{{ sourceStatusLabel('ACCOUNTING_CSV') }}</small>
+            </button>
+            <button class="source-button" type="button" [class.selected]="sourceTab() === 'BANK'" (click)="sourceTab.set('BANK')">
+              <span>CSV</span>
+              <strong>Banque</strong>
+              <small>{{ sourceStatusLabel('BANK_CSV') }}</small>
             </button>
           </div>
 
-          @if (snapshot()) {
+          @if (sourceTab() === 'BNB') {
+            <div class="snapshot-box bnb-box">
+              <div>
+                <small>BNB / CBSO</small>
+                <strong>{{ bnbLookup()?.status || 'Aucune recherche' }} - {{ bnbLookup()?.depositsCount || 0 }} depot(s)</strong>
+              </div>
+              <p>{{ bnbLookup()?.message || 'Lancez une recherche BNB pour verifier les comptes annuels disponibles.' }}</p>
+              @if (bnbLookup()?.latestReference) {
+                <div class="source-note">
+                  <span>Reference {{ bnbLookup()?.latestReference }}</span>
+                  <span>{{ bnbLookup()?.latestModelName }}</span>
+                  <span>Cloture {{ bnbLookup()?.latestPeriodEndDate | date:'dd/MM/yyyy' }}</span>
+                  <span>Depot {{ bnbLookup()?.latestDepositDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+              }
+              <a [href]="bnbLookup()?.consultUrl" target="_blank" rel="noreferrer">Ouvrir la source BNB officielle</a>
+              @if (bnbLookup()?.pdfUrl) {
+                <a [href]="bnbLookup()?.pdfUrl" target="_blank" rel="noreferrer">PDF</a>
+              }
+              @if (bnbLookup()?.xbrlUrl) {
+                <a [href]="bnbLookup()?.xbrlUrl" target="_blank" rel="noreferrer">XBRL</a>
+              }
+              @if (bnbLookup()?.csvUrl) {
+                <a [href]="bnbLookup()?.csvUrl" target="_blank" rel="noreferrer">CSV</a>
+              }
+              @if (bnbLookup()?.status === 'FOUND') {
+                <button class="btn btn-primary" type="button" (click)="importBnbSnapshot()">Ecraser par le dernier CSV BNB</button>
+              }
+              <button class="btn btn-ghost" type="button" (click)="searchBnb()">Verifier BNB</button>
+            </div>
+          }
+
+          @if (sourceTab() === 'BALANCE') {
             <div class="snapshot-box">
               <div>
-                <small>Snapshot #{{ snapshot()?.id }}</small>
-                <strong>{{ sourceLabel(snapshot()?.source || '') }}</strong>
+                <small>Bilan provisoire</small>
+                <strong>{{ latestSource('ACCOUNTING_CSV') ? 'Donnees actuelles disponibles' : 'Aucun bilan provisoire importe' }}</strong>
               </div>
-              <p>{{ snapshot()?.rawMetadata }}</p>
-              @for (warning of snapshot()?.warnings || []; track warning) {
-                <span class="warning">{{ warning }}</span>
+              @if (latestSource('ACCOUNTING_CSV')) {
+                <p>{{ latestSource('ACCOUNTING_CSV')?.rawMetadata }}</p>
+                <div class="source-note">
+                  <span>CA {{ money(latestSource('ACCOUNTING_CSV')?.chiffreAffairesMensuel) }}</span>
+                  <span>Charges {{ money(latestSource('ACCOUNTING_CSV')?.chargesMensuelles) }}</span>
+                  <span>Tresorerie {{ money(latestSource('ACCOUNTING_CSV')?.tresorerie) }}</span>
+                </div>
+              }
+              <label class="btn btn-primary">
+                {{ latestSource('ACCOUNTING_CSV') ? 'Ecraser par un fichier plus recent' : 'Importer un bilan provisoire' }}
+                <input type="file" accept=".csv,text/csv" (change)="onAccountingCsvSelected($event)">
+              </label>
+              <span class="warning soft">Format actuel: CSV comptable accountCode,label,amount. PDF/image prevus pour extraction IA.</span>
+            </div>
+          }
+
+          @if (sourceTab() === 'BANK') {
+            <div class="snapshot-box">
+              <div>
+                <small>Tresorerie bancaire</small>
+                <strong>{{ latestSource('BANK_CSV') ? 'CSV bancaire importe' : 'Aucun extrait bancaire importe' }}</strong>
+              </div>
+              @if (latestSource('BANK_CSV')) {
+                <p>{{ latestSource('BANK_CSV')?.rawMetadata }}</p>
+                <div class="source-note">
+                  <span>Tresorerie {{ money(latestSource('BANK_CSV')?.tresorerie) }}</span>
+                  <span>{{ bankTransactions().length }} transaction(s) classee(s)</span>
+                </div>
+              }
+              <label class="btn btn-primary">
+                {{ latestSource('BANK_CSV') ? 'Ecraser par un fichier plus recent' : 'Importer un CSV bancaire' }}
+                <input type="file" accept=".csv,text/csv" (change)="onBankCsvSelected($event)">
+              </label>
+              @for (transaction of bankTransactions().slice(0, 6); track transaction.id) {
+                <div class="indicator-row">
+                  <span class="status-pill" [class.decision-ROUGE]="transaction.impactsDirectorCurrentAccount" [class.decision-VERT]="!transaction.impactsDirectorCurrentAccount">{{ transaction.classification }}</span>
+                  <div>
+                    <strong>{{ transaction.transactionDate | date:'dd/MM/yyyy' }} - {{ money(transaction.amount) }}</strong>
+                    <small>{{ transaction.description }} - {{ transaction.aiReason }}</small>
+                  </div>
+                </div>
               }
             </div>
           }
         </article>
         }
 
-        @if (currentView() === 'PORTFOLIO' || currentView() === 'SIMULATION') {
+        @if (currentView() === 'DETAIL') {
         <article class="panel decision-panel">
           <div class="panel-head">
             <div>
@@ -371,7 +694,7 @@
               <label>Montant demande</label>
               <input name="withdrawalAmount" type="number" [(ngModel)]="withdrawalAmount">
             </div>
-            <button class="btn btn-primary" type="button" [disabled]="!snapshot()" (click)="simulate()">Analyser</button>
+            <button class="btn btn-primary" type="button" [disabled]="!displayedSnapshot()" (click)="simulate()">Analyser</button>
           </div>
 
           @if (result()) {
@@ -398,29 +721,6 @@
         </article>
         }
 
-        @if (currentView() === 'PORTFOLIO' || currentView() === 'AUDIT') {
-        <article class="panel audit-panel">
-          <div class="panel-head">
-            <div>
-              <p class="eyebrow">Securite</p>
-              <h2>Journal d'audit</h2>
-            </div>
-            <button class="btn btn-ghost" type="button" (click)="refreshAudit()">Rafraichir</button>
-          </div>
-
-          <div class="audit-list">
-            @for (log of auditLogs(); track log.id) {
-              <div class="audit-row">
-                <time>{{ log.createdAt | date:'short' }}</time>
-                <strong>{{ log.action }}</strong>
-                <span>{{ log.details }}</span>
-              </div>
-            } @empty {
-              <p class="muted">Aucune action auditee pour l'instant.</p>
-            }
-          </div>
-        </article>
-        }
       </section>
     }
   </section>

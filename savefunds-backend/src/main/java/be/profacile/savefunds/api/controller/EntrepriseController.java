@@ -1,13 +1,17 @@
 package be.profacile.savefunds.api.controller;
 
 import be.profacile.savefunds.api.dto.request.CreateEntrepriseRequest;
+import be.profacile.savefunds.api.dto.request.CreateEntrepriseFromRegistryRequest;
 import be.profacile.savefunds.api.dto.request.UpdateEntrepriseRequest;
+import be.profacile.savefunds.api.dto.response.CompanyRegistryCompanyResponse;
 import be.profacile.savefunds.api.dto.response.EntrepriseResponse;
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.api.mapper.EntrepriseMapper;
 
 import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.service.BnbAnnualAccountsService;
 import be.profacile.savefunds.domain.service.EntrepriseService;
+import be.profacile.savefunds.domain.service.company.CompanyRegistryProvider;
 import be.profacile.savefunds.security.service.CurrentUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * REST Controller pour la gestion des entreprises (PME/SRL belges).
@@ -42,6 +48,8 @@ public class EntrepriseController {
     private final EntrepriseService entrepriseService;
     private final EntrepriseMapper entrepriseMapper;
     private final CurrentUserService currentUserService;
+    private final CompanyRegistryProvider companyRegistryProvider;
+    private final BnbAnnualAccountsService bnbAnnualAccountsService;
 
     /**
      * Créer une nouvelle entreprise.
@@ -67,6 +75,34 @@ public class EntrepriseController {
                 .body(entrepriseMapper.toResponse(created));
     }
 
+    @PostMapping("/from-registry")
+    @Operation(summary = "Creer une entreprise depuis la BCE",
+            description = "Le dirigeant confirme une entreprise issue du registre BCE. Les informations legales sont pre-remplies automatiquement.")
+    public ResponseEntity<EntrepriseResponse> creerDepuisRegistre(
+            @Valid @RequestBody CreateEntrepriseFromRegistryRequest request) {
+
+        CompanyRegistryCompanyResponse registryCompany = companyRegistryProvider
+                .findByEnterpriseNumber(request.getEnterpriseNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Entreprise BCE introuvable: " + request.getEnterpriseNumber()));
+
+        if (!registryCompany.isActive()) {
+            throw new IllegalArgumentException("Entreprise non active selon la BCE: " + registryCompany.getEnterpriseNumber());
+        }
+
+        Entreprise entreprise = new Entreprise();
+        entreprise.setUserId(currentUserService.getCurrentUserId());
+        String companyName = firstUsable(request.getName(), registryCompany.getName(), "Entreprise BCE");
+        entreprise.setRaisonSociale(companyName);
+        entreprise.setNom(companyName);
+        entreprise.setNumeroEntreprise(registryCompany.getEnterpriseNumber());
+        entreprise.setFormeJuridique(firstUsable(request.getLegalForm(), registryCompany.getLegalForm(), ""));
+        entreprise.setSecteurActivite(firstUsable(request.getActivityLabel(), registryCompany.getActivityLabel(), ""));
+
+        Entreprise created = entrepriseService.create(entreprise);
+        bnbAnnualAccountsService.search(created.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(entrepriseMapper.toResponse(created));
+    }
+
     /**
      * Récupérer une entreprise par son ID.
      */
@@ -86,6 +122,18 @@ public class EntrepriseController {
         assertOwnsEntreprise(entreprise);
 
         return ResponseEntity.ok(entrepriseMapper.toResponse(entreprise));
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Lister mes entreprises",
+            description = "Retourne toutes les entreprises rattachees au dirigeant connecte")
+    public ResponseEntity<List<EntrepriseResponse>> listerMesEntreprises() {
+        Long userId = currentUserService.getCurrentUserId();
+        List<EntrepriseResponse> entreprises = entrepriseService.findAllByUserId(userId).stream()
+                .map(entrepriseMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(entreprises);
     }
 
     /**
@@ -177,7 +225,7 @@ public class EntrepriseController {
             @PathVariable Long userId) {
 
         assertCurrentUser(userId);
-        boolean exists = entrepriseService.findByUserId(userId).isPresent();
+        boolean exists = !entrepriseService.findAllByUserId(userId).isEmpty();
         return ResponseEntity.ok(exists);
     }
 
@@ -189,5 +237,25 @@ public class EntrepriseController {
         if (!currentUserService.getCurrentUserId().equals(userId)) {
             throw new AccessDeniedException("Acces refuse a cette entreprise");
         }
+    }
+
+    private String firstUsable(String primary, String secondary, String fallback) {
+        if (isUsableCompanyText(primary)) {
+            return primary.trim();
+        }
+        if (isUsableCompanyText(secondary)) {
+            return secondary.trim();
+        }
+        return fallback;
+    }
+
+    private boolean isUsableCompanyText(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        String normalized = value.trim().toLowerCase();
+        return !normalized.startsWith("ondernemingsnummer")
+                && !normalized.startsWith("numero d")
+                && !normalized.startsWith("numéro d");
     }
 }

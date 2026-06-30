@@ -1,6 +1,7 @@
 package be.profacile.savefunds.api.dto.request;
 
 import be.profacile.savefunds.domain.enums.FinancialDecisionType;
+import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -19,4 +20,6 @@ public class SimulateFinancialDecisionRequest {
     private BigDecimal amount;
 
     private LocalDate plannedDate;
+
+    private FinancialSnapshotSource forcedSource;
 }

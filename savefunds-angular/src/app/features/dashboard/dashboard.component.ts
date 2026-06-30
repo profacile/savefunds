@@ -6,14 +6,18 @@ import { SaveFundsApiService } from '../../core/savefunds-api.service';
 import {
   AccountantClientSummary,
   AuditLog,
+  BankTransaction,
+  BnbAnnualAccountsLookup,
+  CompanyRegistryCompany,
   CreateEnterpriseRequest,
   Enterprise,
   FinancialSnapshot,
   VigilanceResult
 } from '../../core/models';
 
-type MockSource = 'mock-bnb' | 'mock-bank' | 'mock-balance-sheet';
-type DashboardView = 'PORTFOLIO' | 'PROFILE' | 'INGESTION' | 'SIMULATION' | 'AUDIT';
+type MockSource = 'mock-bank' | 'mock-balance-sheet';
+type DashboardView = 'PROFILE' | 'DETAIL' | 'SOURCES' | 'DASHBOARD' | 'AUDIT';
+type SourceTab = 'BNB' | 'BALANCE' | 'BANK';
 
 interface AccountantClient {
   name: string;
@@ -43,16 +47,31 @@ interface AccountantClient {
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
+  enterprises = signal<Enterprise[]>([]);
   enterprise = signal<Enterprise | null>(null);
   snapshot = signal<FinancialSnapshot | null>(null);
+  snapshots = signal<FinancialSnapshot[]>([]);
+  bnbLookup = signal<BnbAnnualAccountsLookup | null>(null);
   result = signal<VigilanceResult | null>(null);
   auditLogs = signal<AuditLog[]>([]);
+  bankTransactions = signal<BankTransaction[]>([]);
   loading = signal('');
   error = signal('');
   selectedClient = signal<AccountantClient | null>(null);
   accountantFilter = signal<'ALL' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'>('ALL');
-  currentView = signal<DashboardView>('PORTFOLIO');
+  currentView = signal<DashboardView>('PROFILE');
+  sourceTab = signal<SourceTab>('BNB');
+  selectedSource = signal<string>('AUTO');
+  showAddEnterprise = signal(false);
   profilePhoto = signal<string | null>(this.readProfilePhoto());
+  registryQuery = signal('');
+  registryResults = signal<CompanyRegistryCompany[]>([]);
+  selectedRegistryCompany = signal<CompanyRegistryCompany | null>(null);
+  registrySearchMessage = signal('');
+  bceImportMessage = signal('');
+  editingEnterpriseId = signal<number | null>(null);
+  pendingEnterpriseLogo = signal<string | null>(null);
+  enterpriseLogoVersion = signal(0);
 
   withdrawalAmount = 3000;
   decisionType = 'RETRAIT_DIRIGEANT';
@@ -159,6 +178,48 @@ export class DashboardComponent implements OnInit {
     }).sort((a, b) => b.riskScore - a.riskScore);
   });
 
+  visibleAuditLogs = computed(() => this.auditLogs()
+    .filter((log) => log.action !== 'AUDIT_LOG_VIEWED')
+  );
+
+  sourceIndicators = computed(() => {
+    const selected = this.selectedSource();
+    const displayed = this.displayedSnapshot();
+    const snapshots = selected === 'AUTO' ? this.snapshots() : (displayed ? [displayed] : []);
+    return {
+      tresorerie: this.sourceForField(snapshots, 'tresorerie', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      revenue: this.sourceForField(snapshots, 'chiffreAffairesMensuel', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      expenses: this.sourceForField(snapshots, 'chargesMensuelles', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      currentAccount: this.sourceForField(snapshots, 'soldeCompteCourant', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API'])
+    };
+  });
+
+  activeSourceSummary = computed(() => {
+    const sources = new Set(Object.values(this.sourceIndicators())
+      .filter((item) => item.available)
+      .map((item) => item.label));
+    return sources.size ? Array.from(sources).join(' + ') : 'Aucune source';
+  });
+
+  displayedSnapshot = computed(() => {
+    const selectedSource = this.selectedSource();
+    if (selectedSource === 'AUTO') {
+      return this.snapshot();
+    }
+    return this.snapshots().find((candidate) => candidate.source === selectedSource) ?? null;
+  });
+
+  availableSources = computed(() => {
+    const sources = new Set(this.snapshots().map((item) => item.source));
+    return [
+      { value: 'AUTO', label: 'Automatique SaveFunds', available: this.snapshots().length > 0 },
+      { value: 'BANK_CSV', label: 'CSV bancaire', available: sources.has('BANK_CSV') },
+      { value: 'ACCOUNTING_CSV', label: 'Bilan provisoire', available: sources.has('ACCOUNTING_CSV') },
+      { value: 'BNB_API', label: 'BNB officielle', available: sources.has('BNB_API') },
+      { value: 'BALANCE_SHEET_DOCUMENT', label: 'Bilan document', available: sources.has('BALANCE_SHEET_DOCUMENT') }
+    ];
+  });
+
   accountantStats = computed(() => ({
     total: this.accountantClients().length,
     green: this.accountantClients().filter((client) => client.status === 'VERT').length,
@@ -170,23 +231,81 @@ export class DashboardComponent implements OnInit {
 
   enterpriseForm: CreateEnterpriseRequest = {
     userId: 0,
-    raisonSociale: 'Profacile SRL',
-    numeroEntreprise: 'BE 0123.456.789',
-    formeJuridique: 'SRL',
-    secteurActivite: 'Services informatiques',
-    tresorerie: 25000,
-    soldeCompteCourant: -2500,
-    chiffreAffairesMensuel: 42000,
-    chargesMensuelles: 31000
+    raisonSociale: '',
+    numeroEntreprise: '',
+    formeJuridique: '',
+    secteurActivite: '',
+    tresorerie: null,
+    soldeCompteCourant: null,
+    chiffreAffairesMensuel: null,
+    chargesMensuelles: null
+  };
+
+  enterpriseEditForm: CreateEnterpriseRequest = {
+    userId: 0,
+    raisonSociale: '',
+    numeroEntreprise: '',
+    formeJuridique: '',
+    secteurActivite: '',
+    tresorerie: null,
+    soldeCompteCourant: null,
+    chiffreAffairesMensuel: null,
+    chargesMensuelles: null
   };
 
   coverage = computed(() => {
-    const current = this.snapshot();
+    const current = this.displayedSnapshot();
     if (!current || !current.chargesMensuelles) {
       return 0;
     }
     return current.tresorerie / current.chargesMensuelles;
   });
+
+  enterpriseDecision = computed(() => {
+    const current = this.displayedSnapshot();
+    if (!current) {
+      return 'ORANGE';
+    }
+    const coverage = current.chargesMensuelles ? current.tresorerie / current.chargesMensuelles : 0;
+    const ccDays = current.dureeCompteCourantDebiteur ?? 0;
+    if (coverage < 1 || ccDays > 30) {
+      return 'ROUGE';
+    }
+    if (coverage < 3 || ccDays > 0) {
+      return 'ORANGE';
+    }
+    return 'VERT';
+  });
+
+  enterpriseCardDecision(enterprise: Enterprise): 'VERT' | 'ORANGE' | 'ROUGE' {
+    if (this.enterprise()?.id === enterprise.id && this.displayedSnapshot()) {
+      return this.enterpriseDecision() as 'VERT' | 'ORANGE' | 'ROUGE';
+    }
+
+    if (!enterprise.tresorerie || !enterprise.chargesMensuelles) {
+      return 'ORANGE';
+    }
+
+    const coverage = enterprise.tresorerie / enterprise.chargesMensuelles;
+    const currentAccount = enterprise.soldeCompteCourant ?? 0;
+    if (coverage < 1) {
+      return 'ROUGE';
+    }
+    if (coverage < 3 || currentAccount < 0) {
+      return 'ORANGE';
+    }
+    return 'VERT';
+  }
+
+  enterpriseCardStatus(enterprise: Enterprise): string {
+    if (this.enterprise()?.id === enterprise.id && this.displayedSnapshot()) {
+      return this.enterpriseDecision();
+    }
+    if (!enterprise.tresorerie || !enterprise.chargesMensuelles) {
+      return 'A VERIFIER';
+    }
+    return this.enterpriseCardDecision(enterprise);
+  }
 
   constructor(
     readonly auth: AuthService,
@@ -204,7 +323,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
     this.enterpriseForm.userId = user.id;
-    this.loadEnterprise(user.id);
+    this.loadEnterprises();
   }
 
   selectClient(client: AccountantClient): void {
@@ -213,6 +332,121 @@ export class DashboardComponent implements OnInit {
 
   setView(view: DashboardView): void {
     this.currentView.set(view);
+  }
+
+  openAddEnterprise(): void {
+    this.showAddEnterprise.set(true);
+    this.editingEnterpriseId.set(null);
+    this.registryResults.set([]);
+    this.registrySearchMessage.set('');
+  }
+
+  startEditEnterprise(event: Event, enterprise: Enterprise): void {
+    event.stopPropagation();
+    this.showAddEnterprise.set(false);
+    this.enterprise.set(enterprise);
+    this.editingEnterpriseId.set(enterprise.id);
+    this.enterpriseEditForm = {
+      userId: enterprise.userId,
+      raisonSociale: enterprise.raisonSociale,
+      numeroEntreprise: enterprise.numeroEntreprise,
+      formeJuridique: enterprise.formeJuridique || '',
+      secteurActivite: enterprise.secteurActivite || '',
+      tresorerie: enterprise.tresorerie ?? null,
+      soldeCompteCourant: enterprise.soldeCompteCourant ?? null,
+      chiffreAffairesMensuel: enterprise.chiffreAffairesMensuel ?? null,
+      chargesMensuelles: enterprise.chargesMensuelles ?? null
+    };
+  }
+
+  onPendingEnterpriseLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => this.pendingEnterpriseLogo.set(String(reader.result));
+    reader.readAsDataURL(file);
+  }
+
+  onEnterpriseLogoSelected(event: Event, enterprise: Enterprise): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      localStorage.setItem(this.enterpriseLogoKey(enterprise.id), String(reader.result));
+      this.enterpriseLogoVersion.update((value) => value + 1);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeEnterpriseLogo(enterprise: Enterprise): void {
+    localStorage.removeItem(this.enterpriseLogoKey(enterprise.id));
+    this.enterpriseLogoVersion.update((value) => value + 1);
+  }
+
+  cancelEditEnterprise(): void {
+    this.editingEnterpriseId.set(null);
+  }
+
+  updateEnterprise(): void {
+    const id = this.editingEnterpriseId();
+    if (!id) {
+      return;
+    }
+
+    this.setLoading('Mise a jour entreprise...');
+    this.api.updateEnterprise(id, this.enterpriseEditForm).subscribe({
+      next: (updated) => {
+        this.enterprises.update((items) => items.map((item) => item.id === updated.id ? updated : item));
+        if (this.enterprise()?.id === updated.id) {
+          this.enterprise.set(updated);
+        }
+        this.editingEnterpriseId.set(null);
+        this.clearLoading();
+      },
+      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette entreprise.')
+    });
+  }
+
+  deleteEnterprise(event: Event, enterprise: Enterprise): void {
+    event.stopPropagation();
+    const confirmed = window.confirm(`Supprimer ${this.displayEnterpriseName(enterprise)} ? Cette action supprimera aussi les donnees associees.`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.setLoading('Suppression entreprise...');
+    this.api.deleteEnterprise(enterprise.id).subscribe({
+      next: () => {
+        this.enterprises.update((items) => items.filter((item) => item.id !== enterprise.id));
+        if (this.enterprise()?.id === enterprise.id) {
+          const nextEnterprise = this.enterprises()[0] ?? null;
+          this.enterprise.set(nextEnterprise);
+          this.snapshot.set(null);
+          this.snapshots.set([]);
+          this.result.set(null);
+          this.bnbLookup.set(null);
+          this.bankTransactions.set([]);
+          this.auditLogs.set([]);
+          if (nextEnterprise) {
+            this.selectEnterprise(nextEnterprise);
+            this.currentView.set('PROFILE');
+          }
+        }
+        if (this.editingEnterpriseId() === enterprise.id) {
+          this.editingEnterpriseId.set(null);
+        }
+        this.clearLoading();
+      },
+      error: () => this.fail('Suppression impossible. Verifiez vos droits ou les donnees rattachees.')
+    });
   }
 
   onProfilePhotoSelected(event: Event): void {
@@ -255,6 +489,115 @@ export class DashboardComponent implements OnInit {
     this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
   }
 
+  searchRegistry(): void {
+    const query = this.registryQuery().trim();
+    if (query.length < 2) {
+      this.registryResults.set([]);
+      return;
+    }
+
+    this.setLoading('Recherche BCE...');
+    this.registrySearchMessage.set('');
+    if (query.replace(/\D/g, '').length === 10) {
+      this.api.findCompanyRegistryByNumber(query).subscribe({
+        next: (company) => {
+          this.registryResults.set([company]);
+          this.selectedRegistryCompany.set(company);
+          this.registrySearchMessage.set('1 resultat trouve via le numero BCE.');
+          this.clearLoading();
+        },
+        error: () => {
+          this.registryResults.set([]);
+          this.selectedRegistryCompany.set(null);
+          this.registrySearchMessage.set('Aucun resultat trouve pour ce numero BCE.');
+          this.clearLoading();
+        }
+      });
+      return;
+    }
+
+    this.api.searchCompanyRegistry(query).subscribe({
+      next: (results) => {
+        this.registryResults.set(results);
+        this.selectedRegistryCompany.set(results[0] ?? null);
+        this.registrySearchMessage.set(results.length
+          ? `${results.length} resultat(s) trouve(s) via BCE ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
+          : 'Aucun resultat dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
+        );
+        this.clearLoading();
+      },
+      error: () => {
+        this.registrySearchMessage.set('');
+        this.fail('Recherche BCE indisponible. Redemarrez le backend pour charger le fallback Public Search, puis reessayez.')
+      }
+    });
+  }
+
+  selectRegistryCompany(company: CompanyRegistryCompany): void {
+    this.selectedRegistryCompany.set(company);
+  }
+
+  selectEnterprise(enterprise: Enterprise): void {
+    this.enterprise.set(enterprise);
+    this.currentView.set('DETAIL');
+    this.showAddEnterprise.set(false);
+    this.selectedSource.set('AUTO');
+    this.snapshot.set(null);
+    this.result.set(null);
+    this.bnbLookup.set(null);
+    this.bankTransactions.set([]);
+    this.auditLogs.set([]);
+    this.refreshLatest();
+    this.refreshBnbLookup();
+    this.refreshBankTransactions();
+    this.refreshAudit();
+  }
+
+  createEnterpriseFromRegistry(): void {
+    const company = this.selectedRegistryCompany();
+    if (!company || !company.active) {
+      this.fail('Selectionnez une entreprise active selon la BCE.');
+      return;
+    }
+
+    this.setLoading('Creation depuis la BCE...');
+    this.api.createEnterpriseFromRegistry(company).subscribe({
+      next: (enterprise) => {
+        this.enterprises.update((items) => [enterprise, ...items.filter((item) => item.id !== enterprise.id)]);
+        this.savePendingEnterpriseLogo(enterprise);
+        this.selectEnterprise(enterprise);
+        this.enterpriseForm = {
+          ...this.enterpriseForm,
+          userId: enterprise.userId,
+          raisonSociale: enterprise.raisonSociale,
+          numeroEntreprise: enterprise.numeroEntreprise,
+          formeJuridique: enterprise.formeJuridique || '',
+          secteurActivite: enterprise.secteurActivite || ''
+        };
+        this.clearLoading();
+        this.currentView.set('DETAIL');
+      },
+      error: () => this.fail('Creation depuis la BCE impossible. Verifiez que cette entreprise n est pas deja rattachee a votre compte.')
+    });
+  }
+
+  onBceOpenDataSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.setLoading('Import BCE Open Data...');
+    this.api.importCompanyRegistry(file).subscribe({
+      next: (result) => {
+        this.bceImportMessage.set(`${result.importedRows} entreprise(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
+        this.clearLoading();
+      },
+      error: () => this.fail('Import BCE impossible. Verifiez le format CSV et votre role utilisateur.')
+    });
+  }
+
   createEnterprise(): void {
     const user = this.auth.currentUser();
     if (!user) {
@@ -264,11 +607,12 @@ export class DashboardComponent implements OnInit {
     this.setLoading('Creation entreprise...');
     this.api.createEnterprise({ ...this.enterpriseForm, userId: user.id }).subscribe({
       next: (enterprise) => {
-        this.enterprise.set(enterprise);
+        this.enterprises.update((items) => [enterprise, ...items.filter((item) => item.id !== enterprise.id)]);
+        this.savePendingEnterpriseLogo(enterprise);
+        this.selectEnterprise(enterprise);
         this.clearLoading();
-        this.refreshLatest();
       },
-      error: () => this.fail('Entreprise non creee. Elle existe peut-etre deja pour cet utilisateur.')
+      error: () => this.fail('Entreprise non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
     });
   }
 
@@ -290,6 +634,85 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  searchBnb(): void {
+    const enterprise = this.enterprise();
+    if (!enterprise) {
+      return;
+    }
+
+    this.setLoading('Recherche BNB comptes annuels...');
+    this.api.searchBnbAnnualAccounts(enterprise.id).subscribe({
+      next: (lookup) => {
+        this.bnbLookup.set(lookup);
+        this.clearLoading();
+      },
+      error: () => this.fail('Recherche BNB indisponible. Verifiez que le backend a acces a consult.cbso.nbb.be.')
+    });
+  }
+
+  importBnbSnapshot(): void {
+    const enterprise = this.enterprise();
+    if (!enterprise) {
+      return;
+    }
+
+    this.setLoading('Import des chiffres BNB...');
+    this.api.importLatestBnbAnnualAccounts(enterprise.id).subscribe({
+      next: (snapshot) => {
+        this.snapshot.set(snapshot);
+        this.result.set(null);
+        this.clearLoading();
+        this.refreshBnbLookup();
+        this.refreshLatest();
+        this.refreshAudit();
+      },
+      error: () => this.fail('Import BNB impossible. Verifiez qu un depot BNB avec CSV est disponible.')
+    });
+  }
+
+  onBankCsvSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const enterprise = this.enterprise();
+    if (!file || !enterprise) {
+      return;
+    }
+
+    this.setLoading('Import bancaire et classification...');
+    this.api.importBankCsv(enterprise.id, file).subscribe({
+      next: (snapshot) => {
+        this.snapshot.set(snapshot);
+        this.result.set(null);
+        this.clearLoading();
+        this.refreshLatest();
+        this.refreshBankTransactions();
+        this.refreshAudit();
+      },
+      error: () => this.fail('Import bancaire impossible. Format attendu: date,description,amount,balance.')
+    });
+  }
+
+  onAccountingCsvSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const enterprise = this.enterprise();
+    if (!file || !enterprise) {
+      return;
+    }
+
+    this.setLoading('Import bilan provisoire comptable...');
+    this.api.importAccountingCsv(enterprise.id, file).subscribe({
+      next: (snapshot) => {
+        this.snapshot.set(snapshot);
+        this.result.set(null);
+        this.clearLoading();
+        this.refreshLatest();
+        this.refreshAudit();
+      },
+      error: () => this.fail('Import bilan impossible. Format attendu: accountCode,label,amount.')
+    });
+  }
+
   simulate(): void {
     const enterprise = this.enterprise();
     if (!enterprise || !this.snapshot()) {
@@ -297,7 +720,8 @@ export class DashboardComponent implements OnInit {
     }
 
     this.setLoading('Simulation...');
-    this.api.simulateDecision(enterprise.id, this.withdrawalAmount, this.decisionType).subscribe({
+    const forcedSource = this.selectedSource() === 'AUTO' ? undefined : this.selectedSource();
+    this.api.simulateDecision(enterprise.id, this.withdrawalAmount, this.decisionType, forcedSource).subscribe({
       next: (result) => {
         this.result.set(result);
         this.clearLoading();
@@ -313,10 +737,68 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.api.getLatestSnapshot(enterprise.id).subscribe({
+    this.api.getConsolidatedSnapshot(enterprise.id).subscribe({
       next: (snapshot) => this.snapshot.set(snapshot),
       error: () => this.snapshot.set(null)
     });
+    this.refreshSources();
+  }
+
+  refreshSources(): void {
+    const enterprise = this.enterprise();
+    if (!enterprise) {
+      return;
+    }
+
+    this.api.getFinancialSnapshots(enterprise.id).subscribe({
+      next: (snapshots) => this.snapshots.set(snapshots),
+      error: () => this.snapshots.set([])
+    });
+  }
+
+  selectFinancialSource(source: string): void {
+    if (source !== 'AUTO' && !this.snapshots().some((item) => item.source === source)) {
+      return;
+    }
+    this.selectedSource.set(source);
+    this.result.set(null);
+  }
+
+  hasSource(source: string): boolean {
+    return this.snapshots().some((item) => item.source === source);
+  }
+
+  latestSource(source: string): FinancialSnapshot | null {
+    return this.snapshots().find((item) => item.source === source) ?? null;
+  }
+
+  sourceStatusLabel(source: string): string {
+    const snapshot = this.latestSource(source);
+    if (!snapshot) {
+      return 'Aucune donnee';
+    }
+    return `${this.sourceLabel(snapshot.source)} - ${new Date(snapshot.snapshotDate).toLocaleDateString('fr-BE')}`;
+  }
+
+  displayEnterpriseName(enterprise?: Enterprise | null): string {
+    const name = enterprise?.raisonSociale?.trim() || '';
+    if (!name || this.isInvalidEnterpriseName(name)) {
+      return 'Nom de l entreprise a corriger';
+    }
+    return name;
+  }
+
+  enterpriseLogo(enterprise: Enterprise): string | null {
+    this.enterpriseLogoVersion();
+    return localStorage.getItem(this.enterpriseLogoKey(enterprise.id));
+  }
+
+  enterpriseInitial(enterprise: Enterprise): string {
+    const name = this.displayEnterpriseName(enterprise);
+    if (name === 'Nom de l entreprise a corriger') {
+      return 'E';
+    }
+    return name.charAt(0).toUpperCase();
   }
 
   refreshAudit(): void {
@@ -328,6 +810,30 @@ export class DashboardComponent implements OnInit {
     this.api.getAuditLogs(enterprise.id).subscribe({
       next: (logs) => this.auditLogs.set(logs),
       error: () => this.auditLogs.set([])
+    });
+  }
+
+  refreshBnbLookup(): void {
+    const enterprise = this.enterprise();
+    if (!enterprise) {
+      return;
+    }
+
+    this.api.getLatestBnbAnnualAccounts(enterprise.id).subscribe({
+      next: (lookup) => this.bnbLookup.set(lookup),
+      error: () => this.bnbLookup.set(null)
+    });
+  }
+
+  refreshBankTransactions(): void {
+    const enterprise = this.enterprise();
+    if (!enterprise) {
+      return;
+    }
+
+    this.api.getBankTransactions(enterprise.id).subscribe({
+      next: (transactions) => this.bankTransactions.set(transactions),
+      error: () => this.bankTransactions.set([])
     });
   }
 
@@ -354,15 +860,14 @@ export class DashboardComponent implements OnInit {
 
   sourceLabel(source: MockSource | string): string {
     const labels: Record<string, string> = {
-      'mock-bnb': 'Import BNB mock',
       'mock-bank': 'Connexion banque mock',
       'mock-balance-sheet': 'Parsing bilan mock',
-      BNB_API: 'BNB',
+      BNB_API: 'BNB comptes annuels',
       BANK_API: 'Banque',
-      BALANCE_SHEET_DOCUMENT: 'Bilan',
+      BALANCE_SHEET_DOCUMENT: 'Bilan provisoire',
       MANUAL: 'Manuel',
       BANK_CSV: 'CSV bancaire',
-      ACCOUNTING_CSV: 'CSV comptable'
+      ACCOUNTING_CSV: 'Bilan provisoire comptable'
     };
     return labels[source] ?? source;
   }
@@ -404,6 +909,26 @@ export class DashboardComponent implements OnInit {
     return this.isAccountant() ? 'Comptable' : 'Dirigeant';
   }
 
+  viewTitle(): string {
+    if (this.isAccountant()) {
+      if (this.currentView() === 'AUDIT') {
+        return 'Audit portefeuille';
+      }
+      if (this.currentView() === 'PROFILE') {
+        return 'Profil comptable';
+      }
+      return 'Dashboard portefeuille';
+    }
+    const labels: Record<DashboardView, string> = {
+      DETAIL: this.displayEnterpriseName(this.enterprise()) || 'Fiche entreprise',
+      SOURCES: 'Sources financieres',
+      DASHBOARD: 'Dashboard portefeuille',
+      AUDIT: 'Audit et tracabilite',
+      PROFILE: 'Mon profil'
+    };
+    return labels[this.currentView()];
+  }
+
   userInitials(): string {
     const user = this.auth.currentUser();
     return `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`.trim() || 'U';
@@ -415,17 +940,24 @@ export class DashboardComponent implements OnInit {
     return Math.ceil((target.getTime() - today.getTime()) / 86_400_000);
   }
 
-  private loadEnterprise(userId: number): void {
+  private loadEnterprises(): void {
     this.setLoading('Chargement...');
-    this.api.getEnterpriseByUser(userId).subscribe({
-      next: (enterprise) => {
-        this.enterprise.set(enterprise);
+    this.api.getMyEnterprises().subscribe({
+      next: (enterprises) => {
+        this.enterprises.set(enterprises);
+        const active = enterprises[0] ?? null;
+        this.enterprise.set(active);
         this.clearLoading();
-        this.refreshLatest();
-        this.refreshAudit();
+        if (active) {
+          this.refreshLatest();
+          this.refreshBnbLookup();
+          this.refreshBankTransactions();
+          this.refreshAudit();
+        }
       },
       error: () => {
         this.clearLoading();
+        this.enterprises.set([]);
         this.enterprise.set(null);
       }
     });
@@ -445,8 +977,50 @@ export class DashboardComponent implements OnInit {
     this.error.set(message);
   }
 
+  private sourceForField(
+    snapshots: FinancialSnapshot[],
+    field: keyof Pick<FinancialSnapshot, 'tresorerie' | 'chiffreAffairesMensuel' | 'chargesMensuelles' | 'soldeCompteCourant'>,
+    orderedSources: string[]
+  ): { available: boolean; label: string; date: string; confidence: number; warning: boolean } {
+    for (const source of orderedSources) {
+      const match = snapshots.find((candidate) => candidate.source === source && candidate[field] !== null && candidate[field] !== undefined);
+      if (match) {
+        return {
+          available: true,
+          label: this.sourceLabel(match.source),
+          date: match.snapshotDate ? new Date(match.snapshotDate).toLocaleDateString('fr-BE') : '',
+          confidence: match.confidenceScore ?? 0,
+          warning: match.source === 'BNB_API'
+        };
+      }
+    }
+    return { available: false, label: 'Aucune donnée disponible', date: '', confidence: 0, warning: false };
+  }
+
   private profilePhotoKey(): string {
     return `savefunds.profile-photo.${this.auth.currentUser()?.id ?? 'anonymous'}`;
+  }
+
+  private enterpriseLogoKey(enterpriseId: number): string {
+    return `savefunds.enterprise-logo.${this.auth.currentUser()?.id ?? 'anonymous'}.${enterpriseId}`;
+  }
+
+  private savePendingEnterpriseLogo(enterprise: Enterprise): void {
+    const logo = this.pendingEnterpriseLogo();
+    if (!logo) {
+      return;
+    }
+    localStorage.setItem(this.enterpriseLogoKey(enterprise.id), logo);
+    this.pendingEnterpriseLogo.set(null);
+    this.enterpriseLogoVersion.update((value) => value + 1);
+  }
+
+  private isInvalidEnterpriseName(name: string): boolean {
+    const normalized = name.toLowerCase();
+    return normalized.startsWith('ondernemingsnummer')
+      || normalized.startsWith('numero d')
+      || normalized.startsWith('numéro d')
+      || normalized === this.enterprise()?.numeroEntreprise?.toLowerCase();
   }
 
   private readProfilePhoto(): string | null {

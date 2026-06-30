@@ -27,5 +27,6 @@ public class FinancialSnapshotResponse {
     private Integer confidenceScore;
     private List<String> warnings;
     private List<String> missingFields;
+    private String rawMetadata;
     private LocalDateTime createdAt;
 }

@@ -15,6 +15,8 @@ public interface EntrepriseService {
 
     Optional<Entreprise> findByUserId(Long userId);
 
+    List<Entreprise> findAllByUserId(Long userId);
+
     List<Entreprise> findAll();
 
     Entreprise create(Entreprise entreprise);

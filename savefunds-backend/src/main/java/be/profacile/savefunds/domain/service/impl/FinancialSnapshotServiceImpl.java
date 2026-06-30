@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -136,6 +137,76 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
         return snapshotRepository.findTopByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entrepriseId);
     }
 
+    @Override
+    public Optional<FinancialSnapshot> findLatestBySource(Long entrepriseId, FinancialSnapshotSource source) {
+        getEntreprise(entrepriseId);
+        return snapshotRepository.findTopByEntrepriseIdAndSourceOrderBySnapshotDateDescCreatedAtDesc(entrepriseId, source);
+    }
+
+    @Override
+    public List<FinancialSnapshot> findAll(Long entrepriseId) {
+        getEntreprise(entrepriseId);
+        return snapshotRepository.findAllByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entrepriseId);
+    }
+
+    @Override
+    public Optional<FinancialSnapshot> buildConsolidatedSnapshot(Long entrepriseId) {
+        Entreprise entreprise = getEntreprise(entrepriseId);
+        List<FinancialSnapshot> snapshots = snapshotRepository.findAllByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entrepriseId);
+        if (snapshots.isEmpty()) {
+            return Optional.empty();
+        }
+
+        FinancialSnapshot consolidated = new FinancialSnapshot();
+        consolidated.setEntreprise(entreprise);
+        consolidated.setSource(FinancialSnapshotSource.MANUAL);
+        consolidated.setSourceReference("consolidated-hierarchy");
+        consolidated.setSnapshotDate(LocalDate.now());
+        consolidated.setTresorerie(firstValue(snapshots, FinancialSnapshot::getTresorerie,
+                FinancialSnapshotSource.BANK_CSV,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setChiffreAffairesMensuel(firstValue(snapshots, FinancialSnapshot::getChiffreAffairesMensuel,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setChargesMensuelles(firstValue(snapshots, FinancialSnapshot::getChargesMensuelles,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setSoldeCompteCourant(firstValue(snapshots, FinancialSnapshot::getSoldeCompteCourant,
+                FinancialSnapshotSource.BANK_CSV,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setDureeCompteCourantDebiteur(firstValue(snapshots, FinancialSnapshot::getDureeCompteCourantDebiteur,
+                FinancialSnapshotSource.BANK_CSV,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setDettesCourtTerme(firstValue(snapshots, FinancialSnapshot::getDettesCourtTerme,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setCreancesClients(firstValue(snapshots, FinancialSnapshot::getCreancesClients,
+                FinancialSnapshotSource.ACCOUNTING_CSV,
+                FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
+                FinancialSnapshotSource.BNB_API
+        ));
+        consolidated.setConfidenceScore(averageConfidence(snapshots));
+        consolidated.setWarnings("Snapshot consolide selon la hierarchie SaveFunds: banque > bilan provisoire > BNB annuelle");
+        consolidated.setMissingFields("");
+        consolidated.setRawMetadata("sourceHierarchy=tresorerie:BANK_CSV>ACCOUNTING_CSV>BNB_API;caCharges:ACCOUNTING_CSV>BNB_API;cc:BANK_CSV>ACCOUNTING_CSV>BNB_API");
+        return Optional.of(consolidated);
+    }
+
     private FinancialSnapshot toSnapshot(Entreprise entreprise, FinancialSnapshotSource source, String sourceReference, ExtractedFinancialData data) {
         FinancialSnapshot snapshot = new FinancialSnapshot();
         snapshot.setEntreprise(entreprise);
@@ -159,5 +230,32 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
     private Entreprise getEntreprise(Long entrepriseId) {
         return entrepriseRepository.findById(entrepriseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable: " + entrepriseId));
+    }
+
+    @SafeVarargs
+    private <T> T firstValue(
+            List<FinancialSnapshot> snapshots,
+            Function<FinancialSnapshot, T> getter,
+            FinancialSnapshotSource... orderedSources
+    ) {
+        for (FinancialSnapshotSource source : orderedSources) {
+            Optional<T> value = snapshots.stream()
+                    .filter(snapshot -> snapshot.getSource() == source)
+                    .map(getter)
+                    .filter(candidate -> candidate != null)
+                    .findFirst();
+            if (value.isPresent()) {
+                return value.get();
+            }
+        }
+        return null;
+    }
+
+    private int averageConfidence(List<FinancialSnapshot> snapshots) {
+        return (int) Math.round(snapshots.stream()
+                .filter(snapshot -> snapshot.getConfidenceScore() != null)
+                .mapToInt(FinancialSnapshot::getConfidenceScore)
+                .average()
+                .orElse(0));
     }
 }

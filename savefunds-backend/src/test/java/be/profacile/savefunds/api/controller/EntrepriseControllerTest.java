@@ -97,12 +97,31 @@ class EntrepriseControllerTest {
 
     @Test
     @DisplayName("POST /entreprises - 400 si userId a dÃ©jÃ  une entreprise")
-    void shouldReturn400WhenUserAlreadyHasEntreprise() throws Exception {
+    void shouldCreateSecondEntrepriseForSameUser() throws Exception {
         // entreprise avec userId=1 dÃ©jÃ  crÃ©Ã©e dans setUp()
         CreateEntrepriseRequest request = new CreateEntrepriseRequest();
-                request.setUserId(user.getId());
+        request.setUserId(user.getId());
         request.setRaisonSociale("DeuxiÃ¨me SRL");
         request.setNumeroEntreprise("BE0987654321");
+        request.setChiffreAffairesMensuel(new BigDecimal("50000.00"));
+        request.setChargesMensuelles(new BigDecimal("30000.00"));
+        request.setTresorerie(new BigDecimal("100000.00"));
+
+        mockMvc.perform(post("/api/v1/entreprises")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.userId").value(user.getId()))
+                .andExpect(jsonPath("$.raisonSociale").exists());
+    }
+
+    @Test
+    @DisplayName("POST /entreprises - 400 si meme numero BCE deja rattache")
+    void shouldReturn400WhenEnterpriseNumberAlreadyAttachedToUser() throws Exception {
+        CreateEntrepriseRequest request = new CreateEntrepriseRequest();
+        request.setUserId(user.getId());
+        request.setRaisonSociale("Duplicat SRL");
+        request.setNumeroEntreprise("BE0123456789");
         request.setChiffreAffairesMensuel(new BigDecimal("50000.00"));
         request.setChargesMensuelles(new BigDecimal("30000.00"));
         request.setTresorerie(new BigDecimal("100000.00"));

@@ -27,6 +27,7 @@ public class FinancialSnapshotApiMapper {
                 .confidenceScore(snapshot.getConfidenceScore())
                 .warnings(split(snapshot.getWarnings()))
                 .missingFields(split(snapshot.getMissingFields()))
+                .rawMetadata(snapshot.getRawMetadata())
                 .createdAt(snapshot.getCreatedAt())
                 .build();
     }

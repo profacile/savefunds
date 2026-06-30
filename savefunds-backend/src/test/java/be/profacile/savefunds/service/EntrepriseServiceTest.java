@@ -69,7 +69,8 @@ class EntrepriseServiceTest {
 
     @Test
     @DisplayName("Devrait empêcher un userId d'avoir deux entreprises")
-    void shouldPreventDuplicateEntrepriseForUserId() {
+    @org.junit.jupiter.api.Disabled("Ancienne regle remplacee par 1 dirigeant -> N entreprises")
+    void shouldAllowSeveralEntreprisesForUserId() {
         // Given
         Entreprise entreprise1 = new Entreprise();
         entreprise1.setUserId(1L);
@@ -98,6 +99,32 @@ class EntrepriseServiceTest {
         assertThatThrownBy(() -> entrepriseService.create(entreprise2))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("possède déjà une entreprise");
+    }
+
+    @Test
+    @DisplayName("Devrait autoriser plusieurs entreprises differentes pour un userId")
+    void shouldAllowSeveralDifferentEntreprisesForUserId() {
+        Entreprise entreprise1 = createEntreprise(1L, "Entreprise 1", "BE0111111111");
+        Entreprise entreprise2 = createEntreprise(1L, "Entreprise 2", "BE0222222222");
+
+        entrepriseService.create(entreprise1);
+        Entreprise saved = entrepriseService.create(entreprise2);
+
+        assertThat(saved.getId()).isNotNull();
+        assertThat(entrepriseService.findAllByUserId(1L)).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("Devrait refuser deux rattachements du meme numero BCE")
+    void shouldPreventDuplicateEnterpriseNumberForUserId() {
+        Entreprise entreprise1 = createEntreprise(1L, "Entreprise 1", "BE0111111111");
+        Entreprise duplicate = createEntreprise(1L, "Entreprise duplicate", "BE0111111111");
+
+        entrepriseService.create(entreprise1);
+
+        assertThatThrownBy(() -> entrepriseService.create(duplicate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("deja rattachee");
     }
 
     @Test

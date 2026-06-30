@@ -119,12 +119,12 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 64px;
+  padding: 48px 84px;
   background: #ffffff;
 }
 
 .form-card {
-  width: min(620px, 100%);
+  width: min(760px, 100%);
 }
 
 .form-card h2 {
@@ -166,8 +166,8 @@ h1 {
 
 .auth-field input {
   width: 100%;
-  min-height: 46px;
-  padding: 0 14px;
+  min-height: 52px;
+  padding: 0 16px;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   background: #ffffff;
@@ -255,7 +255,7 @@ h1 {
 
 .auth-submit {
   width: 100%;
-  min-height: 48px;
+  min-height: 52px;
   margin-top: 4px;
   border-radius: 10px;
   background: linear-gradient(135deg, #1a4fa0, #0d7a3e);
