@@ -15,10 +15,19 @@ export class RegisterComponent {
   email = `demo${Date.now()}@savefunds.be`;
   password = 'password';
   role: 'DIRIGEANT' | 'COMPTABLE' = 'DIRIGEANT';
+  showPassword = signal(false);
   loading = signal(false);
   error = signal('');
 
   constructor(private readonly auth: AuthService, private readonly router: Router) {}
+
+  revealPassword(): void {
+    this.showPassword.set(true);
+  }
+
+  hidePassword(): void {
+    this.showPassword.set(false);
+  }
 
   submit(): void {
     this.loading.set(true);

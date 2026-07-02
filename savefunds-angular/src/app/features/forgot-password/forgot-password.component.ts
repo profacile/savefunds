@@ -13,6 +13,7 @@ export class ForgotPasswordComponent {
   email = '';
   loading = signal(false);
   message = signal('');
+  resetLink = signal('');
   error = signal('');
 
   constructor(private readonly auth: AuthService) {}
@@ -20,11 +21,18 @@ export class ForgotPasswordComponent {
   submit(): void {
     this.loading.set(true);
     this.message.set('');
+    this.resetLink.set('');
     this.error.set('');
 
     this.auth.forgotPassword(this.email).subscribe({
       next: (response) => {
         this.loading.set(false);
+        const linkPrefix = 'Lien de reinitialisation genere: ';
+        if (response.message.startsWith(linkPrefix)) {
+          this.message.set('Lien de reinitialisation genere pour la demo.');
+          this.resetLink.set(response.message.substring(linkPrefix.length));
+          return;
+        }
         this.message.set(response.message);
       },
       error: () => {

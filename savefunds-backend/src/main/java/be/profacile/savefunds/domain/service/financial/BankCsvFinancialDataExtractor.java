@@ -27,6 +27,8 @@ public class BankCsvFinancialDataExtractor implements FinancialDataExtractor {
 
     @Override
     public ExtractedFinancialData extract(MultipartFile file) {
+        ensureCsvFile(file);
+
         List<String> warnings = new ArrayList<>();
         BigDecimal incoming = BigDecimal.ZERO;
         BigDecimal outgoing = BigDecimal.ZERO;
@@ -106,5 +108,16 @@ public class BankCsvFinancialDataExtractor implements FinancialDataExtractor {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    private void ensureCsvFile(MultipartFile file) {
+        String filename = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+        if (filename.endsWith(".csv") || filename.endsWith(".txt")) {
+            return;
+        }
+        throw new IllegalArgumentException(
+                "Format bancaire recu (" + file.getOriginalFilename() + "). Le MVP parse le CSV bancaire normalise date,description,amount,balance. "
+                        + "Les PDF, Excel, CODA/STA ou la connexion bancaire PSD2 sont prevus comme connecteurs de production."
+        );
     }
 }

@@ -33,6 +33,8 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
 
     @Override
     public ExtractedFinancialData extract(MultipartFile file) {
+        ensureCsvFile(file);
+
         Map<String, BigDecimal> balances = new LinkedHashMap<>();
         List<String> warnings = new ArrayList<>();
         int rows = 0;
@@ -100,5 +102,16 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
     private BigDecimal parseAmount(String value) {
         String normalized = value == null ? "0" : value.trim().replace("\"", "").replace(" ", "").replace(",", ".");
         return normalized.isBlank() ? BigDecimal.ZERO : new BigDecimal(normalized);
+    }
+
+    private void ensureCsvFile(MultipartFile file) {
+        String filename = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+        if (filename.endsWith(".csv") || filename.endsWith(".txt")) {
+            return;
+        }
+        throw new IllegalArgumentException(
+                "Format bilan recu (" + file.getOriginalFilename() + "). Le MVP parse le CSV comptable normalise accountCode,label,amount. "
+                        + "Les formats PDF, Word, Excel ou image sont prevus via extraction IA/OCR dans l'evolution production."
+        );
     }
 }

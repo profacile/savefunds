@@ -68,10 +68,12 @@ export class DashboardComponent implements OnInit {
   registryResults = signal<CompanyRegistryCompany[]>([]);
   selectedRegistryCompany = signal<CompanyRegistryCompany | null>(null);
   registrySearchMessage = signal('');
+  registryAutocompleteLoading = signal(false);
   bceImportMessage = signal('');
   editingEnterpriseId = signal<number | null>(null);
   pendingEnterpriseLogo = signal<string | null>(null);
   enterpriseLogoVersion = signal(0);
+  private registryAutocompleteTimer: ReturnType<typeof setTimeout> | null = null;
 
   withdrawalAmount = 3000;
   decisionType = 'RETRAIT_DIRIGEANT';
@@ -339,6 +341,7 @@ export class DashboardComponent implements OnInit {
     this.editingEnterpriseId.set(null);
     this.registryResults.set([]);
     this.registrySearchMessage.set('');
+    this.selectedRegistryCompany.set(null);
   }
 
   startEditEnterprise(event: Event, enterprise: Enterprise): void {
@@ -489,14 +492,38 @@ export class DashboardComponent implements OnInit {
     this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
   }
 
-  searchRegistry(): void {
-    const query = this.registryQuery().trim();
-    if (query.length < 2) {
+  onRegistryQueryChange(value: string): void {
+    this.registryQuery.set(value);
+    this.selectedRegistryCompany.set(null);
+
+    const query = value.trim();
+    if (this.registryAutocompleteTimer) {
+      clearTimeout(this.registryAutocompleteTimer);
+    }
+
+    if (query.length < 3) {
       this.registryResults.set([]);
+      this.registrySearchMessage.set('');
+      this.registryAutocompleteLoading.set(false);
       return;
     }
 
-    this.setLoading('Recherche BCE...');
+    this.registryAutocompleteLoading.set(true);
+    const delay = query.replace(/\D/g, '').length === 10 ? 120 : 450;
+    this.registryAutocompleteTimer = setTimeout(() => this.searchRegistry(true), delay);
+  }
+
+  searchRegistry(autocomplete = false): void {
+    const query = this.registryQuery().trim();
+    if (query.length < 2) {
+      this.registryResults.set([]);
+      this.registryAutocompleteLoading.set(false);
+      return;
+    }
+
+    if (!autocomplete) {
+      this.setLoading('Recherche BCE...');
+    }
     this.registrySearchMessage.set('');
     if (query.replace(/\D/g, '').length === 10) {
       this.api.findCompanyRegistryByNumber(query).subscribe({
@@ -504,12 +531,14 @@ export class DashboardComponent implements OnInit {
           this.registryResults.set([company]);
           this.selectedRegistryCompany.set(company);
           this.registrySearchMessage.set('1 resultat trouve via le numero BCE.');
+          this.registryAutocompleteLoading.set(false);
           this.clearLoading();
         },
         error: () => {
           this.registryResults.set([]);
           this.selectedRegistryCompany.set(null);
           this.registrySearchMessage.set('Aucun resultat trouve pour ce numero BCE.');
+          this.registryAutocompleteLoading.set(false);
           this.clearLoading();
         }
       });
@@ -521,13 +550,15 @@ export class DashboardComponent implements OnInit {
         this.registryResults.set(results);
         this.selectedRegistryCompany.set(results[0] ?? null);
         this.registrySearchMessage.set(results.length
-          ? `${results.length} resultat(s) trouve(s) via BCE ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
+          ? `${results.length} suggestion(s) BCE trouvee(s) ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
           : 'Aucun resultat dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
         );
+        this.registryAutocompleteLoading.set(false);
         this.clearLoading();
       },
       error: () => {
         this.registrySearchMessage.set('');
+        this.registryAutocompleteLoading.set(false);
         this.fail('Recherche BCE indisponible. Redemarrez le backend pour charger le fallback Public Search, puis reessayez.')
       }
     });
@@ -577,7 +608,7 @@ export class DashboardComponent implements OnInit {
         this.clearLoading();
         this.currentView.set('DETAIL');
       },
-      error: () => this.fail('Creation depuis la BCE impossible. Verifiez que cette entreprise n est pas deja rattachee a votre compte.')
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Creation depuis la BCE impossible. Verifiez que cette entreprise n est pas deja rattachee a votre compte.'))
     });
   }
 
@@ -688,7 +719,7 @@ export class DashboardComponent implements OnInit {
         this.refreshBankTransactions();
         this.refreshAudit();
       },
-      error: () => this.fail('Import bancaire impossible. Format attendu: date,description,amount,balance.')
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bancaire impossible. Format CSV attendu pour le parseur actuel: date,description,amount,balance.'))
     });
   }
 
@@ -709,7 +740,7 @@ export class DashboardComponent implements OnInit {
         this.refreshLatest();
         this.refreshAudit();
       },
-      error: () => this.fail('Import bilan impossible. Format attendu: accountCode,label,amount.')
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bilan impossible. Format CSV attendu pour le parseur actuel: accountCode,label,amount.'))
     });
   }
 
@@ -786,6 +817,21 @@ export class DashboardComponent implements OnInit {
       return 'Nom de l entreprise a corriger';
     }
     return name;
+  }
+
+  registryCompanySubtitle(company: CompanyRegistryCompany): string {
+    return company.legalForm?.trim()
+      ? `${company.enterpriseNumber} - ${company.legalForm}`
+      : company.enterpriseNumber;
+  }
+
+  registryCompanyAddress(company: CompanyRegistryCompany): string {
+    const address = [company.address, [company.postalCode, company.city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    return address || 'Adresse non renseignee';
+  }
+
+  registryCompanyActivity(company: CompanyRegistryCompany): string {
+    return [company.naceCode, company.activityLabel].filter(Boolean).join(' - ') || 'Activite non renseignee';
   }
 
   enterpriseLogo(enterprise: Enterprise): string | null {
@@ -975,6 +1021,17 @@ export class DashboardComponent implements OnInit {
   private fail(message: string): void {
     this.loading.set('');
     this.error.set(message);
+  }
+
+  private apiErrorMessage(error: unknown, fallback: string): string {
+    const payload = (error as { error?: unknown })?.error;
+    if (typeof payload === 'string') {
+      return payload;
+    }
+    if (payload && typeof payload === 'object' && 'message' in payload) {
+      return String((payload as { message?: unknown }).message || fallback);
+    }
+    return fallback;
   }
 
   private sourceForField(

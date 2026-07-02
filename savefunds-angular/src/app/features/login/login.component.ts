@@ -12,10 +12,19 @@ import { AuthService } from '../../core/auth.service';
 export class LoginComponent {
   email = 'demo@savefunds.be';
   password = 'password';
+  showPassword = signal(false);
   loading = signal(false);
   error = signal('');
 
   constructor(private readonly auth: AuthService, private readonly router: Router) {}
+
+  revealPassword(): void {
+    this.showPassword.set(true);
+  }
+
+  hidePassword(): void {
+    this.showPassword.set(false);
+  }
 
   submit(): void {
     this.loading.set(true);

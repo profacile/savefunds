@@ -10,5 +10,12 @@ public class CreateEntrepriseFromRegistryRequest {
 
     private String name;
     private String legalForm;
+    private String status;
+    private String address;
+    private String postalCode;
+    private String city;
+    private String naceCode;
     private String activityLabel;
+    private String source;
+    private Boolean active;
 }

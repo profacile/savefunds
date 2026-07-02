@@ -369,6 +369,12 @@ h2 {
   color: #9a3412;
 }
 
+.autocomplete-hint {
+  color: #1e40af;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .registry-card {
   display: grid;
   gap: 7px;

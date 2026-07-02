@@ -62,6 +62,13 @@ export class SaveFundsApiService {
       enterpriseNumber: company.enterpriseNumber,
       name: company.name,
       legalForm: company.legalForm,
+      status: company.status,
+      address: company.address,
+      postalCode: company.postalCode,
+      city: company.city,
+      naceCode: company.naceCode,
+      source: company.source,
+      active: company.active,
       activityLabel: company.activityLabel
     });
   }

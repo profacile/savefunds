@@ -123,7 +123,7 @@
                 <em>{{ item.secteurActivite || 'Description a completer depuis la BCE / BNB' }}</em>
                 <span class="company-actions">
                   <label class="mini-action" (click)="$event.stopPropagation()">
-                    Logo / photo
+                    Photo
                     <input type="file" accept="image/*" (change)="onEnterpriseLogoSelected($event, item)">
                   </label>
                   <span class="mini-action" role="button" tabindex="0" (click)="startEditEnterprise($event, item)">Modifier</span>
@@ -176,7 +176,7 @@
                 <button class="btn btn-primary" type="button" (click)="updateEnterprise()">Enregistrer</button>
                 <button class="btn btn-ghost" type="button" (click)="cancelEditEnterprise()">Annuler</button>
                 @if (enterprise()) {
-                  <button class="btn btn-ghost" type="button" (click)="removeEnterpriseLogo(enterprise()!)">Retirer le logo</button>
+                  <button class="btn btn-ghost" type="button" (click)="removeEnterpriseLogo(enterprise()!)">Retirer la photo</button>
                 }
               </div>
             </section>
@@ -199,7 +199,7 @@
                   }
                 </span>
                 <label class="btn btn-ghost">
-                  Ajouter un logo ou une photo
+                  Charger la photo de l'entreprise
                   <input type="file" accept="image/*" (change)="onPendingEnterpriseLogoSelected($event)">
                 </label>
               </div>
@@ -207,10 +207,14 @@
               <div class="registry-search">
                 <div class="field">
                   <label>Nom, numero BCE ou commune</label>
-                  <input [ngModel]="registryQuery()" (ngModelChange)="registryQuery.set($event)" placeholder="Profacile, BE 0123.456.789, Bruxelles">
+                  <input [ngModel]="registryQuery()" (ngModelChange)="onRegistryQueryChange($event)" placeholder="Profacile, BE 0123.456.789, Bruxelles" autocomplete="off">
                 </div>
                 <button class="btn btn-primary" type="button" (click)="searchRegistry()">Rechercher BCE</button>
               </div>
+
+              @if (registryAutocompleteLoading()) {
+                <p class="autocomplete-hint">Recherche automatique dans la BCE...</p>
+              }
 
               @if (registrySearchMessage()) {
                 <p class="registry-message" [class.empty]="!registryResults().length">{{ registrySearchMessage() }}</p>
@@ -218,13 +222,13 @@
 
               @if (registryResults().length) {
                 <div class="registry-results">
-                  @for (company of registryResults(); track company.enterpriseNumber) {
-                    <button class="registry-card" type="button" [class.selected]="selectedRegistryCompany()?.enterpriseNumber === company.enterpriseNumber" (click)="selectRegistryCompany(company)">
+                  @for (company of registryResults(); track company.enterpriseNumber + company.address + $index) {
+                    <button class="registry-card" type="button" [class.selected]="selectedRegistryCompany() === company" (click)="selectRegistryCompany(company)">
                       <span class="status-pill" [class.decision-VERT]="company.active" [class.decision-ROUGE]="!company.active">{{ company.status }}</span>
                       <strong>{{ company.name }}</strong>
-                      <small>{{ company.enterpriseNumber }} - {{ company.legalForm }}</small>
-                      <span>{{ company.address }}, {{ company.postalCode }} {{ company.city }}</span>
-                      <span>{{ company.naceCode }} - {{ company.activityLabel }}</span>
+                      <small>{{ registryCompanySubtitle(company) }}</small>
+                      <span>{{ registryCompanyAddress(company) }}</span>
+                      <span>{{ registryCompanyActivity(company) }}</span>
                       <em>Source : {{ company.source }}</em>
                     </button>
                   }
@@ -425,10 +429,14 @@
         <div class="registry-search">
           <div class="field">
             <label>Nom, numero BCE ou commune</label>
-            <input [ngModel]="registryQuery()" (ngModelChange)="registryQuery.set($event)" placeholder="Profacile, BE 0123.456.789, Bruxelles">
+            <input [ngModel]="registryQuery()" (ngModelChange)="onRegistryQueryChange($event)" placeholder="Profacile, BE 0123.456.789, Bruxelles" autocomplete="off">
           </div>
           <button class="btn btn-primary" type="button" (click)="searchRegistry()">Rechercher BCE</button>
         </div>
+
+        @if (registryAutocompleteLoading()) {
+          <p class="autocomplete-hint">Recherche automatique dans la BCE...</p>
+        }
 
         @if (registrySearchMessage()) {
           <p class="registry-message" [class.empty]="!registryResults().length">{{ registrySearchMessage() }}</p>
@@ -436,13 +444,13 @@
 
         @if (registryResults().length) {
           <div class="registry-results">
-            @for (company of registryResults(); track company.enterpriseNumber) {
-              <button class="registry-card" type="button" [class.selected]="selectedRegistryCompany()?.enterpriseNumber === company.enterpriseNumber" (click)="selectRegistryCompany(company)">
+            @for (company of registryResults(); track company.enterpriseNumber + company.address + $index) {
+              <button class="registry-card" type="button" [class.selected]="selectedRegistryCompany() === company" (click)="selectRegistryCompany(company)">
                 <span class="status-pill" [class.decision-VERT]="company.active" [class.decision-ROUGE]="!company.active">{{ company.status }}</span>
                 <strong>{{ company.name }}</strong>
-                <small>{{ company.enterpriseNumber }} - {{ company.legalForm }}</small>
-                <span>{{ company.address }}, {{ company.postalCode }} {{ company.city }}</span>
-                <span>{{ company.naceCode }} - {{ company.activityLabel }}</span>
+                <small>{{ registryCompanySubtitle(company) }}</small>
+                <span>{{ registryCompanyAddress(company) }}</span>
+                <span>{{ registryCompanyActivity(company) }}</span>
                 <em>Source : {{ company.source }}</em>
               </button>
             }
@@ -632,9 +640,9 @@
               }
               <label class="btn btn-primary">
                 {{ latestSource('ACCOUNTING_CSV') ? 'Ecraser par un fichier plus recent' : 'Importer un bilan provisoire' }}
-                <input type="file" accept=".csv,text/csv" (change)="onAccountingCsvSelected($event)">
+                <input type="file" accept=".csv,text/csv,.xlsx,.xls,.pdf,.doc,.docx,image/*" (change)="onAccountingCsvSelected($event)">
               </label>
-              <span class="warning soft">Format actuel: CSV comptable accountCode,label,amount. PDF/image prevus pour extraction IA.</span>
+              <span class="warning soft">Formats metier acceptes: CSV, Excel, PDF, Word ou image. Parsing actuel: CSV comptable accountCode,label,amount. Les autres formats seront traites par extraction IA/OCR.</span>
             </div>
           }
 
@@ -653,8 +661,9 @@
               }
               <label class="btn btn-primary">
                 {{ latestSource('BANK_CSV') ? 'Ecraser par un fichier plus recent' : 'Importer un CSV bancaire' }}
-                <input type="file" accept=".csv,text/csv" (change)="onBankCsvSelected($event)">
+                <input type="file" accept=".csv,text/csv,.xlsx,.xls,.pdf,.coda,.cod,.sta" (change)="onBankCsvSelected($event)">
               </label>
+              <span class="warning soft">Formats metier acceptes: CSV, Excel, PDF, CODA/STA. Parsing actuel: CSV bancaire date,description,amount,balance. PSD2 reste le connecteur cible en production.</span>
               @for (transaction of bankTransactions().slice(0, 6); track transaction.id) {
                 <div class="indicator-row">
                   <span class="status-pill" [class.decision-ROUGE]="transaction.impactsDirectorCurrentAccount" [class.decision-VERT]="!transaction.impactsDirectorCurrentAccount">{{ transaction.classification }}</span>

@@ -3,6 +3,7 @@ package be.profacile.savefunds.api.controller;
 import be.profacile.savefunds.api.dto.request.ForgotPasswordRequest;
 import be.profacile.savefunds.api.dto.request.LoginRequest;
 import be.profacile.savefunds.api.dto.request.RegisterRequest;
+import be.profacile.savefunds.api.dto.request.ResetPasswordRequest;
 import be.profacile.savefunds.api.dto.response.AuthResponse;
 import be.profacile.savefunds.api.dto.response.MessageResponse;
 import be.profacile.savefunds.domain.service.AuthService;
@@ -59,5 +60,18 @@ public class AuthController {
     })
     public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         return ResponseEntity.ok(authService.requestPasswordReset(request.getEmail()));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(
+            summary = "Reinitialiser le mot de passe",
+            description = "Met a jour le mot de passe avec un token temporaire genere par le parcours mot de passe oublie."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Mot de passe reinitialise"),
+            @ApiResponse(responseCode = "400", description = "Token invalide, expire ou mots de passe differents")
+    })
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 }

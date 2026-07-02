@@ -43,7 +43,24 @@
 
         <div class="auth-field">
           <label for="password">Mot de passe</label>
-          <input id="password" name="password" type="password" [(ngModel)]="password" required minlength="6" autocomplete="new-password">
+          <div class="password-control">
+            <input id="password" name="password" [type]="showPassword() ? 'text' : 'password'" [(ngModel)]="password" required minlength="6" autocomplete="new-password">
+            <button
+              class="password-reveal"
+              type="button"
+              aria-label="Afficher le mot de passe pendant l'appui"
+              title="Maintenir pour afficher"
+              (pointerdown)="revealPassword()"
+              (pointerup)="hidePassword()"
+              (pointerleave)="hidePassword()"
+              (pointercancel)="hidePassword()"
+              (blur)="hidePassword()">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="role-choice">

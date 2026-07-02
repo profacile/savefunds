@@ -67,7 +67,8 @@ public class FinancialSnapshotController {
     }
 
     @PostMapping(value = "/import-bank-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Importer un extrait bancaire CSV normalise")
+    @Operation(summary = "Importer un extrait bancaire",
+            description = "MVP: parsing CSV normalise. Production: PDF, Excel, CODA/STA ou PSD2.")
     public ResponseEntity<FinancialSnapshotResponse> importBankCsv(
             @PathVariable Long entrepriseId,
             @RequestPart("file") MultipartFile file) {
@@ -102,7 +103,8 @@ public class FinancialSnapshotController {
     }
 
     @PostMapping(value = "/import-accounting-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Importer un export comptable CSV normalise")
+    @Operation(summary = "Importer un bilan provisoire",
+            description = "MVP: parsing CSV comptable normalise. Production: PDF, Word, Excel ou image via extraction IA/OCR.")
     public ResponseEntity<FinancialSnapshotResponse> importAccountingCsv(
             @PathVariable Long entrepriseId,
             @RequestPart("file") MultipartFile file) {

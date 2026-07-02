@@ -26,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * REST Controller pour la gestion des entreprises (PME/SRL belges).
@@ -81,22 +82,37 @@ public class EntrepriseController {
     public ResponseEntity<EntrepriseResponse> creerDepuisRegistre(
             @Valid @RequestBody CreateEntrepriseFromRegistryRequest request) {
 
-        CompanyRegistryCompanyResponse registryCompany = companyRegistryProvider
-                .findByEnterpriseNumber(request.getEnterpriseNumber())
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise BCE introuvable: " + request.getEnterpriseNumber()));
+        Optional<CompanyRegistryCompanyResponse> registryCompany = companyRegistryProvider
+                .findByEnterpriseNumber(request.getEnterpriseNumber());
 
-        if (!registryCompany.isActive()) {
-            throw new IllegalArgumentException("Entreprise non active selon la BCE: " + registryCompany.getEnterpriseNumber());
+        boolean active = request.getActive() != null
+                ? request.getActive()
+                : registryCompany.map(CompanyRegistryCompanyResponse::isActive).orElse(false);
+
+        if (!active) {
+            throw new IllegalArgumentException("Entreprise non active ou statut BCE impossible a verifier: " + request.getEnterpriseNumber());
         }
 
         Entreprise entreprise = new Entreprise();
         entreprise.setUserId(currentUserService.getCurrentUserId());
-        String companyName = firstUsable(request.getName(), registryCompany.getName(), "Entreprise BCE");
+        String companyName = firstUsable(
+                request.getName(),
+                registryCompany.map(CompanyRegistryCompanyResponse::getName).orElse(null),
+                "Entreprise BCE");
         entreprise.setRaisonSociale(companyName);
         entreprise.setNom(companyName);
-        entreprise.setNumeroEntreprise(registryCompany.getEnterpriseNumber());
-        entreprise.setFormeJuridique(firstUsable(request.getLegalForm(), registryCompany.getLegalForm(), ""));
-        entreprise.setSecteurActivite(firstUsable(request.getActivityLabel(), registryCompany.getActivityLabel(), ""));
+        entreprise.setNumeroEntreprise(firstUsable(
+                normalizeEnterpriseNumber(request.getEnterpriseNumber()),
+                registryCompany.map(CompanyRegistryCompanyResponse::getEnterpriseNumber).orElse(null),
+                request.getEnterpriseNumber()));
+        entreprise.setFormeJuridique(firstUsable(
+                request.getLegalForm(),
+                registryCompany.map(CompanyRegistryCompanyResponse::getLegalForm).orElse(null),
+                ""));
+        entreprise.setSecteurActivite(firstUsable(
+                request.getActivityLabel(),
+                registryCompany.map(CompanyRegistryCompanyResponse::getActivityLabel).orElse(null),
+                firstUsable(request.getNaceCode(), registryCompany.map(CompanyRegistryCompanyResponse::getNaceCode).orElse(null), "")));
 
         Entreprise created = entrepriseService.create(entreprise);
         bnbAnnualAccountsService.search(created.getId());
@@ -247,6 +263,17 @@ public class EntrepriseController {
             return secondary.trim();
         }
         return fallback;
+    }
+
+    private String normalizeEnterpriseNumber(String value) {
+        if (value == null) {
+            return null;
+        }
+        String digits = value.replaceAll("\\D", "");
+        if (digits.length() != 10) {
+            return value.trim();
+        }
+        return "BE " + digits.substring(0, 4) + "." + digits.substring(4, 7) + "." + digits.substring(7);
     }
 
     private boolean isUsableCompanyText(String value) {
