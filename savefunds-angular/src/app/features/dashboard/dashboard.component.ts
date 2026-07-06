@@ -740,7 +740,7 @@ export class DashboardComponent implements OnInit {
         this.refreshLatest();
         this.refreshAudit();
       },
-      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bilan impossible. Format CSV attendu pour le parseur actuel: accountCode,label,amount.'))
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bilan impossible. Formats pris en charge: PDF texte de bilan provisoire ou CSV comptable accountCode,label,amount.'))
     });
   }
 
@@ -801,6 +801,13 @@ export class DashboardComponent implements OnInit {
 
   latestSource(source: string): FinancialSnapshot | null {
     return this.snapshots().find((item) => item.source === source) ?? null;
+  }
+
+  sourceReference(snapshot?: FinancialSnapshot | null): string {
+    if (!snapshot) {
+      return 'la source importee';
+    }
+    return snapshot.sourceReference || snapshot.rawMetadata?.match(/filename=([^;]+)/)?.[1] || this.sourceLabel(snapshot.source);
   }
 
   sourceStatusLabel(source: string): string {

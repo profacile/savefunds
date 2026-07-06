@@ -631,18 +631,25 @@
                 <strong>{{ latestSource('ACCOUNTING_CSV') ? 'Donnees actuelles disponibles' : 'Aucun bilan provisoire importe' }}</strong>
               </div>
               @if (latestSource('ACCOUNTING_CSV')) {
-                <p>{{ latestSource('ACCOUNTING_CSV')?.rawMetadata }}</p>
+                <p>Extraction automatique depuis {{ sourceReference(latestSource('ACCOUNTING_CSV')) }}</p>
                 <div class="source-note">
                   <span>CA {{ money(latestSource('ACCOUNTING_CSV')?.chiffreAffairesMensuel) }}</span>
                   <span>Charges {{ money(latestSource('ACCOUNTING_CSV')?.chargesMensuelles) }}</span>
                   <span>Tresorerie {{ money(latestSource('ACCOUNTING_CSV')?.tresorerie) }}</span>
+                  <span>CC dirigeant {{ money(latestSource('ACCOUNTING_CSV')?.soldeCompteCourant) }}</span>
                 </div>
+                @for (warning of latestSource('ACCOUNTING_CSV')?.warnings || []; track warning) {
+                  <span class="warning soft">{{ warning }}</span>
+                }
+                @if ((latestSource('ACCOUNTING_CSV')?.missingFields || []).length > 0) {
+                  <span class="warning soft">Champs a verifier: {{ latestSource('ACCOUNTING_CSV')?.missingFields?.join(', ') }}</span>
+                }
               }
               <label class="btn btn-primary">
                 {{ latestSource('ACCOUNTING_CSV') ? 'Ecraser par un fichier plus recent' : 'Importer un bilan provisoire' }}
                 <input type="file" accept=".csv,text/csv,.xlsx,.xls,.pdf,.doc,.docx,image/*" (change)="onAccountingCsvSelected($event)">
               </label>
-              <span class="warning soft">Formats metier acceptes: CSV, Excel, PDF, Word ou image. Parsing actuel: CSV comptable accountCode,label,amount. Les autres formats seront traites par extraction IA/OCR.</span>
+              <span class="warning soft">Extraction automatique: PDF texte de bilan provisoire et CSV comptable accountCode,label,amount. Word, Excel scanne ou image necessitent OCR/IA si le texte n'est pas lisible.</span>
             </div>
           }
 
