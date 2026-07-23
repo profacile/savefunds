@@ -1,8 +1,9 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+﻿import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
 import { SaveFundsApiService } from '../../core/savefunds-api.service';
+import { LanguageService } from '../../core/language.service';
 import {
   AccountantClientSummary,
   AuditLog,
@@ -200,7 +201,7 @@ export class DashboardComponent implements OnInit {
     const sources = new Set(Object.values(this.sourceIndicators())
       .filter((item) => item.available)
       .map((item) => item.label));
-    return sources.size ? Array.from(sources).join(' + ') : 'Aucune source';
+    return sources.size ? Array.from(sources).join(' + ') : this.t('noSource');
   });
 
   displayedSnapshot = computed(() => {
@@ -214,7 +215,7 @@ export class DashboardComponent implements OnInit {
   availableSources = computed(() => {
     const sources = new Set(this.snapshots().map((item) => item.source));
     return [
-      { value: 'AUTO', label: 'Automatique SaveFunds', available: this.snapshots().length > 0 },
+      { value: 'AUTO', label: this.t('autoSaveFunds'), available: this.snapshots().length > 0 },
       { value: 'BANK_CSV', label: 'CSV bancaire', available: sources.has('BANK_CSV') },
       { value: 'ACCOUNTING_CSV', label: 'Bilan provisoire', available: sources.has('ACCOUNTING_CSV') },
       { value: 'BNB_API', label: 'BNB officielle', available: sources.has('BNB_API') },
@@ -310,9 +311,14 @@ export class DashboardComponent implements OnInit {
   }
 
   constructor(
-    readonly auth: AuthService,
-    private readonly api: SaveFundsApiService
+      readonly auth: AuthService,
+      private readonly api: SaveFundsApiService,
+      readonly language: LanguageService
   ) {}
+
+  t(key: string): string {
+    return this.language.t(key);
+  }
 
   ngOnInit(): void {
     const user = this.auth.currentUser();
@@ -904,7 +910,7 @@ export class DashboardComponent implements OnInit {
   }
 
   money(value?: number | null): string {
-    return new Intl.NumberFormat('fr-BE', {
+    return new Intl.NumberFormat(this.language.locale(), {
       style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 0
@@ -959,25 +965,25 @@ export class DashboardComponent implements OnInit {
   }
 
   roleLabel(): string {
-    return this.isAccountant() ? 'Comptable' : 'Dirigeant';
+    return this.isAccountant() ? this.t('accountant') : this.t('director');
   }
 
   viewTitle(): string {
     if (this.isAccountant()) {
       if (this.currentView() === 'AUDIT') {
-        return 'Audit portefeuille';
+        return this.t('auditPortfolio');
       }
       if (this.currentView() === 'PROFILE') {
-        return 'Profil comptable';
+        return this.t('accountantProfile');
       }
-      return 'Dashboard portefeuille';
+      return this.t('portfolioDashboard');
     }
     const labels: Record<DashboardView, string> = {
-      DETAIL: this.displayEnterpriseName(this.enterprise()) || 'Fiche company',
-      SOURCES: 'Sources financieres',
-      DASHBOARD: 'Dashboard portefeuille',
-      AUDIT: 'Audit et tracabilite',
-      PROFILE: 'Mon profil'
+      DETAIL: this.displayEnterpriseName(this.enterprise()) || this.t('companyFile'),
+      SOURCES: this.t('financialSources'),
+      DASHBOARD: this.t('portfolioDashboard'),
+      AUDIT: this.t('audit'),
+      PROFILE: this.t('myProfile')
     };
     return labels[this.currentView()];
   }
@@ -1058,7 +1064,7 @@ export class DashboardComponent implements OnInit {
         };
       }
     }
-    return { available: false, label: 'Aucune donnée disponible', date: '', confidence: 0, warning: false };
+    return { available: false, label: 'Aucune donnÃ©e disponible', date: '', confidence: 0, warning: false };
   }
 
   private profilePhotoKey(): string {
@@ -1083,7 +1089,7 @@ export class DashboardComponent implements OnInit {
     const normalized = name.toLowerCase();
     return normalized.startsWith('ondernemingsnummer')
       || normalized.startsWith('numero d')
-      || normalized.startsWith('numéro d')
+      || normalized.startsWith('numÃ©ro d')
       || normalized === this.enterprise()?.enterpriseNumber?.toLowerCase();
   }
 
@@ -1100,3 +1106,4 @@ export class DashboardComponent implements OnInit {
     }
   }
 }
+

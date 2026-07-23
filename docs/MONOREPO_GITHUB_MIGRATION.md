@@ -1,13 +1,13 @@
 # Migration GitHub vers un monorepo
 
-Objectif : remplacer les deux depots separes `savefunds-backend` et `savefunds-frontend` par un seul depot `savefunds`.
+Objectif : remplacer les anciens depots separes par un seul depot `savefunds`, avec le backend Spring Boot et le frontend Angular.
 
 ## Etat cible
 
 ```text
 savefunds/
   savefunds-backend/
-  savefunds-frontend/
+  savefunds-angular/
   docs/
   .github/workflows/ci.yml
   README.md
@@ -19,7 +19,7 @@ savefunds/
 2. Garder les anciens depots en archive ou en lecture seule.
 3. Dans le dossier racine local `savefunds`, supprimer les `.git` internes uniquement apres sauvegarde.
 4. Initialiser le nouveau depot au niveau racine.
-5. Committer les deux applications comme sous-dossiers du monorepo.
+5. Committer le backend et le frontend Angular comme sous-dossiers du monorepo.
 
 Commandes indicatives :
 
@@ -27,7 +27,6 @@ Commandes indicatives :
 cd C:\Users\SHH8701\opt\personnal\PROFACILE_SRL\savefunds
 
 Rename-Item savefunds-backend\.git .git-backup-backend
-Rename-Item savefunds-frontend\.git .git-backup-frontend
 
 git init
 git add .

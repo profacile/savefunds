@@ -35,7 +35,7 @@ public class FinancialSituation {
     private BigDecimal directorCurrentAccountBalance;
 
     // FinancialIndicators calculés
-    @Column(precision = 5, scale = 2)
+    @Column(name = "ratio_ca_charges", precision = 5, scale = 2)
     private BigDecimal ratioCACharges;
 
     @Column(name = "tresorerie_en_mois", precision = 19, scale = 2)
