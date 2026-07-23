@@ -27,6 +27,8 @@ public class BankCsvFinancialDataExtractor implements FinancialDataExtractor {
 
     @Override
     public ExtractedFinancialData extract(MultipartFile file) {
+        ensureCsvFile(file);
+
         List<String> warnings = new ArrayList<>();
         BigDecimal incoming = BigDecimal.ZERO;
         BigDecimal outgoing = BigDecimal.ZERO;
@@ -70,19 +72,19 @@ public class BankCsvFinancialDataExtractor implements FinancialDataExtractor {
 
         List<String> missing = new ArrayList<>();
         if (finalBalance == null) {
-            missing.add("tresorerie");
+            missing.add("cashBalance");
             finalBalance = BigDecimal.ZERO;
         }
         if (outgoing.signum() == 0) {
-            missing.add("chargesMensuelles");
+            missing.add("monthlyExpenses");
             warnings.add("Aucune sortie bancaire detectee: les charges mensuelles seront a verifier.");
         }
 
         return ExtractedFinancialData.builder()
-                .chiffreAffairesMensuel(incoming)
-                .chargesMensuelles(outgoing)
-                .tresorerie(finalBalance)
-                .soldeCompteCourant(BigDecimal.ZERO)
+                .monthlyRevenue(incoming)
+                .monthlyExpenses(outgoing)
+                .cashBalance(finalBalance)
+                .directorCurrentAccountBalance(BigDecimal.ZERO)
                 .snapshotDate(lastDate != null ? lastDate : LocalDate.now())
                 .confidenceScore(missing.isEmpty() ? 80 : 55)
                 .warnings(warnings)
@@ -106,5 +108,16 @@ public class BankCsvFinancialDataExtractor implements FinancialDataExtractor {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    private void ensureCsvFile(MultipartFile file) {
+        String filename = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+        if (filename.endsWith(".csv") || filename.endsWith(".txt")) {
+            return;
+        }
+        throw new IllegalArgumentException(
+                "Format bancaire recu (" + file.getOriginalFilename() + "). Le MVP parse le CSV bancaire normalise date,description,amount,balance. "
+                        + "Les PDF, Excel, CODA/STA ou la connexion bancaire PSD2 sont prevus comme connecteurs de production."
+        );
     }
 }

@@ -24,7 +24,7 @@ public class FinancialSnapshot {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "entreprise_id", nullable = false)
-    private Entreprise entreprise;
+    private Company company;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,25 +34,25 @@ public class FinancialSnapshot {
     private String sourceReference;
 
     @Column(name = "chiffre_affaires_mensuel", precision = 19, scale = 2)
-    private BigDecimal chiffreAffairesMensuel;
+    private BigDecimal monthlyRevenue;
 
     @Column(name = "charges_mensuelles", precision = 19, scale = 2)
-    private BigDecimal chargesMensuelles;
+    private BigDecimal monthlyExpenses;
 
-    @Column(precision = 19, scale = 2)
-    private BigDecimal tresorerie;
+    @Column(name = "tresorerie", precision = 19, scale = 2)
+    private BigDecimal cashBalance;
 
     @Column(name = "solde_compte_courant", precision = 19, scale = 2)
-    private BigDecimal soldeCompteCourant;
+    private BigDecimal directorCurrentAccountBalance;
 
     @Column(name = "dettes_court_terme", precision = 19, scale = 2)
-    private BigDecimal dettesCourtTerme;
+    private BigDecimal shortTermDebt;
 
     @Column(name = "creances_clients", precision = 19, scale = 2)
-    private BigDecimal creancesClients;
+    private BigDecimal customerReceivables;
 
     @Column(name = "duree_compte_courant_debiteur")
-    private Integer dureeCompteCourantDebiteur;
+    private Integer directorCurrentAccountDebtorDays;
 
     @Column(name = "snapshot_date", nullable = false)
     private LocalDate snapshotDate = LocalDate.now();

@@ -35,7 +35,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     private static final BigDecimal THREE = BigDecimal.valueOf(3);
     private static final BigDecimal TEN = BigDecimal.TEN;
 
-    private final EntrepriseRepository entrepriseRepository;
+    private final CompanyRepository companyRepository;
     private final FinancialSnapshotRepository financialSnapshotRepository;
     private final FinancialObligationRepository financialObligationRepository;
     private final AccountantNoteRepository accountantNoteRepository;
@@ -45,7 +45,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     public AccountantDashboardResponse dashboard(User accountant) {
         assertAccountant(accountant);
 
-        List<AccountantClientSummaryResponse> clients = entrepriseRepository.findAll().stream()
+        List<AccountantClientSummaryResponse> clients = companyRepository.findAll().stream()
                 .map(this::toClientSummary)
                 .sorted(Comparator.comparing(AccountantClientSummaryResponse::getRiskScore).reversed())
                 .toList();
@@ -60,12 +60,12 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     }
 
     @Override
-    public AccountantNoteResponse addNote(User accountant, Long entrepriseId, CreateAccountantNoteRequest request) {
+    public AccountantNoteResponse addNote(User accountant, Long companyId, CreateAccountantNoteRequest request) {
         assertAccountant(accountant);
-        Entreprise entreprise = findEntreprise(entrepriseId);
+        Company company = findCompany(companyId);
 
         AccountantNote note = new AccountantNote();
-        note.setEntreprise(entreprise);
+        note.setCompany(company);
         note.setAccountantId(accountant.getId());
         note.setContent(request.getContent());
 
@@ -73,14 +73,14 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     }
 
     @Override
-    public ValidationDecisionResponse createValidationRequest(User requester, Long entrepriseId, CreateValidationDecisionRequest request) {
-        Entreprise entreprise = findEntreprise(entrepriseId);
-        if (!requester.getId().equals(entreprise.getUserId()) && requester.getRole() != Role.ADMIN) {
-            throw new AccessDeniedException("Seul le dirigeant de l'entreprise peut creer une demande de validation");
+    public ValidationDecisionResponse createValidationRequest(User requester, Long companyId, CreateValidationDecisionRequest request) {
+        Company company = findCompany(companyId);
+        if (!requester.getId().equals(company.getUserId()) && requester.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Seul le dirigeant de l'company peut creer une demande de validation");
         }
 
         ValidationDecision validation = new ValidationDecision();
-        validation.setEntreprise(entreprise);
+        validation.setCompany(company);
         validation.setRequestedByUserId(requester.getId());
         validation.setDecisionType(request.getDecisionType());
         validation.setRequestedAmount(request.getRequestedAmount());
@@ -108,20 +108,20 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         return toValidationResponse(validationDecisionRepository.save(validation));
     }
 
-    private AccountantClientSummaryResponse toClientSummary(Entreprise entreprise) {
+    private AccountantClientSummaryResponse toClientSummary(Company company) {
         Optional<FinancialSnapshot> latestSnapshot = financialSnapshotRepository
-                .findTopByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entreprise.getId());
-        Optional<AccountantNote> latestNote = accountantNoteRepository.findFirstByEntrepriseIdOrderByUpdatedAtDescCreatedAtDesc(entreprise.getId());
-        FinancialObligationView obligation = nextObligation(entreprise);
+                .findTopByCompanyIdOrderBySnapshotDateDescCreatedAtDesc(company.getId());
+        Optional<AccountantNote> latestNote = accountantNoteRepository.findFirstByCompanyIdOrderByUpdatedAtDescCreatedAtDesc(company.getId());
+        FinancialObligationView obligation = nextObligation(company);
 
-        BigDecimal cash = latestSnapshot.map(FinancialSnapshot::getTresorerie).orElse(entreprise.getTresorerie());
-        BigDecimal expenses = latestSnapshot.map(FinancialSnapshot::getChargesMensuelles).orElse(entreprise.getChargesMensuelles());
+        BigDecimal cash = latestSnapshot.map(FinancialSnapshot::getCashBalance).orElse(company.getCashBalance());
+        BigDecimal expenses = latestSnapshot.map(FinancialSnapshot::getMonthlyExpenses).orElse(company.getMonthlyExpenses());
         BigDecimal coverage = divide(cash, expenses);
-        Integer debtorDays = latestSnapshot.map(FinancialSnapshot::getDureeCompteCourantDebiteur).orElse(debtorDaysFromEntreprise(entreprise));
+        Integer debtorDays = latestSnapshot.map(FinancialSnapshot::getDirectorCurrentAccountDebtorDays).orElse(debtorDaysFromCompany(company));
         int dataAge = latestSnapshot.map(this::dataAgeDays).orElse(999);
-        long pendingCount = validationDecisionRepository.countByEntrepriseIdAndStatus(entreprise.getId(), ValidationDecisionStatus.PENDING);
+        long pendingCount = validationDecisionRepository.countByCompanyIdAndStatus(company.getId(), ValidationDecisionStatus.PENDING);
         String pendingLabel = validationDecisionRepository
-                .findByEntrepriseIdAndStatusOrderByCreatedAtDesc(entreprise.getId(), ValidationDecisionStatus.PENDING)
+                .findByCompanyIdAndStatusOrderByCreatedAtDesc(company.getId(), ValidationDecisionStatus.PENDING)
                 .stream()
                 .findFirst()
                 .map(validation -> validation.getDecisionType() + " " + validation.getRequestedAmount() + " EUR")
@@ -130,31 +130,31 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         Decision status = statusFromRisk(riskScore);
 
         return AccountantClientSummaryResponse.builder()
-                .entrepriseId(entreprise.getId())
-                .companyName(entreprise.getRaisonSociale())
-                .companyNumber(entreprise.getNumeroEntreprise())
+                .companyId(company.getId())
+                .companyName(company.getLegalName())
+                .companyNumber(company.getEnterpriseNumber())
                 .status(status)
                 .dossierStatus(dossierStatus(status, dataAge, pendingCount))
                 .riskScore(riskScore)
                 .cash(nullToZero(cash))
                 .coverageMonths(coverage)
                 .currentAccountDebtorDays(debtorDays)
-                .trend(trend(entreprise, latestSnapshot.orElse(null)))
+                .trend(trend(company, latestSnapshot.orElse(null)))
                 .dataAgeDays(dataAge)
                 .nextObligationType(obligation.type())
                 .nextObligationDate(obligation.dueDate())
                 .pendingValidationCount(pendingCount)
                 .pendingValidationLabel(pendingLabel)
                 .lastSource(latestSnapshot.map(snapshot -> snapshot.getSource().name()).orElse("Aucune source"))
-                .lastUpdate(latestSnapshot.map(FinancialSnapshot::getCreatedAt).orElse(entreprise.getUpdatedAt()))
+                .lastUpdate(latestSnapshot.map(FinancialSnapshot::getCreatedAt).orElse(company.getUpdatedAt()))
                 .internalNote(latestNote.map(AccountantNote::getContent).orElse("Aucune note interne"))
                 .activity(activity(latestSnapshot.orElse(null), latestNote.orElse(null), pendingCount))
                 .build();
     }
 
-    private FinancialObligationView nextObligation(Entreprise entreprise) {
+    private FinancialObligationView nextObligation(Company company) {
         return financialObligationRepository
-                .findFirstByEntrepriseIdAndStatusOrderByDueDateAsc(entreprise.getId(), FinancialObligationStatus.OPEN)
+                .findFirstByCompanyIdAndStatusOrderByDueDateAsc(company.getId(), FinancialObligationStatus.OPEN)
                 .map(obligation -> new FinancialObligationView(obligation.getType(), obligation.getDueDate()))
                 .orElse(new FinancialObligationView(FinancialObligationType.TVA, nextDefaultVatDate()));
     }
@@ -224,11 +224,11 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         return "A jour";
     }
 
-    private TreasuryTrend trend(Entreprise entreprise, FinancialSnapshot latestSnapshot) {
-        if (latestSnapshot == null || entreprise.getTresorerie() == null || latestSnapshot.getTresorerie() == null) {
+    private TreasuryTrend trend(Company company, FinancialSnapshot latestSnapshot) {
+        if (latestSnapshot == null || company.getCashBalance() == null || latestSnapshot.getCashBalance() == null) {
             return TreasuryTrend.STABLE;
         }
-        int comparison = latestSnapshot.getTresorerie().compareTo(entreprise.getTresorerie());
+        int comparison = latestSnapshot.getCashBalance().compareTo(company.getCashBalance());
         if (comparison > 0) {
             return TreasuryTrend.UP;
         }
@@ -238,11 +238,11 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         return TreasuryTrend.STABLE;
     }
 
-    private Integer debtorDaysFromEntreprise(Entreprise entreprise) {
-        if (entreprise.getSoldeCompteCourant() == null || entreprise.getSoldeCompteCourant().signum() >= 0 || entreprise.getDateDebutDebiteurCC() == null) {
+    private Integer debtorDaysFromCompany(Company company) {
+        if (company.getDirectorCurrentAccountBalance() == null || company.getDirectorCurrentAccountBalance().signum() >= 0 || company.getDirectorCurrentAccountDebitStartDate() == null) {
             return 0;
         }
-        return Math.toIntExact(ChronoUnit.DAYS.between(entreprise.getDateDebutDebiteurCC(), LocalDate.now()));
+        return Math.toIntExact(ChronoUnit.DAYS.between(company.getDirectorCurrentAccountDebitStartDate(), LocalDate.now()));
     }
 
     private int dataAgeDays(FinancialSnapshot snapshot) {
@@ -259,7 +259,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     private AccountantNoteResponse toNoteResponse(AccountantNote note) {
         return AccountantNoteResponse.builder()
                 .id(note.getId())
-                .entrepriseId(note.getEntreprise().getId())
+                .companyId(note.getCompany().getId())
                 .accountantId(note.getAccountantId())
                 .content(note.getContent())
                 .createdAt(note.getCreatedAt())
@@ -270,7 +270,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     private ValidationDecisionResponse toValidationResponse(ValidationDecision validation) {
         return ValidationDecisionResponse.builder()
                 .id(validation.getId())
-                .entrepriseId(validation.getEntreprise().getId())
+                .companyId(validation.getCompany().getId())
                 .decisionType(validation.getDecisionType())
                 .requestedAmount(validation.getRequestedAmount())
                 .status(validation.getStatus())
@@ -283,9 +283,9 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
                 .build();
     }
 
-    private Entreprise findEntreprise(Long entrepriseId) {
-        return entrepriseRepository.findById(entrepriseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable: " + entrepriseId));
+    private Company findCompany(Long companyId) {
+        return companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company introuvable: " + companyId));
     }
 
     private void assertAccountant(User user) {

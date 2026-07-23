@@ -9,9 +9,9 @@ import java.util.List;
 
 @Repository
 public interface ValidationDecisionRepository extends JpaRepository<ValidationDecision, Long> {
-    long countByEntrepriseIdAndStatus(Long entrepriseId, ValidationDecisionStatus status);
+    long countByCompanyIdAndStatus(Long companyId, ValidationDecisionStatus status);
 
-    List<ValidationDecision> findByEntrepriseIdOrderByCreatedAtDesc(Long entrepriseId);
+    List<ValidationDecision> findByCompanyIdOrderByCreatedAtDesc(Long companyId);
 
-    List<ValidationDecision> findByEntrepriseIdAndStatusOrderByCreatedAtDesc(Long entrepriseId, ValidationDecisionStatus status);
+    List<ValidationDecision> findByCompanyIdAndStatusOrderByCreatedAtDesc(Long companyId, ValidationDecisionStatus status);
 }

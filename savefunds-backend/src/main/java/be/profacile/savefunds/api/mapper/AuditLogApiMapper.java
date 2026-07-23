@@ -10,7 +10,7 @@ public class AuditLogApiMapper {
     public AuditLogResponse toResponse(AuditLog auditLog) {
         return AuditLogResponse.builder()
                 .id(auditLog.getId())
-                .entrepriseId(auditLog.getEntreprise() != null ? auditLog.getEntreprise().getId() : null)
+                .companyId(auditLog.getCompany() != null ? auditLog.getCompany().getId() : null)
                 .userId(auditLog.getUserId())
                 .userEmail(auditLog.getUserEmail())
                 .action(auditLog.getAction())

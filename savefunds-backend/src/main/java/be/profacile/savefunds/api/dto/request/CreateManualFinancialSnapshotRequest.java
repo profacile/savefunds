@@ -12,19 +12,19 @@ public class CreateManualFinancialSnapshotRequest {
 
     @NotNull
     @DecimalMin(value = "0.00")
-    private BigDecimal chiffreAffairesMensuel;
+    private BigDecimal monthlyRevenue;
 
     @NotNull
     @DecimalMin(value = "0.00")
-    private BigDecimal chargesMensuelles;
+    private BigDecimal monthlyExpenses;
 
     @NotNull
     @DecimalMin(value = "0.00")
-    private BigDecimal tresorerie;
+    private BigDecimal cashBalance;
 
-    private BigDecimal soldeCompteCourant;
-    private BigDecimal dettesCourtTerme;
-    private BigDecimal creancesClients;
-    private Integer dureeCompteCourantDebiteur;
+    private BigDecimal directorCurrentAccountBalance;
+    private BigDecimal shortTermDebt;
+    private BigDecimal customerReceivables;
+    private Integer directorCurrentAccountDebtorDays;
     private LocalDate snapshotDate;
 }

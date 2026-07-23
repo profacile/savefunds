@@ -13,16 +13,16 @@ import java.util.List;
 @Builder
 public class FinancialSnapshotResponse {
     private Long id;
-    private Long entrepriseId;
+    private Long companyId;
     private FinancialSnapshotSource source;
     private String sourceReference;
-    private BigDecimal chiffreAffairesMensuel;
-    private BigDecimal chargesMensuelles;
-    private BigDecimal tresorerie;
-    private BigDecimal soldeCompteCourant;
-    private BigDecimal dettesCourtTerme;
-    private BigDecimal creancesClients;
-    private Integer dureeCompteCourantDebiteur;
+    private BigDecimal monthlyRevenue;
+    private BigDecimal monthlyExpenses;
+    private BigDecimal cashBalance;
+    private BigDecimal directorCurrentAccountBalance;
+    private BigDecimal shortTermDebt;
+    private BigDecimal customerReceivables;
+    private Integer directorCurrentAccountDebtorDays;
     private LocalDate snapshotDate;
     private Integer confidenceScore;
     private List<String> warnings;

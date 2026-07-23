@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface FinancialSnapshotRepository extends JpaRepository<FinancialSnapshot, Long> {
-    Optional<FinancialSnapshot> findTopByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(Long entrepriseId);
+    Optional<FinancialSnapshot> findTopByCompanyIdOrderBySnapshotDateDescCreatedAtDesc(Long companyId);
 
-    Optional<FinancialSnapshot> findTopByEntrepriseIdAndSourceOrderBySnapshotDateDescCreatedAtDesc(Long entrepriseId, be.profacile.savefunds.domain.enums.FinancialSnapshotSource source);
+    Optional<FinancialSnapshot> findTopByCompanyIdAndSourceOrderBySnapshotDateDescCreatedAtDesc(Long companyId, be.profacile.savefunds.domain.enums.FinancialSnapshotSource source);
 
-    List<FinancialSnapshot> findAllByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(Long entrepriseId);
+    List<FinancialSnapshot> findAllByCompanyIdOrderBySnapshotDateDescCreatedAtDesc(Long companyId);
 }

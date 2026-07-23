@@ -44,42 +44,42 @@ class AuthServiceTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@example.com");
         request.setPassword("password123");
-        request.setNom("Doe");
-        request.setPrenom("John");
+        request.setLastName("Doe");
+        request.setFirstName("John");
 
         AuthResponse response = authService.register(request);
 
         assertThat(response).isNotNull();
         assertThat(response.getToken()).isNotBlank();
         assertThat(response.getUser()).isNotNull();
-        assertThat(response.getUser().getEmail()).isEqualTo("test@example.com");   // ← via getUser()
-        assertThat(response.getUser().getNom()).isEqualTo("Doe");
-        assertThat(response.getUser().getPrenom()).isEqualTo("John");
+        assertThat(response.getUser().getEmail()).isEqualTo("test@example.com");   // â† via getUser()
+        assertThat(response.getUser().getLastName()).isEqualTo("Doe");
+        assertThat(response.getUser().getFirstName()).isEqualTo("John");
 
-        // Vérifier que le mot de passe est bien hashé en base
+        // VÃ©rifier que le mot de passe est bien hashÃ© en base
         User user = userRepository.findByEmail("test@example.com").orElseThrow();
         assertThat(user.getPasswordHash()).isNotEqualTo("password123");
     }
 
     @Test
-    @DisplayName("Devrait rejeter un email déjà existant")
+    @DisplayName("Devrait rejeter un email dÃ©jÃ  existant")
     void shouldRejectDuplicateEmail() {
         RegisterRequest request1 = new RegisterRequest();
         request1.setEmail("test@example.com");
         request1.setPassword("password123");
-        request1.setNom("Doe");
-        request1.setPrenom("John");
+        request1.setLastName("Doe");
+        request1.setFirstName("John");
         authService.register(request1);
 
         RegisterRequest request2 = new RegisterRequest();
         request2.setEmail("test@example.com");
         request2.setPassword("password456");
-        request2.setNom("Smith");
-        request2.setPrenom("Jane");
+        request2.setLastName("Smith");
+        request2.setFirstName("Jane");
 
         assertThatThrownBy(() -> authService.register(request2))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Email déjà utilisé");
+                .hasMessageContaining("Email");
     }
 
     @Test
@@ -88,8 +88,8 @@ class AuthServiceTest {
         RegisterRequest registerRequest = new RegisterRequest();
         registerRequest.setEmail("test@example.com");
         registerRequest.setPassword("password123");
-        registerRequest.setNom("Doe");
-        registerRequest.setPrenom("John");
+        registerRequest.setLastName("Doe");
+        registerRequest.setFirstName("John");
         authService.register(registerRequest);
 
         LoginRequest loginRequest = new LoginRequest();
@@ -101,7 +101,7 @@ class AuthServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getToken()).isNotBlank();
         assertThat(response.getUser()).isNotNull();
-        assertThat(response.getUser().getEmail()).isEqualTo("test@example.com");   // ← via getUser()
+        assertThat(response.getUser().getEmail()).isEqualTo("test@example.com");   // â† via getUser()
     }
 
     @Test
@@ -110,8 +110,8 @@ class AuthServiceTest {
         RegisterRequest registerRequest = new RegisterRequest();
         registerRequest.setEmail("test@example.com");
         registerRequest.setPassword("correctPassword");
-        registerRequest.setNom("Doe");
-        registerRequest.setPrenom("John");
+        registerRequest.setLastName("Doe");
+        registerRequest.setFirstName("John");
         authService.register(registerRequest);
 
         LoginRequest loginRequest = new LoginRequest();

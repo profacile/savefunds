@@ -7,7 +7,6 @@ Le projet est organise en monorepo :
 
 - `savefunds-backend` : API Spring Boot, moteur de vigilance, ingestion de donnees financieres.
 - `savefunds-angular` : nouveau frontend Angular oriente demonstration metier.
-- `savefunds-frontend` : ancien frontend Vue, conserve comme reference visuelle.
 
 ## Nouvelle orientation metier
 
@@ -40,15 +39,15 @@ cd savefunds-backend
 
 ```powershell
 cd savefunds-angular
-pnpm install
-pnpm start
+npm install
+npm start
 ```
 
 Build :
 
 ```powershell
 cd savefunds-angular
-pnpm exec ng build
+npm run build
 ```
 
 L'application Angular attend le backend sur `http://localhost:8080`.

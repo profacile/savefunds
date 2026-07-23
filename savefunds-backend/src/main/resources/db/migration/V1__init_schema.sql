@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
+﻿CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS resultats_analyse (
     analyse_id BIGINT NOT NULL UNIQUE,
     decision_globale VARCHAR(50) NOT NULL,
     details_decision_globale TEXT,
-    recommandation_globale TEXT,
+    recommendation_globale TEXT,
     score_tresorerie NUMERIC(19, 2),
     score_ratio_ca_charges NUMERIC(5, 2),
     score_compte_courant_debiteur INTEGER,
@@ -62,9 +62,9 @@ CREATE TABLE IF NOT EXISTS resultats_analyse (
     details_tresorerie TEXT,
     details_ratio_ca_charges TEXT,
     details_compte_courant TEXT,
-    recommandation_tresorerie TEXT,
-    recommandation_ratio_ca_charges TEXT,
-    recommandation_compte_courant TEXT,
+    recommendation_tresorerie TEXT,
+    recommendation_ratio_ca_charges TEXT,
+    recommendation_compte_courant TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_resultats_analyse
@@ -92,3 +92,4 @@ CREATE TABLE IF NOT EXISTS situations_financieres (
 
 CREATE INDEX IF NOT EXISTS idx_situations_entreprise_captured
     ON situations_financieres(entreprise_id, captured_at DESC);
+

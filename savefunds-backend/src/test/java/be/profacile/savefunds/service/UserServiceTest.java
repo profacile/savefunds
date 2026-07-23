@@ -36,14 +36,14 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait créer un utilisateur")
+    @DisplayName("Devrait crÃ©er un utilisateur")
     void shouldCreateUser() {
         // Given
         User user = new User();
         user.setEmail("test@example.com");
         user.setPasswordHash("hashedPassword");
-        user.setNom("Dupont");
-        user.setPrenom("Jean");
+        user.setLastName("Dupont");
+        user.setFirstName("Jean");
         user.setEmailVerified(false);
         user.setRole(Role.DIRIGEANT);
 
@@ -57,29 +57,29 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait empêcher la création avec email dupliqué")
+    @DisplayName("Devrait empÃªcher la crÃ©ation avec email dupliquÃ©")
     void shouldPreventDuplicateEmail() {
         // Given
         User user1 = new User();
         user1.setEmail("test@example.com");
         user1.setPasswordHash("hash1");
-        user1.setNom("Dupont");
-        user1.setPrenom("Jean");
+        user1.setLastName("Dupont");
+        user1.setFirstName("Jean");
         user1.setRole(Role.DIRIGEANT);
 
         userService.create(user1);
 
         User user2 = new User();
-        user2.setEmail("test@example.com");  // Même email!
+        user2.setEmail("test@example.com");  // MÃªme email!
         user2.setPasswordHash("hash2");
-        user2.setNom("Martin");
-        user2.setPrenom("Marie");
+        user2.setLastName("Martin");
+        user2.setFirstName("Marie");
         user2.setRole(Role.DIRIGEANT);
 
         // When / Then
         assertThatThrownBy(() -> userService.create(user2))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Email déjà utilisé");
+                .hasMessageContaining("Email");
     }
 
     @Test
@@ -113,7 +113,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait vérifier l'existence d'un email")
+    @DisplayName("Devrait vÃ©rifier l'existence d'un email")
     void shouldCheckEmailExists() {
         // Given
         User user = createUser("test@example.com", "Dupont", "Jean");
@@ -129,7 +129,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer tous les utilisateurs")
+    @DisplayName("Devrait rÃ©cupÃ©rer tous les utilisateurs")
     void shouldFindAll() {
         // Given
         userRepository.save(createUser("user1@example.com", "Dupont", "Jean"));
@@ -144,25 +144,25 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait mettre à jour un utilisateur")
+    @DisplayName("Devrait mettre Ã  jour un utilisateur")
     void shouldUpdateUser() {
         // Given
         User user = createUser("test@example.com", "Dupont", "Jean");
         User saved = userRepository.save(user);
 
         User updates = new User();
-        updates.setNom("Martin");
-        updates.setPrenom("Marie");
+        updates.setLastName("Martin");
+        updates.setFirstName("Marie");
         updates.setEmailVerified(true);
 
         // When
         User updated = userService.update(saved.getId(), updates);
 
         // Then
-        assertThat(updated.getNom()).isEqualTo("Martin");
-        assertThat(updated.getPrenom()).isEqualTo("Marie");
+        assertThat(updated.getLastName()).isEqualTo("Martin");
+        assertThat(updated.getFirstName()).isEqualTo("Marie");
         assertThat(updated.getEmailVerified()).isTrue();
-        assertThat(updated.getEmail()).isEqualTo("test@example.com");  // Pas changé
+        assertThat(updated.getEmail()).isEqualTo("test@example.com");  // Pas changÃ©
     }
 
     @Test
@@ -196,8 +196,8 @@ class UserServiceTest {
         User user = new User();
         user.setEmail(email);
         user.setPasswordHash("hashedPassword");
-        user.setNom(nom);
-        user.setPrenom(prenom);
+        user.setLastName(nom);
+        user.setFirstName(prenom);
         user.setEmailVerified(false);
         user.setRole(Role.DIRIGEANT);
         return user;

@@ -34,25 +34,25 @@ public class AccountantController {
         return ResponseEntity.ok(accountantDashboardService.dashboard(accountant));
     }
 
-    @PostMapping("/entreprises/{entrepriseId}/notes")
+    @PostMapping("/companies/{companyId}/notes")
     @Operation(summary = "Ajouter une note interne sur un dossier client")
     public ResponseEntity<AccountantNoteResponse> addNote(
-            @PathVariable Long entrepriseId,
+            @PathVariable Long companyId,
             @Valid @RequestBody CreateAccountantNoteRequest request) {
         User accountant = currentUserService.getCurrentUser();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(accountantDashboardService.addNote(accountant, entrepriseId, request));
+                .body(accountantDashboardService.addNote(accountant, companyId, request));
     }
 
-    @PostMapping("/entreprises/{entrepriseId}/validation-requests")
+    @PostMapping("/companies/{companyId}/validation-requests")
     @Operation(summary = "Creer une demande de validation comptable",
             description = "Utilise par le dirigeant pour demander l'avis du comptable avant un retrait ou une depense.")
     public ResponseEntity<ValidationDecisionResponse> createValidationRequest(
-            @PathVariable Long entrepriseId,
+            @PathVariable Long companyId,
             @Valid @RequestBody CreateValidationDecisionRequest request) {
         User requester = currentUserService.getCurrentUser();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(accountantDashboardService.createValidationRequest(requester, entrepriseId, request));
+                .body(accountantDashboardService.createValidationRequest(requester, companyId, request));
     }
 
     @PutMapping("/validation-requests/{validationId}/decision")

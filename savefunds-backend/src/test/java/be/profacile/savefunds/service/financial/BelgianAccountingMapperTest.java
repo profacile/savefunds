@@ -32,3 +32,4 @@ class BelgianAccountingMapperTest {
         assertThat(buckets.getCustomerReceivables()).isEqualByComparingTo("12000");
     }
 }
+

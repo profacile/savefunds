@@ -20,11 +20,11 @@ class VigilanceEngineTest {
     void returnsRedWhenRequestedAmountBreaksCashReserve() {
         FinancialSnapshot snapshot = new FinancialSnapshot();
         snapshot.setId(1L);
-        snapshot.setTresorerie(BigDecimal.valueOf(7500));
-        snapshot.setChargesMensuelles(BigDecimal.valueOf(2000));
-        snapshot.setChiffreAffairesMensuel(BigDecimal.valueOf(10000));
-        snapshot.setSoldeCompteCourant(BigDecimal.ZERO);
-        snapshot.setDureeCompteCourantDebiteur(0);
+        snapshot.setCashBalance(BigDecimal.valueOf(7500));
+        snapshot.setMonthlyExpenses(BigDecimal.valueOf(2000));
+        snapshot.setMonthlyRevenue(BigDecimal.valueOf(10000));
+        snapshot.setDirectorCurrentAccountBalance(BigDecimal.ZERO);
+        snapshot.setDirectorCurrentAccountDebtorDays(0);
 
         SimulateFinancialDecisionRequest request = new SimulateFinancialDecisionRequest();
         request.setType(FinancialDecisionType.RETRAIT_DIRIGEANT);
@@ -38,3 +38,4 @@ class VigilanceEngineTest {
                 && indicator.getDecision() == Decision.ROUGE);
     }
 }
+

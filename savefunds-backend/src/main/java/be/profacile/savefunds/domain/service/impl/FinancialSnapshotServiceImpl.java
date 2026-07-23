@@ -2,12 +2,12 @@ package be.profacile.savefunds.domain.service.impl;
 
 import be.profacile.savefunds.api.dto.request.CreateManualFinancialSnapshotRequest;
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.entity.FinancialSnapshot;
 import be.profacile.savefunds.domain.entity.ImportJob;
 import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 import be.profacile.savefunds.domain.enums.ImportJobStatus;
-import be.profacile.savefunds.domain.repository.EntrepriseRepository;
+import be.profacile.savefunds.domain.repository.CompanyRepository;
 import be.profacile.savefunds.domain.repository.FinancialSnapshotRepository;
 import be.profacile.savefunds.domain.repository.ImportJobRepository;
 import be.profacile.savefunds.domain.service.FinancialSnapshotService;
@@ -28,7 +28,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
 
-    private final EntrepriseRepository entrepriseRepository;
+    private final CompanyRepository companyRepository;
     private final FinancialSnapshotRepository snapshotRepository;
     private final ImportJobRepository importJobRepository;
     private final List<FinancialDataExtractor> extractors;
@@ -36,20 +36,20 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
 
     @Override
     @Transactional
-    public FinancialSnapshot createManualSnapshot(Long entrepriseId, CreateManualFinancialSnapshotRequest request) {
-        Entreprise entreprise = getEntreprise(entrepriseId);
+    public FinancialSnapshot createManualSnapshot(Long companyId, CreateManualFinancialSnapshotRequest request) {
+        Company company = getCompany(companyId);
 
         FinancialSnapshot snapshot = new FinancialSnapshot();
-        snapshot.setEntreprise(entreprise);
+        snapshot.setCompany(company);
         snapshot.setSource(FinancialSnapshotSource.MANUAL);
         snapshot.setSourceReference("manual-input");
-        snapshot.setChiffreAffairesMensuel(request.getChiffreAffairesMensuel());
-        snapshot.setChargesMensuelles(request.getChargesMensuelles());
-        snapshot.setTresorerie(request.getTresorerie());
-        snapshot.setSoldeCompteCourant(request.getSoldeCompteCourant());
-        snapshot.setDettesCourtTerme(request.getDettesCourtTerme());
-        snapshot.setCreancesClients(request.getCreancesClients());
-        snapshot.setDureeCompteCourantDebiteur(request.getDureeCompteCourantDebiteur());
+        snapshot.setMonthlyRevenue(request.getMonthlyRevenue());
+        snapshot.setMonthlyExpenses(request.getMonthlyExpenses());
+        snapshot.setCashBalance(request.getCashBalance());
+        snapshot.setDirectorCurrentAccountBalance(request.getDirectorCurrentAccountBalance());
+        snapshot.setShortTermDebt(request.getShortTermDebt());
+        snapshot.setCustomerReceivables(request.getCustomerReceivables());
+        snapshot.setDirectorCurrentAccountDebtorDays(request.getDirectorCurrentAccountDebtorDays());
         snapshot.setSnapshotDate(request.getSnapshotDate() != null ? request.getSnapshotDate() : LocalDate.now());
         snapshot.setConfidenceScore(100);
         snapshot.setWarnings("");
@@ -60,15 +60,15 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
 
     @Override
     @Transactional
-    public FinancialSnapshot importSnapshot(Long entrepriseId, MultipartFile file, FinancialSnapshotSource source, Long userId) {
-        Entreprise entreprise = getEntreprise(entrepriseId);
+    public FinancialSnapshot importSnapshot(Long companyId, MultipartFile file, FinancialSnapshotSource source, Long userId) {
+        Company company = getCompany(companyId);
         FinancialDataExtractor extractor = extractors.stream()
                 .filter(candidate -> candidate.source() == source)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Aucun extracteur disponible pour la source " + source));
 
         ImportJob importJob = new ImportJob();
-        importJob.setEntreprise(entreprise);
+        importJob.setCompany(company);
         importJob.setSource(source);
         importJob.setStatus(ImportJobStatus.UPLOADED);
         importJob.setFileName(file.getOriginalFilename());
@@ -78,7 +78,7 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
 
         try {
             ExtractedFinancialData data = extractor.extract(file);
-            FinancialSnapshot snapshot = toSnapshot(entreprise, source, file.getOriginalFilename(), data);
+            FinancialSnapshot snapshot = toSnapshot(company, source, file.getOriginalFilename(), data);
             snapshot = snapshotRepository.save(snapshot);
 
             importJob.setSnapshot(snapshot);
@@ -97,15 +97,15 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
 
     @Override
     @Transactional
-    public FinancialSnapshot createExternalSnapshot(Long entrepriseId, FinancialSnapshotSource source, Long userId) {
-        Entreprise entreprise = getEntreprise(entrepriseId);
+    public FinancialSnapshot createExternalSnapshot(Long companyId, FinancialSnapshotSource source, Long userId) {
+        Company company = getCompany(companyId);
         ExternalFinancialDataProvider provider = externalProviders.stream()
                 .filter(candidate -> candidate.source() == source)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Aucun provider externe disponible pour la source " + source));
 
         ImportJob importJob = new ImportJob();
-        importJob.setEntreprise(entreprise);
+        importJob.setCompany(company);
         importJob.setSource(source);
         importJob.setStatus(ImportJobStatus.UPLOADED);
         importJob.setFileName(provider.providerName());
@@ -114,8 +114,8 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
         importJob = importJobRepository.save(importJob);
 
         try {
-            ExtractedFinancialData data = provider.fetch(entreprise);
-            FinancialSnapshot snapshot = toSnapshot(entreprise, source, provider.providerName(), data);
+            ExtractedFinancialData data = provider.fetch(company);
+            FinancialSnapshot snapshot = toSnapshot(company, source, provider.providerName(), data);
             snapshot = snapshotRepository.save(snapshot);
 
             importJob.setSnapshot(snapshot);
@@ -133,69 +133,69 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
     }
 
     @Override
-    public Optional<FinancialSnapshot> findLatest(Long entrepriseId) {
-        return snapshotRepository.findTopByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entrepriseId);
+    public Optional<FinancialSnapshot> findLatest(Long companyId) {
+        return snapshotRepository.findTopByCompanyIdOrderBySnapshotDateDescCreatedAtDesc(companyId);
     }
 
     @Override
-    public Optional<FinancialSnapshot> findLatestBySource(Long entrepriseId, FinancialSnapshotSource source) {
-        getEntreprise(entrepriseId);
-        return snapshotRepository.findTopByEntrepriseIdAndSourceOrderBySnapshotDateDescCreatedAtDesc(entrepriseId, source);
+    public Optional<FinancialSnapshot> findLatestBySource(Long companyId, FinancialSnapshotSource source) {
+        getCompany(companyId);
+        return snapshotRepository.findTopByCompanyIdAndSourceOrderBySnapshotDateDescCreatedAtDesc(companyId, source);
     }
 
     @Override
-    public List<FinancialSnapshot> findAll(Long entrepriseId) {
-        getEntreprise(entrepriseId);
-        return snapshotRepository.findAllByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entrepriseId);
+    public List<FinancialSnapshot> findAll(Long companyId) {
+        getCompany(companyId);
+        return snapshotRepository.findAllByCompanyIdOrderBySnapshotDateDescCreatedAtDesc(companyId);
     }
 
     @Override
-    public Optional<FinancialSnapshot> buildConsolidatedSnapshot(Long entrepriseId) {
-        Entreprise entreprise = getEntreprise(entrepriseId);
-        List<FinancialSnapshot> snapshots = snapshotRepository.findAllByEntrepriseIdOrderBySnapshotDateDescCreatedAtDesc(entrepriseId);
+    public Optional<FinancialSnapshot> buildConsolidatedSnapshot(Long companyId) {
+        Company company = getCompany(companyId);
+        List<FinancialSnapshot> snapshots = snapshotRepository.findAllByCompanyIdOrderBySnapshotDateDescCreatedAtDesc(companyId);
         if (snapshots.isEmpty()) {
             return Optional.empty();
         }
 
         FinancialSnapshot consolidated = new FinancialSnapshot();
-        consolidated.setEntreprise(entreprise);
+        consolidated.setCompany(company);
         consolidated.setSource(FinancialSnapshotSource.MANUAL);
         consolidated.setSourceReference("consolidated-hierarchy");
         consolidated.setSnapshotDate(LocalDate.now());
-        consolidated.setTresorerie(firstValue(snapshots, FinancialSnapshot::getTresorerie,
+        consolidated.setCashBalance(firstValue(snapshots, FinancialSnapshot::getCashBalance,
                 FinancialSnapshotSource.BANK_CSV,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
         ));
-        consolidated.setChiffreAffairesMensuel(firstValue(snapshots, FinancialSnapshot::getChiffreAffairesMensuel,
+        consolidated.setMonthlyRevenue(firstValue(snapshots, FinancialSnapshot::getMonthlyRevenue,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
         ));
-        consolidated.setChargesMensuelles(firstValue(snapshots, FinancialSnapshot::getChargesMensuelles,
+        consolidated.setMonthlyExpenses(firstValue(snapshots, FinancialSnapshot::getMonthlyExpenses,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
         ));
-        consolidated.setSoldeCompteCourant(firstValue(snapshots, FinancialSnapshot::getSoldeCompteCourant,
+        consolidated.setDirectorCurrentAccountBalance(firstValue(snapshots, FinancialSnapshot::getDirectorCurrentAccountBalance,
                 FinancialSnapshotSource.BANK_CSV,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
         ));
-        consolidated.setDureeCompteCourantDebiteur(firstValue(snapshots, FinancialSnapshot::getDureeCompteCourantDebiteur,
+        consolidated.setDirectorCurrentAccountDebtorDays(firstValue(snapshots, FinancialSnapshot::getDirectorCurrentAccountDebtorDays,
                 FinancialSnapshotSource.BANK_CSV,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
         ));
-        consolidated.setDettesCourtTerme(firstValue(snapshots, FinancialSnapshot::getDettesCourtTerme,
+        consolidated.setShortTermDebt(firstValue(snapshots, FinancialSnapshot::getShortTermDebt,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
         ));
-        consolidated.setCreancesClients(firstValue(snapshots, FinancialSnapshot::getCreancesClients,
+        consolidated.setCustomerReceivables(firstValue(snapshots, FinancialSnapshot::getCustomerReceivables,
                 FinancialSnapshotSource.ACCOUNTING_CSV,
                 FinancialSnapshotSource.BALANCE_SHEET_DOCUMENT,
                 FinancialSnapshotSource.BNB_API
@@ -203,22 +203,22 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
         consolidated.setConfidenceScore(averageConfidence(snapshots));
         consolidated.setWarnings("Snapshot consolide selon la hierarchie SaveFunds: banque > bilan provisoire > BNB annuelle");
         consolidated.setMissingFields("");
-        consolidated.setRawMetadata("sourceHierarchy=tresorerie:BANK_CSV>ACCOUNTING_CSV>BNB_API;caCharges:ACCOUNTING_CSV>BNB_API;cc:BANK_CSV>ACCOUNTING_CSV>BNB_API");
+        consolidated.setRawMetadata("sourceHierarchy=cashBalance:BANK_CSV>ACCOUNTING_CSV>BNB_API;caCharges:ACCOUNTING_CSV>BNB_API;cc:BANK_CSV>ACCOUNTING_CSV>BNB_API");
         return Optional.of(consolidated);
     }
 
-    private FinancialSnapshot toSnapshot(Entreprise entreprise, FinancialSnapshotSource source, String sourceReference, ExtractedFinancialData data) {
+    private FinancialSnapshot toSnapshot(Company company, FinancialSnapshotSource source, String sourceReference, ExtractedFinancialData data) {
         FinancialSnapshot snapshot = new FinancialSnapshot();
-        snapshot.setEntreprise(entreprise);
+        snapshot.setCompany(company);
         snapshot.setSource(source);
         snapshot.setSourceReference(sourceReference);
-        snapshot.setChiffreAffairesMensuel(data.getChiffreAffairesMensuel());
-        snapshot.setChargesMensuelles(data.getChargesMensuelles());
-        snapshot.setTresorerie(data.getTresorerie());
-        snapshot.setSoldeCompteCourant(data.getSoldeCompteCourant());
-        snapshot.setDettesCourtTerme(data.getDettesCourtTerme());
-        snapshot.setCreancesClients(data.getCreancesClients());
-        snapshot.setDureeCompteCourantDebiteur(data.getDureeCompteCourantDebiteur());
+        snapshot.setMonthlyRevenue(data.getMonthlyRevenue());
+        snapshot.setMonthlyExpenses(data.getMonthlyExpenses());
+        snapshot.setCashBalance(data.getCashBalance());
+        snapshot.setDirectorCurrentAccountBalance(data.getDirectorCurrentAccountBalance());
+        snapshot.setShortTermDebt(data.getShortTermDebt());
+        snapshot.setCustomerReceivables(data.getCustomerReceivables());
+        snapshot.setDirectorCurrentAccountDebtorDays(data.getDirectorCurrentAccountDebtorDays());
         snapshot.setSnapshotDate(data.getSnapshotDate() != null ? data.getSnapshotDate() : LocalDate.now());
         snapshot.setConfidenceScore(data.getConfidenceScore());
         snapshot.setWarnings(String.join("\n", data.getWarnings()));
@@ -227,9 +227,9 @@ public class FinancialSnapshotServiceImpl implements FinancialSnapshotService {
         return snapshot;
     }
 
-    private Entreprise getEntreprise(Long entrepriseId) {
-        return entrepriseRepository.findById(entrepriseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable: " + entrepriseId));
+    private Company getCompany(Long companyId) {
+        return companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company introuvable: " + companyId));
     }
 
     @SafeVarargs

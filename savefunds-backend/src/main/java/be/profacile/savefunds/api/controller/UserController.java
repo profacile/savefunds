@@ -46,7 +46,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Liste recuperee avec succes"),
             @ApiResponse(responseCode = "403", description = "Acces reserve aux administrateurs")
     })
-    public ResponseEntity<List<UserResponse>> listerUtilisateurs() {
+    public ResponseEntity<List<UserResponse>> listUsers() {
         assertAdmin();
         List<UserResponse> responses = userService.findAll()
                 .stream()
@@ -59,7 +59,7 @@ public class UserController {
     @GetMapping("/{id}")
     @Operation(summary = "Recuperer un utilisateur",
             description = "Un utilisateur peut consulter son profil. Un admin peut consulter tous les profils.")
-    public ResponseEntity<UserResponse> recupererUtilisateur(
+    public ResponseEntity<UserResponse> getUser(
             @Parameter(description = "ID de l'utilisateur")
             @PathVariable Long id) {
 
@@ -73,7 +73,7 @@ public class UserController {
     @GetMapping("/email/{email}")
     @Operation(summary = "Recuperer un utilisateur par email",
             description = "Un utilisateur peut consulter son profil. Un admin peut consulter tous les profils.")
-    public ResponseEntity<UserResponse> recupererParEmail(
+    public ResponseEntity<UserResponse> getByEmail(
             @Parameter(description = "Email de l'utilisateur")
             @PathVariable String email) {
 
@@ -86,8 +86,8 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Mettre a jour un utilisateur",
-            description = "Un utilisateur peut modifier son nom/prenom. Seul un admin peut modifier le role ou la verification email.")
-    public ResponseEntity<UserResponse> mettreAJourUtilisateur(
+            description = "Un utilisateur peut modifier son lastName/prenom. Seul un admin peut modifier le role ou la verification email.")
+    public ResponseEntity<UserResponse> updateUser(
             @Parameter(description = "ID de l'utilisateur")
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -109,7 +109,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Supprimer un utilisateur",
             description = "Reserve aux administrateurs")
-    public ResponseEntity<Void> supprimerUtilisateur(
+    public ResponseEntity<Void> deleteUser(
             @Parameter(description = "ID de l'utilisateur")
             @PathVariable Long id) {
 
@@ -126,7 +126,7 @@ public class UserController {
             @PathVariable Long id,
             @Valid @RequestBody ChangePasswordRequest request) {
         assertSelfOrAdmin(id);
-        userService.changePassword(id, request.getAncienMotDePasse(), request.getNouveauMotDePasse());
+        userService.changePassword(id, request.getCurrentPassword(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 

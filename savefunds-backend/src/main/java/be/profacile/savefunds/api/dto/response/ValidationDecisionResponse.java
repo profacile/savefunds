@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ValidationDecisionResponse {
     private Long id;
-    private Long entrepriseId;
+    private Long companyId;
     private FinancialDecisionType decisionType;
     private BigDecimal requestedAmount;
     private ValidationDecisionStatus status;

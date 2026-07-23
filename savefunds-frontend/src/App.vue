@@ -1,4 +1,0 @@
-<template>
-  <PvToast />
-  <RouterView />
-</template>

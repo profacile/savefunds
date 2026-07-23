@@ -26,7 +26,7 @@ public class FinancialObligation {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "entreprise_id", nullable = false)
-    private Entreprise entreprise;
+    private Company company;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

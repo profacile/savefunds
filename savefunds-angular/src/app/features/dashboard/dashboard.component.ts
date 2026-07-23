@@ -1,8 +1,9 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+﻿import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
 import { SaveFundsApiService } from '../../core/savefunds-api.service';
+import { LanguageService } from '../../core/language.service';
 import {
   AccountantClientSummary,
   AuditLog,
@@ -68,10 +69,12 @@ export class DashboardComponent implements OnInit {
   registryResults = signal<CompanyRegistryCompany[]>([]);
   selectedRegistryCompany = signal<CompanyRegistryCompany | null>(null);
   registrySearchMessage = signal('');
+  registryAutocompleteLoading = signal(false);
   bceImportMessage = signal('');
   editingEnterpriseId = signal<number | null>(null);
   pendingEnterpriseLogo = signal<string | null>(null);
   enterpriseLogoVersion = signal(0);
+  private registryAutocompleteTimer: ReturnType<typeof setTimeout> | null = null;
 
   withdrawalAmount = 3000;
   decisionType = 'RETRAIT_DIRIGEANT';
@@ -187,10 +190,10 @@ export class DashboardComponent implements OnInit {
     const displayed = this.displayedSnapshot();
     const snapshots = selected === 'AUTO' ? this.snapshots() : (displayed ? [displayed] : []);
     return {
-      tresorerie: this.sourceForField(snapshots, 'tresorerie', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
-      revenue: this.sourceForField(snapshots, 'chiffreAffairesMensuel', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
-      expenses: this.sourceForField(snapshots, 'chargesMensuelles', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
-      currentAccount: this.sourceForField(snapshots, 'soldeCompteCourant', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API'])
+      cashBalance: this.sourceForField(snapshots, 'cashBalance', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      revenue: this.sourceForField(snapshots, 'monthlyRevenue', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      expenses: this.sourceForField(snapshots, 'monthlyExpenses', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      currentAccount: this.sourceForField(snapshots, 'directorCurrentAccountBalance', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API'])
     };
   });
 
@@ -198,7 +201,7 @@ export class DashboardComponent implements OnInit {
     const sources = new Set(Object.values(this.sourceIndicators())
       .filter((item) => item.available)
       .map((item) => item.label));
-    return sources.size ? Array.from(sources).join(' + ') : 'Aucune source';
+    return sources.size ? Array.from(sources).join(' + ') : this.t('noSource');
   });
 
   displayedSnapshot = computed(() => {
@@ -212,7 +215,7 @@ export class DashboardComponent implements OnInit {
   availableSources = computed(() => {
     const sources = new Set(this.snapshots().map((item) => item.source));
     return [
-      { value: 'AUTO', label: 'Automatique SaveFunds', available: this.snapshots().length > 0 },
+      { value: 'AUTO', label: this.t('autoSaveFunds'), available: this.snapshots().length > 0 },
       { value: 'BANK_CSV', label: 'CSV bancaire', available: sources.has('BANK_CSV') },
       { value: 'ACCOUNTING_CSV', label: 'Bilan provisoire', available: sources.has('ACCOUNTING_CSV') },
       { value: 'BNB_API', label: 'BNB officielle', available: sources.has('BNB_API') },
@@ -231,34 +234,34 @@ export class DashboardComponent implements OnInit {
 
   enterpriseForm: CreateEnterpriseRequest = {
     userId: 0,
-    raisonSociale: '',
-    numeroEntreprise: '',
-    formeJuridique: '',
-    secteurActivite: '',
-    tresorerie: null,
-    soldeCompteCourant: null,
-    chiffreAffairesMensuel: null,
-    chargesMensuelles: null
+    legalName: '',
+    enterpriseNumber: '',
+    legalForm: '',
+    activitySector: '',
+    cashBalance: null,
+    directorCurrentAccountBalance: null,
+    monthlyRevenue: null,
+    monthlyExpenses: null
   };
 
   enterpriseEditForm: CreateEnterpriseRequest = {
     userId: 0,
-    raisonSociale: '',
-    numeroEntreprise: '',
-    formeJuridique: '',
-    secteurActivite: '',
-    tresorerie: null,
-    soldeCompteCourant: null,
-    chiffreAffairesMensuel: null,
-    chargesMensuelles: null
+    legalName: '',
+    enterpriseNumber: '',
+    legalForm: '',
+    activitySector: '',
+    cashBalance: null,
+    directorCurrentAccountBalance: null,
+    monthlyRevenue: null,
+    monthlyExpenses: null
   };
 
   coverage = computed(() => {
     const current = this.displayedSnapshot();
-    if (!current || !current.chargesMensuelles) {
+    if (!current || !current.monthlyExpenses) {
       return 0;
     }
-    return current.tresorerie / current.chargesMensuelles;
+    return current.cashBalance / current.monthlyExpenses;
   });
 
   enterpriseDecision = computed(() => {
@@ -266,8 +269,8 @@ export class DashboardComponent implements OnInit {
     if (!current) {
       return 'ORANGE';
     }
-    const coverage = current.chargesMensuelles ? current.tresorerie / current.chargesMensuelles : 0;
-    const ccDays = current.dureeCompteCourantDebiteur ?? 0;
+    const coverage = current.monthlyExpenses ? current.cashBalance / current.monthlyExpenses : 0;
+    const ccDays = current.directorCurrentAccountDebtorDays ?? 0;
     if (coverage < 1 || ccDays > 30) {
       return 'ROUGE';
     }
@@ -282,12 +285,12 @@ export class DashboardComponent implements OnInit {
       return this.enterpriseDecision() as 'VERT' | 'ORANGE' | 'ROUGE';
     }
 
-    if (!enterprise.tresorerie || !enterprise.chargesMensuelles) {
+    if (!enterprise.cashBalance || !enterprise.monthlyExpenses) {
       return 'ORANGE';
     }
 
-    const coverage = enterprise.tresorerie / enterprise.chargesMensuelles;
-    const currentAccount = enterprise.soldeCompteCourant ?? 0;
+    const coverage = enterprise.cashBalance / enterprise.monthlyExpenses;
+    const currentAccount = enterprise.directorCurrentAccountBalance ?? 0;
     if (coverage < 1) {
       return 'ROUGE';
     }
@@ -301,16 +304,21 @@ export class DashboardComponent implements OnInit {
     if (this.enterprise()?.id === enterprise.id && this.displayedSnapshot()) {
       return this.enterpriseDecision();
     }
-    if (!enterprise.tresorerie || !enterprise.chargesMensuelles) {
+    if (!enterprise.cashBalance || !enterprise.monthlyExpenses) {
       return 'A VERIFIER';
     }
     return this.enterpriseCardDecision(enterprise);
   }
 
   constructor(
-    readonly auth: AuthService,
-    private readonly api: SaveFundsApiService
+      readonly auth: AuthService,
+      private readonly api: SaveFundsApiService,
+      readonly language: LanguageService
   ) {}
+
+  t(key: string): string {
+    return this.language.t(key);
+  }
 
   ngOnInit(): void {
     const user = this.auth.currentUser();
@@ -339,6 +347,7 @@ export class DashboardComponent implements OnInit {
     this.editingEnterpriseId.set(null);
     this.registryResults.set([]);
     this.registrySearchMessage.set('');
+    this.selectedRegistryCompany.set(null);
   }
 
   startEditEnterprise(event: Event, enterprise: Enterprise): void {
@@ -348,14 +357,14 @@ export class DashboardComponent implements OnInit {
     this.editingEnterpriseId.set(enterprise.id);
     this.enterpriseEditForm = {
       userId: enterprise.userId,
-      raisonSociale: enterprise.raisonSociale,
-      numeroEntreprise: enterprise.numeroEntreprise,
-      formeJuridique: enterprise.formeJuridique || '',
-      secteurActivite: enterprise.secteurActivite || '',
-      tresorerie: enterprise.tresorerie ?? null,
-      soldeCompteCourant: enterprise.soldeCompteCourant ?? null,
-      chiffreAffairesMensuel: enterprise.chiffreAffairesMensuel ?? null,
-      chargesMensuelles: enterprise.chargesMensuelles ?? null
+      legalName: enterprise.legalName,
+      enterpriseNumber: enterprise.enterpriseNumber,
+      legalForm: enterprise.legalForm || '',
+      activitySector: enterprise.activitySector || '',
+      cashBalance: enterprise.cashBalance ?? null,
+      directorCurrentAccountBalance: enterprise.directorCurrentAccountBalance ?? null,
+      monthlyRevenue: enterprise.monthlyRevenue ?? null,
+      monthlyExpenses: enterprise.monthlyExpenses ?? null
     };
   }
 
@@ -401,7 +410,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Mise a jour entreprise...');
+    this.setLoading('Mise a jour company...');
     this.api.updateEnterprise(id, this.enterpriseEditForm).subscribe({
       next: (updated) => {
         this.enterprises.update((items) => items.map((item) => item.id === updated.id ? updated : item));
@@ -411,7 +420,7 @@ export class DashboardComponent implements OnInit {
         this.editingEnterpriseId.set(null);
         this.clearLoading();
       },
-      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette entreprise.')
+      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette company.')
     });
   }
 
@@ -422,7 +431,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Suppression entreprise...');
+    this.setLoading('Suppression company...');
     this.api.deleteEnterprise(enterprise.id).subscribe({
       next: () => {
         this.enterprises.update((items) => items.filter((item) => item.id !== enterprise.id));
@@ -489,27 +498,53 @@ export class DashboardComponent implements OnInit {
     this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
   }
 
-  searchRegistry(): void {
-    const query = this.registryQuery().trim();
-    if (query.length < 2) {
+  onRegistryQueryChange(value: string): void {
+    this.registryQuery.set(value);
+    this.selectedRegistryCompany.set(null);
+
+    const query = value.trim();
+    if (this.registryAutocompleteTimer) {
+      clearTimeout(this.registryAutocompleteTimer);
+    }
+
+    if (query.length < 3) {
       this.registryResults.set([]);
+      this.registrySearchMessage.set('');
+      this.registryAutocompleteLoading.set(false);
       return;
     }
 
-    this.setLoading('Recherche BCE...');
+    this.registryAutocompleteLoading.set(true);
+    const delay = query.replace(/\D/g, '').length === 10 ? 120 : 450;
+    this.registryAutocompleteTimer = setTimeout(() => this.searchRegistry(true), delay);
+  }
+
+  searchRegistry(autocomplete = false): void {
+    const query = this.registryQuery().trim();
+    if (query.length < 2) {
+      this.registryResults.set([]);
+      this.registryAutocompleteLoading.set(false);
+      return;
+    }
+
+    if (!autocomplete) {
+      this.setLoading('Recherche BCE...');
+    }
     this.registrySearchMessage.set('');
     if (query.replace(/\D/g, '').length === 10) {
       this.api.findCompanyRegistryByNumber(query).subscribe({
         next: (company) => {
           this.registryResults.set([company]);
           this.selectedRegistryCompany.set(company);
-          this.registrySearchMessage.set('1 resultat trouve via le numero BCE.');
+          this.registrySearchMessage.set('1 result trouve via le numero BCE.');
+          this.registryAutocompleteLoading.set(false);
           this.clearLoading();
         },
         error: () => {
           this.registryResults.set([]);
           this.selectedRegistryCompany.set(null);
-          this.registrySearchMessage.set('Aucun resultat trouve pour ce numero BCE.');
+          this.registrySearchMessage.set('Aucun result trouve pour ce numero BCE.');
+          this.registryAutocompleteLoading.set(false);
           this.clearLoading();
         }
       });
@@ -521,13 +556,15 @@ export class DashboardComponent implements OnInit {
         this.registryResults.set(results);
         this.selectedRegistryCompany.set(results[0] ?? null);
         this.registrySearchMessage.set(results.length
-          ? `${results.length} resultat(s) trouve(s) via BCE ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
-          : 'Aucun resultat dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
+          ? `${results.length} suggestion(s) BCE trouvee(s) ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
+          : 'Aucun result dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
         );
+        this.registryAutocompleteLoading.set(false);
         this.clearLoading();
       },
       error: () => {
         this.registrySearchMessage.set('');
+        this.registryAutocompleteLoading.set(false);
         this.fail('Recherche BCE indisponible. Redemarrez le backend pour charger le fallback Public Search, puis reessayez.')
       }
     });
@@ -569,15 +606,15 @@ export class DashboardComponent implements OnInit {
         this.enterpriseForm = {
           ...this.enterpriseForm,
           userId: enterprise.userId,
-          raisonSociale: enterprise.raisonSociale,
-          numeroEntreprise: enterprise.numeroEntreprise,
-          formeJuridique: enterprise.formeJuridique || '',
-          secteurActivite: enterprise.secteurActivite || ''
+          legalName: enterprise.legalName,
+          enterpriseNumber: enterprise.enterpriseNumber,
+          legalForm: enterprise.legalForm || '',
+          activitySector: enterprise.activitySector || ''
         };
         this.clearLoading();
         this.currentView.set('DETAIL');
       },
-      error: () => this.fail('Creation depuis la BCE impossible. Verifiez que cette entreprise n est pas deja rattachee a votre compte.')
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Creation depuis la BCE impossible. Verifiez que cette company n est pas deja rattachee a votre compte.'))
     });
   }
 
@@ -591,7 +628,7 @@ export class DashboardComponent implements OnInit {
     this.setLoading('Import BCE Open Data...');
     this.api.importCompanyRegistry(file).subscribe({
       next: (result) => {
-        this.bceImportMessage.set(`${result.importedRows} entreprise(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
+        this.bceImportMessage.set(`${result.importedRows} company(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
         this.clearLoading();
       },
       error: () => this.fail('Import BCE impossible. Verifiez le format CSV et votre role utilisateur.')
@@ -604,7 +641,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Creation entreprise...');
+    this.setLoading('Creation company...');
     this.api.createEnterprise({ ...this.enterpriseForm, userId: user.id }).subscribe({
       next: (enterprise) => {
         this.enterprises.update((items) => [enterprise, ...items.filter((item) => item.id !== enterprise.id)]);
@@ -612,7 +649,7 @@ export class DashboardComponent implements OnInit {
         this.selectEnterprise(enterprise);
         this.clearLoading();
       },
-      error: () => this.fail('Entreprise non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
+      error: () => this.fail('Company non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
     });
   }
 
@@ -688,7 +725,7 @@ export class DashboardComponent implements OnInit {
         this.refreshBankTransactions();
         this.refreshAudit();
       },
-      error: () => this.fail('Import bancaire impossible. Format attendu: date,description,amount,balance.')
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bancaire impossible. Format CSV attendu pour le parseur actuel: date,description,amount,balance.'))
     });
   }
 
@@ -709,7 +746,7 @@ export class DashboardComponent implements OnInit {
         this.refreshLatest();
         this.refreshAudit();
       },
-      error: () => this.fail('Import bilan impossible. Format attendu: accountCode,label,amount.')
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bilan impossible. Formats pris en charge: PDF texte de bilan provisoire ou CSV comptable accountCode,label,amount.'))
     });
   }
 
@@ -772,6 +809,13 @@ export class DashboardComponent implements OnInit {
     return this.snapshots().find((item) => item.source === source) ?? null;
   }
 
+  sourceReference(snapshot?: FinancialSnapshot | null): string {
+    if (!snapshot) {
+      return 'la source importee';
+    }
+    return snapshot.sourceReference || snapshot.rawMetadata?.match(/filename=([^;]+)/)?.[1] || this.sourceLabel(snapshot.source);
+  }
+
   sourceStatusLabel(source: string): string {
     const snapshot = this.latestSource(source);
     if (!snapshot) {
@@ -781,11 +825,26 @@ export class DashboardComponent implements OnInit {
   }
 
   displayEnterpriseName(enterprise?: Enterprise | null): string {
-    const name = enterprise?.raisonSociale?.trim() || '';
+    const name = enterprise?.legalName?.trim() || '';
     if (!name || this.isInvalidEnterpriseName(name)) {
-      return 'Nom de l entreprise a corriger';
+      return 'Nom de l company a corriger';
     }
     return name;
+  }
+
+  registryCompanySubtitle(company: CompanyRegistryCompany): string {
+    return company.legalForm?.trim()
+      ? `${company.enterpriseNumber} - ${company.legalForm}`
+      : company.enterpriseNumber;
+  }
+
+  registryCompanyAddress(company: CompanyRegistryCompany): string {
+    const address = [company.address, [company.postalCode, company.city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    return address || 'Adresse non renseignee';
+  }
+
+  registryCompanyActivity(company: CompanyRegistryCompany): string {
+    return [company.naceCode, company.activityLabel].filter(Boolean).join(' - ') || 'Activite non renseignee';
   }
 
   enterpriseLogo(enterprise: Enterprise): string | null {
@@ -795,7 +854,7 @@ export class DashboardComponent implements OnInit {
 
   enterpriseInitial(enterprise: Enterprise): string {
     const name = this.displayEnterpriseName(enterprise);
-    if (name === 'Nom de l entreprise a corriger') {
+    if (name === 'Nom de l company a corriger') {
       return 'E';
     }
     return name.charAt(0).toUpperCase();
@@ -851,7 +910,7 @@ export class DashboardComponent implements OnInit {
   }
 
   money(value?: number | null): string {
-    return new Intl.NumberFormat('fr-BE', {
+    return new Intl.NumberFormat(this.language.locale(), {
       style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 0
@@ -906,32 +965,32 @@ export class DashboardComponent implements OnInit {
   }
 
   roleLabel(): string {
-    return this.isAccountant() ? 'Comptable' : 'Dirigeant';
+    return this.isAccountant() ? this.t('accountant') : this.t('director');
   }
 
   viewTitle(): string {
     if (this.isAccountant()) {
       if (this.currentView() === 'AUDIT') {
-        return 'Audit portefeuille';
+        return this.t('auditPortfolio');
       }
       if (this.currentView() === 'PROFILE') {
-        return 'Profil comptable';
+        return this.t('accountantProfile');
       }
-      return 'Dashboard portefeuille';
+      return this.t('portfolioDashboard');
     }
     const labels: Record<DashboardView, string> = {
-      DETAIL: this.displayEnterpriseName(this.enterprise()) || 'Fiche entreprise',
-      SOURCES: 'Sources financieres',
-      DASHBOARD: 'Dashboard portefeuille',
-      AUDIT: 'Audit et tracabilite',
-      PROFILE: 'Mon profil'
+      DETAIL: this.displayEnterpriseName(this.enterprise()) || this.t('companyFile'),
+      SOURCES: this.t('financialSources'),
+      DASHBOARD: this.t('portfolioDashboard'),
+      AUDIT: this.t('audit'),
+      PROFILE: this.t('myProfile')
     };
     return labels[this.currentView()];
   }
 
   userInitials(): string {
     const user = this.auth.currentUser();
-    return `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`.trim() || 'U';
+    return `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`.trim() || 'U';
   }
 
   daysUntil(date: string): number {
@@ -977,9 +1036,20 @@ export class DashboardComponent implements OnInit {
     this.error.set(message);
   }
 
+  private apiErrorMessage(error: unknown, fallback: string): string {
+    const payload = (error as { error?: unknown })?.error;
+    if (typeof payload === 'string') {
+      return payload;
+    }
+    if (payload && typeof payload === 'object' && 'message' in payload) {
+      return String((payload as { message?: unknown }).message || fallback);
+    }
+    return fallback;
+  }
+
   private sourceForField(
     snapshots: FinancialSnapshot[],
-    field: keyof Pick<FinancialSnapshot, 'tresorerie' | 'chiffreAffairesMensuel' | 'chargesMensuelles' | 'soldeCompteCourant'>,
+    field: keyof Pick<FinancialSnapshot, 'cashBalance' | 'monthlyRevenue' | 'monthlyExpenses' | 'directorCurrentAccountBalance'>,
     orderedSources: string[]
   ): { available: boolean; label: string; date: string; confidence: number; warning: boolean } {
     for (const source of orderedSources) {
@@ -994,7 +1064,7 @@ export class DashboardComponent implements OnInit {
         };
       }
     }
-    return { available: false, label: 'Aucune donnée disponible', date: '', confidence: 0, warning: false };
+    return { available: false, label: 'Aucune donnÃ©e disponible', date: '', confidence: 0, warning: false };
   }
 
   private profilePhotoKey(): string {
@@ -1019,8 +1089,8 @@ export class DashboardComponent implements OnInit {
     const normalized = name.toLowerCase();
     return normalized.startsWith('ondernemingsnummer')
       || normalized.startsWith('numero d')
-      || normalized.startsWith('numéro d')
-      || normalized === this.enterprise()?.numeroEntreprise?.toLowerCase();
+      || normalized.startsWith('numÃ©ro d')
+      || normalized === this.enterprise()?.enterpriseNumber?.toLowerCase();
   }
 
   private readProfilePhoto(): string | null {
@@ -1036,3 +1106,4 @@ export class DashboardComponent implements OnInit {
     }
   }
 }
+

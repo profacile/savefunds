@@ -24,11 +24,11 @@ public class User {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
-    private String nom;
+    @Column(name = "nom", nullable = false)
+    private String lastName;
 
-    @Column(nullable = false)
-    private String prenom;
+    @Column(name = "prenom", nullable = false)
+    private String firstName;
 
     @Column(nullable = false)
     private Boolean emailVerified = false;

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AccountantNoteResponse {
     private Long id;
-    private Long entrepriseId;
+    private Long companyId;
     private Long accountantId;
     private String content;
     private LocalDateTime createdAt;

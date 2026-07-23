@@ -1,6 +1,6 @@
 package be.profacile.savefunds.domain.service.transaction;
 
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.enums.TransactionClassificationType;
 import be.profacile.savefunds.domain.enums.TransactionReviewStatus;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class RuleBasedTransactionClassifierService implements TransactionClassif
 
     @Override
     public TransactionClassificationResult classify(
-            Entreprise entreprise,
+            Company company,
             LocalDate transactionDate,
             String description,
             BigDecimal amount
@@ -36,7 +36,7 @@ public class RuleBasedTransactionClassifierService implements TransactionClassif
                     "Libelle salarial detecte: la transaction ne doit pas alimenter le compte courant.");
         }
 
-        if (amount != null && amount.signum() < 0 && mentionsDirector(text, entreprise)) {
+        if (amount != null && amount.signum() < 0 && mentionsDirector(text, company)) {
             return result(TransactionClassificationType.RETRAIT_CC, TransactionReviewStatus.NEEDS_REVIEW, 78, true,
                     "Virement sortant vers une personne liee au dirigeant: impact CC probable, validation recommandee.");
         }
@@ -77,8 +77,8 @@ public class RuleBasedTransactionClassifierService implements TransactionClassif
                 .build();
     }
 
-    private boolean mentionsDirector(String text, Entreprise entreprise) {
-        String companyName = normalize(entreprise.getRaisonSociale());
+    private boolean mentionsDirector(String text, Company company) {
+        String companyName = normalize(company.getLegalName());
         if (!companyName.isBlank() && text.contains(companyName)) {
             return false;
         }

@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/company-registry")
 @RequiredArgsConstructor
-@Tag(name = "BCE / Registre entreprises", description = "Recherche officielle d'entreprise avant creation dans SaveFunds")
+@Tag(name = "BCE / Registre companies", description = "Recherche officielle d'company avant creation dans SaveFunds")
 public class CompanyRegistryController {
 
     private final CompanyRegistryProvider companyRegistryProvider;
@@ -29,16 +29,16 @@ public class CompanyRegistryController {
     private final CurrentUserService currentUserService;
 
     @GetMapping("/search")
-    @Operation(summary = "Rechercher une entreprise dans le registre BCE")
+    @Operation(summary = "Rechercher une company dans le registre BCE")
     public ResponseEntity<List<CompanyRegistryCompanyResponse>> search(@RequestParam String query) {
         return ResponseEntity.ok(companyRegistryProvider.search(query));
     }
 
     @GetMapping("/{enterpriseNumber}")
-    @Operation(summary = "Recuperer une entreprise par numero BCE")
+    @Operation(summary = "Recuperer une company par numero BCE")
     public ResponseEntity<CompanyRegistryCompanyResponse> findByEnterpriseNumber(@PathVariable String enterpriseNumber) {
         return ResponseEntity.ok(companyRegistryProvider.findByEnterpriseNumber(enterpriseNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise BCE introuvable: " + enterpriseNumber)));
+                .orElseThrow(() -> new ResourceNotFoundException("Company BCE introuvable: " + enterpriseNumber)));
     }
 
     @PostMapping("/import")

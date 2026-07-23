@@ -9,17 +9,17 @@ import java.util.Optional;
 import java.util.List;
 
 public interface FinancialSnapshotService {
-    FinancialSnapshot createManualSnapshot(Long entrepriseId, CreateManualFinancialSnapshotRequest request);
+    FinancialSnapshot createManualSnapshot(Long companyId, CreateManualFinancialSnapshotRequest request);
 
-    FinancialSnapshot importSnapshot(Long entrepriseId, MultipartFile file, FinancialSnapshotSource source, Long userId);
+    FinancialSnapshot importSnapshot(Long companyId, MultipartFile file, FinancialSnapshotSource source, Long userId);
 
-    FinancialSnapshot createExternalSnapshot(Long entrepriseId, FinancialSnapshotSource source, Long userId);
+    FinancialSnapshot createExternalSnapshot(Long companyId, FinancialSnapshotSource source, Long userId);
 
-    Optional<FinancialSnapshot> findLatest(Long entrepriseId);
+    Optional<FinancialSnapshot> findLatest(Long companyId);
 
-    Optional<FinancialSnapshot> findLatestBySource(Long entrepriseId, FinancialSnapshotSource source);
+    Optional<FinancialSnapshot> findLatestBySource(Long companyId, FinancialSnapshotSource source);
 
-    List<FinancialSnapshot> findAll(Long entrepriseId);
+    List<FinancialSnapshot> findAll(Long companyId);
 
-    Optional<FinancialSnapshot> buildConsolidatedSnapshot(Long entrepriseId);
+    Optional<FinancialSnapshot> buildConsolidatedSnapshot(Long companyId);
 }

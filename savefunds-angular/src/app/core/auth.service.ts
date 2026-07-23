@@ -26,14 +26,18 @@ export class AuthService {
     );
   }
 
-  register(email: string, password: string, nom: string, prenom: string, role: 'DIRIGEANT' | 'COMPTABLE'): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${API_URL}/api/auth/register`, { email, password, nom, prenom, role }).pipe(
+  register(email: string, password: string, lastName: string, firstName: string, role: 'DIRIGEANT' | 'COMPTABLE'): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${API_URL}/api/auth/register`, { email, password, lastName, firstName, role }).pipe(
       tap((response) => this.persist(response))
     );
   }
 
   forgotPassword(email: string): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${API_URL}/api/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string, confirmPassword: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${API_URL}/api/auth/reset-password`, { token, newPassword, confirmPassword });
   }
 
   logout(): void {

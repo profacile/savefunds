@@ -24,7 +24,7 @@ public interface UserMapper {
 
     /**
      * Entity → Response
-     * Mapping direct — tous les champs ont le même nom.
+     * Mapping direct — tous les champs ont le même lastName.
      */
     UserResponse toResponse(User user);
 

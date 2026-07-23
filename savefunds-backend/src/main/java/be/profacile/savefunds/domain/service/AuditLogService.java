@@ -11,7 +11,7 @@ public interface AuditLogService {
 
     AuditLog record(
             User user,
-            Long entrepriseId,
+            Long companyId,
             AuditAction action,
             AuditOutcome outcome,
             String resourceType,
@@ -19,5 +19,5 @@ public interface AuditLogService {
             String details
     );
 
-    List<AuditLog> findLastForEntreprise(Long entrepriseId);
+    List<AuditLog> findLastForCompany(Long companyId);
 }
