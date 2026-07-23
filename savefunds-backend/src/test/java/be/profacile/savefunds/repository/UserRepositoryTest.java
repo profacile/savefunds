@@ -37,15 +37,15 @@ class UserRepositoryTest {
     void shouldSaveUser() {
         // Given
         User user = new User();
-        // TODO : Définir les propriétés
+        // TODO : DÃ©finir les propriÃ©tÃ©s
 
         // When
         // TODO : Sauvegarder l'utilisateur
 
         // Then
-        // TODO : Vérifier que l'ID n'est pas null
+        // TODO : VÃ©rifier que l'ID n'est pas null
 
-        // TODO : Vérifier que l'email est correct
+        // TODO : VÃ©rifier que l'email est correct
 
     }
 
@@ -58,7 +58,7 @@ class UserRepositoryTest {
     void shouldFindByEmail() {
         // Given
         User user = new User();
-        // TODO : Créer un utilisateur avec email = "john@example.com"
+        // TODO : CrÃ©er un utilisateur avec email = "john@example.com"
 
         // TODO : Sauvegarder
 
@@ -68,9 +68,9 @@ class UserRepositoryTest {
 
 
         // Then
-        // TODO : Vérifier que l'Optional est présent
+        // TODO : VÃ©rifier que l'Optional est prÃ©sent
 
-        // TODO : Vérifier que le nom est correct
+        // TODO : VÃ©rifier que le nom est correct
 
     }
 
@@ -81,12 +81,12 @@ class UserRepositoryTest {
         // TODO : Rechercher un email qui n'existe pas
 
         // Then
-        // TODO : Vérifier que l'Optional est vide
+        // TODO : VÃ©rifier que l'Optional est vide
 
     }
 
     // ==========================================
-    // TEST 3 : existsByEmail() - Vérifie existence
+    // TEST 3 : existsByEmail() - VÃ©rifie existence
     // ==========================================
 
     @Test
@@ -94,17 +94,17 @@ class UserRepositoryTest {
     void shouldReturnTrueWhenEmailExists() {
         // Given
         User user = new User();
-        // TODO : Créer un utilisateur avec email = "exists@example.com"
+        // TODO : CrÃ©er un utilisateur avec email = "exists@example.com"
 
         // TODO : Sauvegarder
 
 
         // When
-        // TODO : Vérifier l'existence
+        // TODO : VÃ©rifier l'existence
 
 
         // Then
-        // TODO : Vérifier que le résultat est true
+        // TODO : VÃ©rifier que le rÃ©sultat est true
 
     }
 
@@ -112,11 +112,11 @@ class UserRepositoryTest {
     @DisplayName("Devrait retourner false si email n'existe pas")
     void shouldReturnFalseWhenEmailDoesNotExist() {
         // When
-        // TODO : Vérifier un email qui n'existe pas
+        // TODO : VÃ©rifier un email qui n'existe pas
 
 
         // Then
-        // TODO : Vérifier que le résultat est false
+        // TODO : VÃ©rifier que le rÃ©sultat est false
 
     }
 
@@ -129,20 +129,20 @@ class UserRepositoryTest {
     void shouldFindById() {
         // Given
         User user = new User();
-        // TODO : Créer un utilisateur
+        // TODO : CrÃ©er un utilisateur
 
-        // TODO : Sauvegarder et récupérer l'ID
+        // TODO : Sauvegarder et rÃ©cupÃ©rer l'ID
 
         // When
         // TODO : Rechercher par ID
 
 
         // Then
-        // TODO : Vérifier que l'Optional est présent
+        // TODO : VÃ©rifier que l'Optional est prÃ©sent
 
-        // TODO : Vérifier que l'ID correspond
+        // TODO : VÃ©rifier que l'ID correspond
 
-        // TODO : Vérifier l'email
+        // TODO : VÃ©rifier l'email
 
     }
 }

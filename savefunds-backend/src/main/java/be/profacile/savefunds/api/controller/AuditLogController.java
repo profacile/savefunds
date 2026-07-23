@@ -3,9 +3,9 @@ package be.profacile.savefunds.api.controller;
 import be.profacile.savefunds.api.dto.response.AuditLogResponse;
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.api.mapper.AuditLogApiMapper;
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.service.AuditLogService;
-import be.profacile.savefunds.domain.service.EntrepriseService;
+import be.profacile.savefunds.domain.service.CompanyService;
 import be.profacile.savefunds.security.service.CurrentUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,33 +17,33 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/entreprises/{entrepriseId}/audit-logs")
+@RequestMapping("/api/v1/companies/{companyId}/audit-logs")
 @RequiredArgsConstructor
-@Tag(name = "Audit", description = "Tracabilite des actions sensibles par entreprise")
+@Tag(name = "Audit", description = "Tracabilite des actions sensibles par company")
 public class AuditLogController {
 
     private final AuditLogService auditLogService;
-    private final EntrepriseService entrepriseService;
+    private final CompanyService companyService;
     private final CurrentUserService currentUserService;
     private final AuditLogApiMapper auditLogMapper;
 
     @GetMapping
-    @Operation(summary = "Consulter les 50 dernieres actions auditees d'une entreprise")
-    public ResponseEntity<List<AuditLogResponse>> findLastAuditLogs(@PathVariable Long entrepriseId) {
-        assertOwnsEntreprise(entrepriseId);
+    @Operation(summary = "Consulter les 50 dernieres actions auditees d'une company")
+    public ResponseEntity<List<AuditLogResponse>> findLastAuditLogs(@PathVariable Long companyId) {
+        assertOwnsCompany(companyId);
 
-        List<AuditLogResponse> responses = auditLogService.findLastForEntreprise(entrepriseId)
+        List<AuditLogResponse> responses = auditLogService.findLastForCompany(companyId)
                 .stream()
                 .map(auditLogMapper::toResponse)
                 .toList();
         return ResponseEntity.ok(responses);
     }
 
-    private void assertOwnsEntreprise(Long entrepriseId) {
-        Entreprise entreprise = entrepriseService.findById(entrepriseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable: " + entrepriseId));
-        if (!currentUserService.getCurrentUserId().equals(entreprise.getUserId())) {
-            throw new AccessDeniedException("Acces refuse a cette entreprise");
+    private void assertOwnsCompany(Long companyId) {
+        Company company = companyService.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company introuvable: " + companyId));
+        if (!currentUserService.getCurrentUserId().equals(company.getUserId())) {
+            throw new AccessDeniedException("Acces refuse a cette company");
         }
     }
 }

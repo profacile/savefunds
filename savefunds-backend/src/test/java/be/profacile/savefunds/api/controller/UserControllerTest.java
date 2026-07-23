@@ -49,8 +49,8 @@ class UserControllerTest {
         user = new User();
         user.setEmail("christian@profacile.be");
         user.setPasswordHash(passwordEncoder.encode("password123"));
-        user.setNom("SANDJONG MOTIO");
-        user.setPrenom("Christian");
+        user.setLastName("SANDJONG MOTIO");
+        user.setFirstName("Christian");
         user.setRole(Role.DIRIGEANT);
         user.setEmailVerified(false);
         user = userRepository.save(user);
@@ -58,8 +58,8 @@ class UserControllerTest {
         admin = new User();
         admin.setEmail("admin@profacile.be");
         admin.setPasswordHash(passwordEncoder.encode("password123"));
-        admin.setNom("Admin");
-        admin.setPrenom("SaveFunds");
+        admin.setLastName("Admin");
+        admin.setFirstName("SaveFunds");
         admin.setRole(Role.ADMIN);
         admin.setEmailVerified(true);
         admin = userRepository.save(admin);
@@ -101,7 +101,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.email").value("christian@profacile.be"))
-                .andExpect(jsonPath("$.nom").value("SANDJONG MOTIO"));
+                .andExpect(jsonPath("$.lastName").value("SANDJONG MOTIO"));
     }
 
     @Test
@@ -134,15 +134,15 @@ class UserControllerTest {
     @WithMockUser(username = "christian@profacile.be")
     void shouldUpdateOwnUser() throws Exception {
         UpdateUserRequest request = new UpdateUserRequest();
-        request.setNom("NOUVEAU NOM");
-        request.setPrenom("NouveauPrenom");
+        request.setLastName("NOUVEAU NOM");
+        request.setFirstName("NouveauPrenom");
 
         mockMvc.perform(put("/api/v1/users/" + user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nom").value("NOUVEAU NOM"))
-                .andExpect(jsonPath("$.prenom").value("NouveauPrenom"))
+                .andExpect(jsonPath("$.lastName").value("NOUVEAU NOM"))
+                .andExpect(jsonPath("$.firstName").value("NouveauPrenom"))
                 .andExpect(jsonPath("$.email").value("christian@profacile.be"));
     }
 
@@ -164,7 +164,7 @@ class UserControllerTest {
     @WithMockUser(username = "admin@profacile.be")
     void shouldReturn404OnUpdateWhenNotFound() throws Exception {
         UpdateUserRequest request = new UpdateUserRequest();
-        request.setNom("Test");
+        request.setLastName("Test");
 
         mockMvc.perform(put("/api/v1/users/999")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -188,3 +188,4 @@ class UserControllerTest {
                 .andExpect(status().isForbidden());
     }
 }
+

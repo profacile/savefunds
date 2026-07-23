@@ -7,7 +7,7 @@
 
       <div class="features">
         <div class="feature-item"><span class="dot green"></span>Compte dirigeant securise par JWT</div>
-        <div class="feature-item"><span class="dot orange"></span>Isolation stricte par entreprise</div>
+        <div class="feature-item"><span class="dot orange"></span>Isolation stricte par company</div>
         <div class="feature-item"><span class="dot blue"></span>Tracabilite des actions sensibles</div>
       </div>
 
@@ -26,13 +26,13 @@
       <form (ngSubmit)="submit()" #form="ngForm" class="login-form">
         <div class="name-grid">
           <div class="auth-field">
-            <label for="prenom">Prenom</label>
-            <input id="prenom" name="prenom" [(ngModel)]="prenom" required minlength="2">
+            <label for="firstName">Prenom</label>
+            <input id="firstName" name="firstName" [(ngModel)]="firstName" required minlength="2">
           </div>
 
           <div class="auth-field">
-            <label for="nom">Nom</label>
-            <input id="nom" name="nom" [(ngModel)]="nom" required minlength="2">
+            <label for="lastName">Nom</label>
+            <input id="lastName" name="lastName" [(ngModel)]="lastName" required minlength="2">
           </div>
         </div>
 

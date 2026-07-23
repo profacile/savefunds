@@ -28,12 +28,12 @@ public class UserResponse {
     /**
      * Nom
      */
-    private String nom;
+    private String lastName;
 
     /**
      * Prénom
      */
-    private String prenom;
+    private String firstName;
 
     /**
      * Rôle (DIRIGEANT / COMPTABLE / ADMIN)

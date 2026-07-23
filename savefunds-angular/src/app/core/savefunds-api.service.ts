@@ -22,23 +22,23 @@ export class SaveFundsApiService {
   constructor(private readonly http: HttpClient) {}
 
   getEnterpriseByUser(userId: number): Observable<Enterprise> {
-    return this.http.get<Enterprise>(`${API_URL}/api/v1/entreprises/user/${userId}`);
+    return this.http.get<Enterprise>(`${API_URL}/api/v1/companies/user/${userId}`);
   }
 
   getMyEnterprises(): Observable<Enterprise[]> {
-    return this.http.get<Enterprise[]>(`${API_URL}/api/v1/entreprises/me`);
+    return this.http.get<Enterprise[]>(`${API_URL}/api/v1/companies/me`);
   }
 
   createEnterprise(request: CreateEnterpriseRequest): Observable<Enterprise> {
-    return this.http.post<Enterprise>(`${API_URL}/api/v1/entreprises`, request);
+    return this.http.post<Enterprise>(`${API_URL}/api/v1/companies`, request);
   }
 
   updateEnterprise(enterpriseId: number, request: Partial<CreateEnterpriseRequest>): Observable<Enterprise> {
-    return this.http.put<Enterprise>(`${API_URL}/api/v1/entreprises/${enterpriseId}`, request);
+    return this.http.put<Enterprise>(`${API_URL}/api/v1/companies/${enterpriseId}`, request);
   }
 
   deleteEnterprise(enterpriseId: number): Observable<void> {
-    return this.http.delete<void>(`${API_URL}/api/v1/entreprises/${enterpriseId}`);
+    return this.http.delete<void>(`${API_URL}/api/v1/companies/${enterpriseId}`);
   }
 
   searchCompanyRegistry(query: string): Observable<CompanyRegistryCompany[]> {
@@ -58,7 +58,7 @@ export class SaveFundsApiService {
   }
 
   createEnterpriseFromRegistry(company: CompanyRegistryCompany): Observable<Enterprise> {
-    return this.http.post<Enterprise>(`${API_URL}/api/v1/entreprises/from-registry`, {
+    return this.http.post<Enterprise>(`${API_URL}/api/v1/companies/from-registry`, {
       enterpriseNumber: company.enterpriseNumber,
       name: company.name,
       legalForm: company.legalForm,
@@ -75,46 +75,46 @@ export class SaveFundsApiService {
 
   searchBnbAnnualAccounts(enterpriseId: number): Observable<BnbAnnualAccountsLookup> {
     return this.http.post<BnbAnnualAccountsLookup>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/bnb/annual-accounts/search`,
+      `${API_URL}/api/v1/companies/${enterpriseId}/bnb/annual-accounts/search`,
       {}
     );
   }
 
   getLatestBnbAnnualAccounts(enterpriseId: number): Observable<BnbAnnualAccountsLookup> {
     return this.http.get<BnbAnnualAccountsLookup>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/bnb/annual-accounts/latest`
+      `${API_URL}/api/v1/companies/${enterpriseId}/bnb/annual-accounts/latest`
     );
   }
 
   importLatestBnbAnnualAccounts(enterpriseId: number): Observable<FinancialSnapshot> {
     return this.http.post<FinancialSnapshot>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/bnb/annual-accounts/import-latest`,
+      `${API_URL}/api/v1/companies/${enterpriseId}/bnb/annual-accounts/import-latest`,
       {}
     );
   }
 
   createMockSnapshot(enterpriseId: number, source: 'mock-bank' | 'mock-balance-sheet'): Observable<FinancialSnapshot> {
     return this.http.post<FinancialSnapshot>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/${source}`,
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/${source}`,
       {}
     );
   }
 
   getLatestSnapshot(enterpriseId: number): Observable<FinancialSnapshot> {
     return this.http.get<FinancialSnapshot>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/latest`
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/latest`
     );
   }
 
   getFinancialSnapshots(enterpriseId: number): Observable<FinancialSnapshot[]> {
     return this.http.get<FinancialSnapshot[]>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots`
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots`
     );
   }
 
   getConsolidatedSnapshot(enterpriseId: number): Observable<FinancialSnapshot> {
     return this.http.get<FinancialSnapshot>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/consolidated`
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/consolidated`
     );
   }
 
@@ -122,7 +122,7 @@ export class SaveFundsApiService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<FinancialSnapshot>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/import-bank-csv`,
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/import-bank-csv`,
       formData
     );
   }
@@ -131,26 +131,26 @@ export class SaveFundsApiService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<FinancialSnapshot>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/import-accounting-csv`,
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/import-accounting-csv`,
       formData
     );
   }
 
   getBankTransactions(enterpriseId: number): Observable<BankTransaction[]> {
     return this.http.get<BankTransaction[]>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/bank-transactions`
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/bank-transactions`
     );
   }
 
   simulateDecision(enterpriseId: number, amount: number, type = 'RETRAIT_DIRIGEANT', forcedSource?: string): Observable<VigilanceResult> {
     return this.http.post<VigilanceResult>(
-      `${API_URL}/api/v1/entreprises/${enterpriseId}/financial-snapshots/simulate`,
+      `${API_URL}/api/v1/companies/${enterpriseId}/financial-snapshots/simulate`,
       { type, amount, forcedSource: forcedSource || null }
     );
   }
 
   getAuditLogs(enterpriseId: number): Observable<AuditLog[]> {
-    return this.http.get<AuditLog[]>(`${API_URL}/api/v1/entreprises/${enterpriseId}/audit-logs`);
+    return this.http.get<AuditLog[]>(`${API_URL}/api/v1/companies/${enterpriseId}/audit-logs`);
   }
 
   getAccountantDashboard(): Observable<AccountantDashboard> {

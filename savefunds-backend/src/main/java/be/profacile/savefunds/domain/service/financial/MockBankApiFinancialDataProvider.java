@@ -1,6 +1,6 @@
 package be.profacile.savefunds.domain.service.financial;
 
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 import org.springframework.stereotype.Component;
 
@@ -27,17 +27,17 @@ public class MockBankApiFinancialDataProvider implements ExternalFinancialDataPr
     }
 
     @Override
-    public ExtractedFinancialData fetch(Entreprise entreprise) {
+    public ExtractedFinancialData fetch(Company company) {
         // Production target: use PSD2/Open Banking after explicit company consent.
         // The mock keeps the domain flow testable while legal consent and bank connectors are pending.
         return ExtractedFinancialData.builder()
-                .chiffreAffairesMensuel(new BigDecimal("36500.00"))
-                .chargesMensuelles(new BigDecimal("28750.00"))
-                .tresorerie(new BigDecimal("18450.00"))
-                .soldeCompteCourant(new BigDecimal("-4800.00"))
-                .dettesCourtTerme(new BigDecimal("9100.00"))
-                .creancesClients(new BigDecimal("15800.00"))
-                .dureeCompteCourantDebiteur(34)
+                .monthlyRevenue(new BigDecimal("36500.00"))
+                .monthlyExpenses(new BigDecimal("28750.00"))
+                .cashBalance(new BigDecimal("18450.00"))
+                .directorCurrentAccountBalance(new BigDecimal("-4800.00"))
+                .shortTermDebt(new BigDecimal("9100.00"))
+                .customerReceivables(new BigDecimal("15800.00"))
+                .directorCurrentAccountDebtorDays(34)
                 .snapshotDate(LocalDate.now())
                 .confidenceScore(85)
                 .warnings(List.of(
@@ -45,7 +45,7 @@ public class MockBankApiFinancialDataProvider implements ExternalFinancialDataPr
                         "Le consentement explicite du dirigeant sera obligatoire avant toute connexion bancaire"
                 ))
                 .missingFields(List.of())
-                .rawMetadata("provider=BANK_API;mode=mock;enterpriseId=" + entreprise.getId())
+                .rawMetadata("provider=BANK_API;mode=mock;enterpriseId=" + company.getId())
                 .build();
     }
 }

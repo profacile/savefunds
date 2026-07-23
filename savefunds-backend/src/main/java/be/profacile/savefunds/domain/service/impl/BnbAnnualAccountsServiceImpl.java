@@ -2,12 +2,12 @@ package be.profacile.savefunds.domain.service.impl;
 
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.domain.entity.BnbAnnualAccountsLookup;
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.entity.FinancialSnapshot;
 import be.profacile.savefunds.domain.enums.BnbAnnualAccountsStatus;
 import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 import be.profacile.savefunds.domain.repository.BnbAnnualAccountsLookupRepository;
-import be.profacile.savefunds.domain.repository.EntrepriseRepository;
+import be.profacile.savefunds.domain.repository.CompanyRepository;
 import be.profacile.savefunds.domain.repository.FinancialSnapshotRepository;
 import be.profacile.savefunds.domain.service.BnbAnnualAccountsService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,7 +36,7 @@ public class BnbAnnualAccountsServiceImpl implements BnbAnnualAccountsService {
     private static final String SOURCE = "BNB/CBSO public annual accounts";
     private static final String BNB_BASE_URL = "https://consult.cbso.nbb.be";
 
-    private final EntrepriseRepository entrepriseRepository;
+    private final CompanyRepository companyRepository;
     private final BnbAnnualAccountsLookupRepository lookupRepository;
     private final FinancialSnapshotRepository financialSnapshotRepository;
     private final ObjectMapper objectMapper;
@@ -45,18 +45,18 @@ public class BnbAnnualAccountsServiceImpl implements BnbAnnualAccountsService {
             .build();
 
     @Override
-    public BnbAnnualAccountsLookup search(Long entrepriseId) {
-        Entreprise entreprise = entrepriseRepository.findById(entrepriseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable: " + entrepriseId));
+    public BnbAnnualAccountsLookup search(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company introuvable: " + companyId));
 
-        String enterpriseNumber = normalizeEnterpriseNumber(entreprise.getNumeroEntreprise());
+        String enterpriseNumber = normalizeEnterpriseNumber(company.getEnterpriseNumber());
         String consultUrl = BNB_BASE_URL + "/consult-enterprise";
         String apiUrl = BNB_BASE_URL + "/api/rs-consult/published-deposits"
                 + "?page=0&size=10&enterpriseNumber=" + URLEncoder.encode(enterpriseNumber, StandardCharsets.UTF_8)
                 + "&allSearchText=&sort=periodEndDate,desc";
 
         BnbAnnualAccountsLookup lookup = new BnbAnnualAccountsLookup();
-        lookup.setEntreprise(entreprise);
+        lookup.setCompany(company);
         lookup.setEnterpriseNumber(enterpriseNumber);
         lookup.setConsultUrl(consultUrl);
         lookup.setSource(SOURCE);
@@ -68,7 +68,7 @@ public class BnbAnnualAccountsServiceImpl implements BnbAnnualAccountsService {
                 applyPublishedDepositsResponse(lookup, response.body());
             } else {
                 lookup.setStatus(BnbAnnualAccountsStatus.UNAVAILABLE);
-                lookup.setMessage("La source BNB/CBSO a repondu avec le statut HTTP " + response.statusCode() + ".");
+                lookup.setMessage("La source BNB/CBSO a repondu avec le status HTTP " + response.statusCode() + ".");
             }
         } catch (Exception ex) {
             lookup.setStatus(BnbAnnualAccountsStatus.UNAVAILABLE);
@@ -80,15 +80,15 @@ public class BnbAnnualAccountsServiceImpl implements BnbAnnualAccountsService {
     }
 
     @Override
-    public Optional<BnbAnnualAccountsLookup> findLatest(Long entrepriseId) {
-        return lookupRepository.findTopByEntrepriseIdOrderByCreatedAtDesc(entrepriseId);
+    public Optional<BnbAnnualAccountsLookup> findLatest(Long companyId) {
+        return lookupRepository.findTopByCompanyIdOrderByCreatedAtDesc(companyId);
     }
 
     @Override
-    public FinancialSnapshot createSnapshotFromLatestDeposit(Long entrepriseId) {
-        BnbAnnualAccountsLookup lookup = findLatest(entrepriseId)
+    public FinancialSnapshot createSnapshotFromLatestDeposit(Long companyId) {
+        BnbAnnualAccountsLookup lookup = findLatest(companyId)
                 .filter(candidate -> candidate.getStatus() == BnbAnnualAccountsStatus.FOUND)
-                .orElseGet(() -> search(entrepriseId));
+                .orElseGet(() -> search(companyId));
 
         if (lookup.getStatus() != BnbAnnualAccountsStatus.FOUND || lookup.getCsvUrl() == null) {
             throw new IllegalStateException("Aucun depot BNB exploitable pour creer un snapshot financier");
@@ -124,7 +124,7 @@ public class BnbAnnualAccountsServiceImpl implements BnbAnnualAccountsService {
         JsonNode deposits = root.path("content");
         if (!deposits.isArray() || deposits.isEmpty()) {
             lookup.setStatus(BnbAnnualAccountsStatus.NOT_FOUND);
-            lookup.setMessage("Aucun depot de comptes annuels BNB trouve pour ce numero d'entreprise.");
+            lookup.setMessage("Aucun depot de comptes annuels BNB trouve pour ce numero d'company.");
             return;
         }
 
@@ -150,17 +150,17 @@ public class BnbAnnualAccountsServiceImpl implements BnbAnnualAccountsService {
 
     private FinancialSnapshot toBnbSnapshot(BnbAnnualAccountsLookup lookup, Map<String, String> values) {
         FinancialSnapshot snapshot = new FinancialSnapshot();
-        snapshot.setEntreprise(lookup.getEntreprise());
+        snapshot.setCompany(lookup.getCompany());
         snapshot.setSource(FinancialSnapshotSource.BNB_API);
         snapshot.setSourceReference(lookup.getLatestReference());
         snapshot.setSnapshotDate(parseDate(lookup.getLatestPeriodEndDate()).orElse(LocalDate.now()));
-        snapshot.setTresorerie(amount(values, "54/58").orElse(null));
-        snapshot.setDettesCourtTerme(amount(values, "42/48").orElse(amount(values, "17/49").orElse(null)));
-        snapshot.setCreancesClients(amount(values, "40").orElse(amount(values, "40/41").orElse(null)));
-        snapshot.setChiffreAffairesMensuel(amount(values, "70").map(value -> divideByTwelve(value)).orElse(null));
-        snapshot.setChargesMensuelles(monthlyCharges(values).orElse(null));
-        snapshot.setSoldeCompteCourant(null);
-        snapshot.setDureeCompteCourantDebiteur(null);
+        snapshot.setCashBalance(amount(values, "54/58").orElse(null));
+        snapshot.setShortTermDebt(amount(values, "42/48").orElse(amount(values, "17/49").orElse(null)));
+        snapshot.setCustomerReceivables(amount(values, "40").orElse(amount(values, "40/41").orElse(null)));
+        snapshot.setMonthlyRevenue(amount(values, "70").map(value -> divideByTwelve(value)).orElse(null));
+        snapshot.setMonthlyExpenses(monthlyCharges(values).orElse(null));
+        snapshot.setDirectorCurrentAccountBalance(null);
+        snapshot.setDirectorCurrentAccountDebtorDays(null);
         snapshot.setConfidenceScore(78);
         snapshot.setWarnings(String.join("\n", List.of(
                 "Source BNB officielle basee sur le depot annuel " + lookup.getLatestReference(),

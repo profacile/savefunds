@@ -21,12 +21,12 @@ public class ChangePasswordRequest {
 
     @NotBlank(message = "L'ancien mot de passe est obligatoire")
     @Schema(description = "Mot de passe actuel", required = true)
-    private String ancienMotDePasse;
+    private String currentPassword;
 
     @NotBlank(message = "Le nouveau mot de passe est obligatoire")
     @Size(min = 6, message = "Le nouveau mot de passe doit contenir au moins 6 caractères")
     @Schema(description = "Nouveau mot de passe", required = true)
-    private String nouveauMotDePasse;
+    private String newPassword;
 
     @NotBlank(message = "La confirmation est obligatoire")
     @Schema(description = "Confirmation du nouveau mot de passe", required = true)

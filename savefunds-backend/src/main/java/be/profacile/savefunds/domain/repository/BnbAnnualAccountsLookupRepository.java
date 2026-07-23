@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface BnbAnnualAccountsLookupRepository extends JpaRepository<BnbAnnualAccountsLookup, Long> {
-    Optional<BnbAnnualAccountsLookup> findTopByEntrepriseIdOrderByCreatedAtDesc(Long entrepriseId);
+    Optional<BnbAnnualAccountsLookup> findTopByCompanyIdOrderByCreatedAtDesc(Long companyId);
 }

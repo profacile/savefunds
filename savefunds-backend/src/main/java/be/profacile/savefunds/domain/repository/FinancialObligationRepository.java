@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface FinancialObligationRepository extends JpaRepository<FinancialObligation, Long> {
-    Optional<FinancialObligation> findFirstByEntrepriseIdAndStatusOrderByDueDateAsc(Long entrepriseId, FinancialObligationStatus status);
+    Optional<FinancialObligation> findFirstByCompanyIdAndStatusOrderByDueDateAsc(Long companyId, FinancialObligationStatus status);
 
-    List<FinancialObligation> findByEntrepriseIdOrderByDueDateAsc(Long entrepriseId);
+    List<FinancialObligation> findByCompanyIdOrderByDueDateAsc(Long companyId);
 }

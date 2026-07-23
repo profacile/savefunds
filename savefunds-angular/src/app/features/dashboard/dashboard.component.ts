@@ -189,10 +189,10 @@ export class DashboardComponent implements OnInit {
     const displayed = this.displayedSnapshot();
     const snapshots = selected === 'AUTO' ? this.snapshots() : (displayed ? [displayed] : []);
     return {
-      tresorerie: this.sourceForField(snapshots, 'tresorerie', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
-      revenue: this.sourceForField(snapshots, 'chiffreAffairesMensuel', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
-      expenses: this.sourceForField(snapshots, 'chargesMensuelles', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
-      currentAccount: this.sourceForField(snapshots, 'soldeCompteCourant', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API'])
+      cashBalance: this.sourceForField(snapshots, 'cashBalance', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      revenue: this.sourceForField(snapshots, 'monthlyRevenue', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      expenses: this.sourceForField(snapshots, 'monthlyExpenses', ['ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API']),
+      currentAccount: this.sourceForField(snapshots, 'directorCurrentAccountBalance', ['BANK_CSV', 'ACCOUNTING_CSV', 'BALANCE_SHEET_DOCUMENT', 'BNB_API'])
     };
   });
 
@@ -233,34 +233,34 @@ export class DashboardComponent implements OnInit {
 
   enterpriseForm: CreateEnterpriseRequest = {
     userId: 0,
-    raisonSociale: '',
-    numeroEntreprise: '',
-    formeJuridique: '',
-    secteurActivite: '',
-    tresorerie: null,
-    soldeCompteCourant: null,
-    chiffreAffairesMensuel: null,
-    chargesMensuelles: null
+    legalName: '',
+    enterpriseNumber: '',
+    legalForm: '',
+    activitySector: '',
+    cashBalance: null,
+    directorCurrentAccountBalance: null,
+    monthlyRevenue: null,
+    monthlyExpenses: null
   };
 
   enterpriseEditForm: CreateEnterpriseRequest = {
     userId: 0,
-    raisonSociale: '',
-    numeroEntreprise: '',
-    formeJuridique: '',
-    secteurActivite: '',
-    tresorerie: null,
-    soldeCompteCourant: null,
-    chiffreAffairesMensuel: null,
-    chargesMensuelles: null
+    legalName: '',
+    enterpriseNumber: '',
+    legalForm: '',
+    activitySector: '',
+    cashBalance: null,
+    directorCurrentAccountBalance: null,
+    monthlyRevenue: null,
+    monthlyExpenses: null
   };
 
   coverage = computed(() => {
     const current = this.displayedSnapshot();
-    if (!current || !current.chargesMensuelles) {
+    if (!current || !current.monthlyExpenses) {
       return 0;
     }
-    return current.tresorerie / current.chargesMensuelles;
+    return current.cashBalance / current.monthlyExpenses;
   });
 
   enterpriseDecision = computed(() => {
@@ -268,8 +268,8 @@ export class DashboardComponent implements OnInit {
     if (!current) {
       return 'ORANGE';
     }
-    const coverage = current.chargesMensuelles ? current.tresorerie / current.chargesMensuelles : 0;
-    const ccDays = current.dureeCompteCourantDebiteur ?? 0;
+    const coverage = current.monthlyExpenses ? current.cashBalance / current.monthlyExpenses : 0;
+    const ccDays = current.directorCurrentAccountDebtorDays ?? 0;
     if (coverage < 1 || ccDays > 30) {
       return 'ROUGE';
     }
@@ -284,12 +284,12 @@ export class DashboardComponent implements OnInit {
       return this.enterpriseDecision() as 'VERT' | 'ORANGE' | 'ROUGE';
     }
 
-    if (!enterprise.tresorerie || !enterprise.chargesMensuelles) {
+    if (!enterprise.cashBalance || !enterprise.monthlyExpenses) {
       return 'ORANGE';
     }
 
-    const coverage = enterprise.tresorerie / enterprise.chargesMensuelles;
-    const currentAccount = enterprise.soldeCompteCourant ?? 0;
+    const coverage = enterprise.cashBalance / enterprise.monthlyExpenses;
+    const currentAccount = enterprise.directorCurrentAccountBalance ?? 0;
     if (coverage < 1) {
       return 'ROUGE';
     }
@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit {
     if (this.enterprise()?.id === enterprise.id && this.displayedSnapshot()) {
       return this.enterpriseDecision();
     }
-    if (!enterprise.tresorerie || !enterprise.chargesMensuelles) {
+    if (!enterprise.cashBalance || !enterprise.monthlyExpenses) {
       return 'A VERIFIER';
     }
     return this.enterpriseCardDecision(enterprise);
@@ -351,14 +351,14 @@ export class DashboardComponent implements OnInit {
     this.editingEnterpriseId.set(enterprise.id);
     this.enterpriseEditForm = {
       userId: enterprise.userId,
-      raisonSociale: enterprise.raisonSociale,
-      numeroEntreprise: enterprise.numeroEntreprise,
-      formeJuridique: enterprise.formeJuridique || '',
-      secteurActivite: enterprise.secteurActivite || '',
-      tresorerie: enterprise.tresorerie ?? null,
-      soldeCompteCourant: enterprise.soldeCompteCourant ?? null,
-      chiffreAffairesMensuel: enterprise.chiffreAffairesMensuel ?? null,
-      chargesMensuelles: enterprise.chargesMensuelles ?? null
+      legalName: enterprise.legalName,
+      enterpriseNumber: enterprise.enterpriseNumber,
+      legalForm: enterprise.legalForm || '',
+      activitySector: enterprise.activitySector || '',
+      cashBalance: enterprise.cashBalance ?? null,
+      directorCurrentAccountBalance: enterprise.directorCurrentAccountBalance ?? null,
+      monthlyRevenue: enterprise.monthlyRevenue ?? null,
+      monthlyExpenses: enterprise.monthlyExpenses ?? null
     };
   }
 
@@ -404,7 +404,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Mise a jour entreprise...');
+    this.setLoading('Mise a jour company...');
     this.api.updateEnterprise(id, this.enterpriseEditForm).subscribe({
       next: (updated) => {
         this.enterprises.update((items) => items.map((item) => item.id === updated.id ? updated : item));
@@ -414,7 +414,7 @@ export class DashboardComponent implements OnInit {
         this.editingEnterpriseId.set(null);
         this.clearLoading();
       },
-      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette entreprise.')
+      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette company.')
     });
   }
 
@@ -425,7 +425,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Suppression entreprise...');
+    this.setLoading('Suppression company...');
     this.api.deleteEnterprise(enterprise.id).subscribe({
       next: () => {
         this.enterprises.update((items) => items.filter((item) => item.id !== enterprise.id));
@@ -530,14 +530,14 @@ export class DashboardComponent implements OnInit {
         next: (company) => {
           this.registryResults.set([company]);
           this.selectedRegistryCompany.set(company);
-          this.registrySearchMessage.set('1 resultat trouve via le numero BCE.');
+          this.registrySearchMessage.set('1 result trouve via le numero BCE.');
           this.registryAutocompleteLoading.set(false);
           this.clearLoading();
         },
         error: () => {
           this.registryResults.set([]);
           this.selectedRegistryCompany.set(null);
-          this.registrySearchMessage.set('Aucun resultat trouve pour ce numero BCE.');
+          this.registrySearchMessage.set('Aucun result trouve pour ce numero BCE.');
           this.registryAutocompleteLoading.set(false);
           this.clearLoading();
         }
@@ -551,7 +551,7 @@ export class DashboardComponent implements OnInit {
         this.selectedRegistryCompany.set(results[0] ?? null);
         this.registrySearchMessage.set(results.length
           ? `${results.length} suggestion(s) BCE trouvee(s) ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
-          : 'Aucun resultat dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
+          : 'Aucun result dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
         );
         this.registryAutocompleteLoading.set(false);
         this.clearLoading();
@@ -600,15 +600,15 @@ export class DashboardComponent implements OnInit {
         this.enterpriseForm = {
           ...this.enterpriseForm,
           userId: enterprise.userId,
-          raisonSociale: enterprise.raisonSociale,
-          numeroEntreprise: enterprise.numeroEntreprise,
-          formeJuridique: enterprise.formeJuridique || '',
-          secteurActivite: enterprise.secteurActivite || ''
+          legalName: enterprise.legalName,
+          enterpriseNumber: enterprise.enterpriseNumber,
+          legalForm: enterprise.legalForm || '',
+          activitySector: enterprise.activitySector || ''
         };
         this.clearLoading();
         this.currentView.set('DETAIL');
       },
-      error: (error) => this.fail(this.apiErrorMessage(error, 'Creation depuis la BCE impossible. Verifiez que cette entreprise n est pas deja rattachee a votre compte.'))
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Creation depuis la BCE impossible. Verifiez que cette company n est pas deja rattachee a votre compte.'))
     });
   }
 
@@ -622,7 +622,7 @@ export class DashboardComponent implements OnInit {
     this.setLoading('Import BCE Open Data...');
     this.api.importCompanyRegistry(file).subscribe({
       next: (result) => {
-        this.bceImportMessage.set(`${result.importedRows} entreprise(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
+        this.bceImportMessage.set(`${result.importedRows} company(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
         this.clearLoading();
       },
       error: () => this.fail('Import BCE impossible. Verifiez le format CSV et votre role utilisateur.')
@@ -635,7 +635,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Creation entreprise...');
+    this.setLoading('Creation company...');
     this.api.createEnterprise({ ...this.enterpriseForm, userId: user.id }).subscribe({
       next: (enterprise) => {
         this.enterprises.update((items) => [enterprise, ...items.filter((item) => item.id !== enterprise.id)]);
@@ -643,7 +643,7 @@ export class DashboardComponent implements OnInit {
         this.selectEnterprise(enterprise);
         this.clearLoading();
       },
-      error: () => this.fail('Entreprise non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
+      error: () => this.fail('Company non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
     });
   }
 
@@ -740,7 +740,7 @@ export class DashboardComponent implements OnInit {
         this.refreshLatest();
         this.refreshAudit();
       },
-      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bilan impossible. Format CSV attendu pour le parseur actuel: accountCode,label,amount.'))
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Import bilan impossible. Formats pris en charge: PDF texte de bilan provisoire ou CSV comptable accountCode,label,amount.'))
     });
   }
 
@@ -803,6 +803,13 @@ export class DashboardComponent implements OnInit {
     return this.snapshots().find((item) => item.source === source) ?? null;
   }
 
+  sourceReference(snapshot?: FinancialSnapshot | null): string {
+    if (!snapshot) {
+      return 'la source importee';
+    }
+    return snapshot.sourceReference || snapshot.rawMetadata?.match(/filename=([^;]+)/)?.[1] || this.sourceLabel(snapshot.source);
+  }
+
   sourceStatusLabel(source: string): string {
     const snapshot = this.latestSource(source);
     if (!snapshot) {
@@ -812,9 +819,9 @@ export class DashboardComponent implements OnInit {
   }
 
   displayEnterpriseName(enterprise?: Enterprise | null): string {
-    const name = enterprise?.raisonSociale?.trim() || '';
+    const name = enterprise?.legalName?.trim() || '';
     if (!name || this.isInvalidEnterpriseName(name)) {
-      return 'Nom de l entreprise a corriger';
+      return 'Nom de l company a corriger';
     }
     return name;
   }
@@ -841,7 +848,7 @@ export class DashboardComponent implements OnInit {
 
   enterpriseInitial(enterprise: Enterprise): string {
     const name = this.displayEnterpriseName(enterprise);
-    if (name === 'Nom de l entreprise a corriger') {
+    if (name === 'Nom de l company a corriger') {
       return 'E';
     }
     return name.charAt(0).toUpperCase();
@@ -966,7 +973,7 @@ export class DashboardComponent implements OnInit {
       return 'Dashboard portefeuille';
     }
     const labels: Record<DashboardView, string> = {
-      DETAIL: this.displayEnterpriseName(this.enterprise()) || 'Fiche entreprise',
+      DETAIL: this.displayEnterpriseName(this.enterprise()) || 'Fiche company',
       SOURCES: 'Sources financieres',
       DASHBOARD: 'Dashboard portefeuille',
       AUDIT: 'Audit et tracabilite',
@@ -977,7 +984,7 @@ export class DashboardComponent implements OnInit {
 
   userInitials(): string {
     const user = this.auth.currentUser();
-    return `${user?.prenom?.charAt(0) ?? ''}${user?.nom?.charAt(0) ?? ''}`.trim() || 'U';
+    return `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`.trim() || 'U';
   }
 
   daysUntil(date: string): number {
@@ -1036,7 +1043,7 @@ export class DashboardComponent implements OnInit {
 
   private sourceForField(
     snapshots: FinancialSnapshot[],
-    field: keyof Pick<FinancialSnapshot, 'tresorerie' | 'chiffreAffairesMensuel' | 'chargesMensuelles' | 'soldeCompteCourant'>,
+    field: keyof Pick<FinancialSnapshot, 'cashBalance' | 'monthlyRevenue' | 'monthlyExpenses' | 'directorCurrentAccountBalance'>,
     orderedSources: string[]
   ): { available: boolean; label: string; date: string; confidence: number; warning: boolean } {
     for (const source of orderedSources) {
@@ -1077,7 +1084,7 @@ export class DashboardComponent implements OnInit {
     return normalized.startsWith('ondernemingsnummer')
       || normalized.startsWith('numero d')
       || normalized.startsWith('numéro d')
-      || normalized === this.enterprise()?.numeroEntreprise?.toLowerCase();
+      || normalized === this.enterprise()?.enterpriseNumber?.toLowerCase();
   }
 
   private readProfilePhoto(): string | null {

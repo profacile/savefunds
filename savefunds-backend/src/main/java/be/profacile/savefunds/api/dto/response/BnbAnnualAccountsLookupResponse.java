@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BnbAnnualAccountsLookupResponse {
     private Long id;
-    private Long entrepriseId;
+    private Long companyId;
     private String enterpriseNumber;
     private BnbAnnualAccountsStatus status;
     private String consultUrl;

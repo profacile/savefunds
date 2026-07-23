@@ -26,8 +26,8 @@ export class AuthService {
     );
   }
 
-  register(email: string, password: string, nom: string, prenom: string, role: 'DIRIGEANT' | 'COMPTABLE'): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${API_URL}/api/auth/register`, { email, password, nom, prenom, role }).pipe(
+  register(email: string, password: string, lastName: string, firstName: string, role: 'DIRIGEANT' | 'COMPTABLE'): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${API_URL}/api/auth/register`, { email, password, lastName, firstName, role }).pipe(
       tap((response) => this.persist(response))
     );
   }

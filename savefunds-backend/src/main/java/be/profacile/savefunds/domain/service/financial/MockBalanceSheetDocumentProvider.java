@@ -1,6 +1,6 @@
 package be.profacile.savefunds.domain.service.financial;
 
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 import org.springframework.stereotype.Component;
 
@@ -27,17 +27,17 @@ public class MockBalanceSheetDocumentProvider implements ExternalFinancialDataPr
     }
 
     @Override
-    public ExtractedFinancialData fetch(Entreprise entreprise) {
+    public ExtractedFinancialData fetch(Company company) {
         // Production target: parse a structured balance sheet PDF/XLSX and map accounting codes to SaveFunds fields.
         // This mock documents the expected output of that parser.
         return ExtractedFinancialData.builder()
-                .chiffreAffairesMensuel(new BigDecimal("39000.00"))
-                .chargesMensuelles(new BigDecimal("33500.00"))
-                .tresorerie(new BigDecimal("12200.00"))
-                .soldeCompteCourant(new BigDecimal("-7600.00"))
-                .dettesCourtTerme(new BigDecimal("24000.00"))
-                .creancesClients(new BigDecimal("31000.00"))
-                .dureeCompteCourantDebiteur(47)
+                .monthlyRevenue(new BigDecimal("39000.00"))
+                .monthlyExpenses(new BigDecimal("33500.00"))
+                .cashBalance(new BigDecimal("12200.00"))
+                .directorCurrentAccountBalance(new BigDecimal("-7600.00"))
+                .shortTermDebt(new BigDecimal("24000.00"))
+                .customerReceivables(new BigDecimal("31000.00"))
+                .directorCurrentAccountDebtorDays(47)
                 .snapshotDate(LocalDate.now())
                 .confidenceScore(65)
                 .warnings(List.of(
@@ -45,7 +45,7 @@ public class MockBalanceSheetDocumentProvider implements ExternalFinancialDataPr
                         "Le bilan doit etre relu si le parser detecte des champs manquants ou ambigus"
                 ))
                 .missingFields(List.of())
-                .rawMetadata("provider=BALANCE_SHEET_DOCUMENT;mode=mock;enterpriseId=" + entreprise.getId())
+                .rawMetadata("provider=BALANCE_SHEET_DOCUMENT;mode=mock;enterpriseId=" + company.getId())
                 .build();
     }
 }

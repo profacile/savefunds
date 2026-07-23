@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface BankTransactionService {
-    List<BankTransaction> importAndClassify(Long entrepriseId, FinancialSnapshot snapshot, MultipartFile file);
+    List<BankTransaction> importAndClassify(Long companyId, FinancialSnapshot snapshot, MultipartFile file);
 
-    List<BankTransaction> findByEntreprise(Long entrepriseId);
+    List<BankTransaction> findByCompany(Long companyId);
 }

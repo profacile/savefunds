@@ -17,7 +17,7 @@ import java.util.Optional;
  * Implémentation du service de gestion des utilisateurs
  *
  * EXEMPLE COMPLET - Les stagiaires doivent s'en inspirer
- * pour créer EntrepriseServiceImpl, AnalyseServiceImpl, etc.
+ * pour créer CompanyServiceImpl, WithdrawalAnalysisServiceImpl, etc.
  */
 @Service
 @Transactional
@@ -96,12 +96,12 @@ public class UserServiceImpl implements UserService {
 
         // ✅ MISE À JOUR CHAMP PAR CHAMP (évite la perte de données)
 
-        if (user.getNom() != null) {
-            existing.setNom(user.getNom());
+        if (user.getLastName() != null) {
+            existing.setLastName(user.getLastName());
         }
 
-        if (user.getPrenom() != null) {
-            existing.setPrenom(user.getPrenom());
+        if (user.getFirstName() != null) {
+            existing.setFirstName(user.getFirstName());
         }
 
         if (user.getEmailVerified() != null) {
@@ -138,15 +138,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(Long id, String ancienMotDePasse, String nouveauMotDePasse) {
+    public void changePassword(Long id, String currentPassword, String newPassword) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
-        if (!passwordEncoder.matches(ancienMotDePasse, user.getPasswordHash())) {
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
             throw new IllegalArgumentException("Ancien mot de passe incorrect");
         }
 
-        user.setPasswordHash(passwordEncoder.encode(nouveauMotDePasse));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         log.info("Mot de passe modifié pour utilisateur ID : {}", id);
     }

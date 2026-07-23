@@ -11,7 +11,7 @@
     <nav>
       @if (!isAccountant()) {
         <button type="button" [class.active]="currentView() === 'PROFILE'" (click)="setView('PROFILE')">Mon profil</button>
-        <button type="button" [class.active]="currentView() === 'DETAIL'" [disabled]="!enterprise()" (click)="setView('DETAIL')">Fiche entreprise</button>
+        <button type="button" [class.active]="currentView() === 'DETAIL'" [disabled]="!enterprise()" (click)="setView('DETAIL')">Fiche company</button>
         <button type="button" [class.active]="currentView() === 'SOURCES'" (click)="setView('SOURCES')">Sources financieres</button>
       } @else {
         <button type="button" [class.active]="currentView() === 'PROFILE'" (click)="setView('PROFILE')">Mon profil</button>
@@ -38,7 +38,7 @@
           }
         </span>
         <div>
-          <strong>{{ auth.currentUser()?.prenom }} {{ auth.currentUser()?.nom }}</strong>
+          <strong>{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</strong>
           <small>{{ roleLabel() }} - {{ auth.currentUser()?.email }}</small>
         </div>
       </div>
@@ -63,7 +63,7 @@
           </div>
           <div>
             <p class="eyebrow">Profil {{ roleLabel() }}</p>
-            <h2>{{ auth.currentUser()?.prenom }} {{ auth.currentUser()?.nom }}</h2>
+            <h2>{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</h2>
             <p class="muted">{{ auth.currentUser()?.email }}</p>
           </div>
           <div class="profile-actions">
@@ -79,7 +79,7 @@
           <div class="panel-head">
             <div>
               <p class="eyebrow">Responsabilites</p>
-              <h2>{{ isAccountant() ? 'Pilotage portefeuille' : 'Pilotage entreprise' }}</h2>
+              <h2>{{ isAccountant() ? 'Pilotage portefeuille' : 'Pilotage company' }}</h2>
             </div>
           </div>
           @if (isAccountant()) {
@@ -102,7 +102,7 @@
           <div class="panel-head">
             <div>
               <p class="eyebrow">Portefeuille dirigeant</p>
-              <h2>Mes entreprises</h2>
+              <h2>Mes companies</h2>
             </div>
           </div>
 
@@ -118,9 +118,9 @@
                 </span>
                 <span class="status-pill decision-{{ enterpriseCardDecision(item) }}">{{ enterpriseCardStatus(item) }}</span>
                 <strong>{{ displayEnterpriseName(item) }}</strong>
-                <small>Numero d'entreprise : {{ item.numeroEntreprise }}</small>
-                <span>{{ item.formeJuridique || 'Forme juridique a verifier' }}</span>
-                <em>{{ item.secteurActivite || 'Description a completer depuis la BCE / BNB' }}</em>
+                <small>Numero d'entreprise : {{ item.enterpriseNumber }}</small>
+                <span>{{ item.legalForm || 'Forme juridique a verifier' }}</span>
+                <em>{{ item.activitySector || 'Description a completer depuis la BCE / BNB' }}</em>
                 <span class="company-actions">
                   <label class="mini-action" (click)="$event.stopPropagation()">
                     Photo
@@ -149,26 +149,26 @@
             <section class="setup-panel edit-company-panel">
               <div>
                 <p class="eyebrow">Modifier l'entreprise</p>
-                <h2>{{ enterpriseEditForm.raisonSociale || 'Entreprise' }}</h2>
+                <h2>{{ enterpriseEditForm.legalName || 'Company' }}</h2>
                 <p class="muted">Le dirigeant peut corriger les informations de rattachement. Les donnees financieres restent gerees dans Sources financieres.</p>
               </div>
 
               <div class="setup-grid">
                 <div class="field">
                   <label>Raison sociale</label>
-                  <input name="editRaisonSociale" [(ngModel)]="enterpriseEditForm.raisonSociale">
+                  <input name="editRaisonSociale" [(ngModel)]="enterpriseEditForm.legalName">
                 </div>
                 <div class="field">
                   <label>Numero d'entreprise</label>
-                  <input name="editNumeroEntreprise" [(ngModel)]="enterpriseEditForm.numeroEntreprise">
+                  <input name="editEnterpriseNumber" [(ngModel)]="enterpriseEditForm.enterpriseNumber">
                 </div>
                 <div class="field">
                   <label>Forme juridique</label>
-                  <input name="editFormeJuridique" [(ngModel)]="enterpriseEditForm.formeJuridique">
+                  <input name="editFormeJuridique" [(ngModel)]="enterpriseEditForm.legalForm">
                 </div>
                 <div class="field">
                   <label>Secteur / activite</label>
-                  <input name="editSecteurActivite" [(ngModel)]="enterpriseEditForm.secteurActivite">
+                  <input name="editSecteurActivite" [(ngModel)]="enterpriseEditForm.activitySector">
                 </div>
               </div>
 
@@ -187,7 +187,7 @@
               <div>
                 <p class="eyebrow">Ajouter une entreprise</p>
                 <h2>Retrouver l'entreprise via la BCE</h2>
-                <p class="muted">Le dirigeant recherche son entreprise officielle, verifie le statut actif, puis confirme le rattachement dans SaveFunds.</p>
+                <p class="muted">Le dirigeant recherche son company officielle, verifie le status actif, puis confirme le rattachement dans SaveFunds.</p>
               </div>
 
               <div class="enterprise-logo-upload">
@@ -233,7 +233,7 @@
                     </button>
                   }
                 </div>
-                <button class="btn btn-primary confirm-registry" type="button" [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">Confirmer cette entreprise</button>
+                <button class="btn btn-primary confirm-registry" type="button" [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">Confirmer cette company</button>
               }
             </section>
           }
@@ -349,7 +349,7 @@
           <div class="validation-box">
             <small>Demande en attente</small>
             <strong>{{ selectedClient()?.pendingValidation }}</strong>
-            <p>Le comptable verifie la source, le risque fiscal, l'echeance a venir et la tresorerie avant de valider ou reporter l'operation.</p>
+            <p>Le comptable verifie la source, le risque fiscal, l'echeance a venir et la cashBalance avant de valider ou reporter l'operation.</p>
           </div>
 
           <div class="accountant-actions">
@@ -386,7 +386,7 @@
           </div>
           <div class="accountant-alerts">
             <div><strong>Atelier Verhaegen SRL</strong><span>Compte courant debiteur depuis 48 jours.</span></div>
-            <div><strong>Studio Delta SRL</strong><span>Couverture tresorerie sous 1,5 mois.</span></div>
+            <div><strong>Studio Delta SRL</strong><span>Couverture cashBalance sous 1,5 mois.</span></div>
             <div><strong>MecaNord SRL</strong><span>Depense exceptionnelle a valider avant paiement.</span></div>
           </div>
         </article>
@@ -423,7 +423,7 @@
         <div>
           <p class="eyebrow">Premiere etape</p>
           <h2>Retrouver l'entreprise via la BCE</h2>
-          <p class="muted">Le dirigeant recherche son entreprise officielle, verifie le statut actif, puis confirme le rattachement dans SaveFunds.</p>
+          <p class="muted">Le dirigeant recherche son company officielle, verifie le status actif, puis confirme le rattachement dans SaveFunds.</p>
         </div>
 
         <div class="registry-search">
@@ -455,7 +455,7 @@
               </button>
             }
           </div>
-          <button class="btn btn-primary confirm-registry" type="button" [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">Confirmer cette entreprise</button>
+          <button class="btn btn-primary confirm-registry" type="button" [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">Confirmer cette company</button>
         }
 
         <div class="registry-next-step">
@@ -468,17 +468,17 @@
         <article class="metric-card">
           <small>Nom de l'entreprise</small>
           <strong>{{ displayEnterpriseName(enterprise()) }}</strong>
-          <span>Numero d'entreprise : {{ enterprise()?.numeroEntreprise }}</span>
+          <span>Numero d'entreprise : {{ enterprise()?.enterpriseNumber }}</span>
         </article>
         <article class="metric-card">
           <small>Tresorerie actuelle</small>
-          <strong>{{ money(displayedSnapshot()?.tresorerie || enterprise()?.tresorerie) }}</strong>
+          <strong>{{ money(displayedSnapshot()?.cashBalance || enterprise()?.cashBalance) }}</strong>
           <span>{{ coverage() | number:'1.1-1' }} mois de charges</span>
         </article>
         <article class="metric-card">
           <small>Compte courant</small>
-          <strong>{{ money(displayedSnapshot()?.soldeCompteCourant || enterprise()?.soldeCompteCourant) }}</strong>
-          <span>{{ displayedSnapshot()?.dureeCompteCourantDebiteur || 0 }} jours debiteur</span>
+          <strong>{{ money(displayedSnapshot()?.directorCurrentAccountBalance || enterprise()?.directorCurrentAccountBalance) }}</strong>
+          <span>{{ displayedSnapshot()?.directorCurrentAccountDebtorDays || 0 }} jours debiteur</span>
         </article>
         <article class="metric-card">
           <small>Sources actives</small>
@@ -508,7 +508,7 @@
           <article class="panel indicators-panel">
             <div class="panel-head">
               <div>
-                <p class="eyebrow">Indicateurs consolides</p>
+                <p class="eyebrow">FinancialIndicators consolides</p>
                 <h2>Calcul selon la hierarchie SaveFunds</h2>
               </div>
             </div>
@@ -522,39 +522,39 @@
             } @else {
               <div class="indicator-source-table">
                 <div class="indicator-source-row table-head">
-                  <span>Indicateur</span>
+                  <span>FinancialIndicator</span>
                   <span>Valeur</span>
                   <span>Source utilisee</span>
                   <span>Confiance</span>
                 </div>
                 <div class="indicator-source-row">
                   <strong>Tresorerie</strong>
-                  <span>{{ money(displayedSnapshot()?.tresorerie) }}</span>
-                  <small [class.warning-text]="sourceIndicators().tresorerie.warning">{{ sourceIndicators().tresorerie.label }} {{ sourceIndicators().tresorerie.date }}</small>
-                  <span>{{ sourceIndicators().tresorerie.confidence }}%</span>
+                  <span>{{ money(displayedSnapshot()?.cashBalance) }}</span>
+                  <small [class.warning-text]="sourceIndicators().cashBalance.warning">{{ sourceIndicators().cashBalance.label }} {{ sourceIndicators().cashBalance.date }}</small>
+                  <span>{{ sourceIndicators().cashBalance.confidence }}%</span>
                 </div>
                 <div class="indicator-source-row">
                   <strong>CA mensuel</strong>
-                  <span>{{ money(displayedSnapshot()?.chiffreAffairesMensuel) }}</span>
+                  <span>{{ money(displayedSnapshot()?.monthlyRevenue) }}</span>
                   <small [class.warning-text]="sourceIndicators().revenue.warning">{{ sourceIndicators().revenue.label }} {{ sourceIndicators().revenue.date }}</small>
                   <span>{{ sourceIndicators().revenue.confidence }}%</span>
                 </div>
                 <div class="indicator-source-row">
                   <strong>Charges</strong>
-                  <span>{{ money(displayedSnapshot()?.chargesMensuelles) }}</span>
+                  <span>{{ money(displayedSnapshot()?.monthlyExpenses) }}</span>
                   <small [class.warning-text]="sourceIndicators().expenses.warning">{{ sourceIndicators().expenses.label }} {{ sourceIndicators().expenses.date }}</small>
                   <span>{{ sourceIndicators().expenses.confidence }}%</span>
                 </div>
                 <div class="indicator-source-row">
                   <strong>CC dirigeant</strong>
-                  <span>{{ displayedSnapshot()?.dureeCompteCourantDebiteur || 0 }} jour(s)</span>
+                  <span>{{ displayedSnapshot()?.directorCurrentAccountDebtorDays || 0 }} jour(s)</span>
                   <small [class.warning-text]="sourceIndicators().currentAccount.warning">{{ sourceIndicators().currentAccount.label }} {{ sourceIndicators().currentAccount.date }}</small>
                   <span>{{ sourceIndicators().currentAccount.confidence }}%</span>
                 </div>
               </div>
 
               <div class="active-sources">
-                <button type="button" [class.available]="sourceIndicators().tresorerie.available" [disabled]="!sourceIndicators().tresorerie.available" title="Source utilisee automatiquement selon la hierarchie">Tresorerie: {{ sourceIndicators().tresorerie.label }}</button>
+                <button type="button" [class.available]="sourceIndicators().cashBalance.available" [disabled]="!sourceIndicators().cashBalance.available" title="Source utilisee automatiquement selon la hierarchie">Tresorerie: {{ sourceIndicators().cashBalance.label }}</button>
                 <button type="button" [class.available]="sourceIndicators().revenue.available" [disabled]="!sourceIndicators().revenue.available" title="Source utilisee automatiquement selon la hierarchie">CA: {{ sourceIndicators().revenue.label }}</button>
                 <button type="button" [class.available]="sourceIndicators().expenses.available" [disabled]="!sourceIndicators().expenses.available" title="Source utilisee automatiquement selon la hierarchie">Charges: {{ sourceIndicators().expenses.label }}</button>
                 <button type="button" [class.available]="sourceIndicators().currentAccount.available" [disabled]="!sourceIndicators().currentAccount.available" title="Source utilisee automatiquement selon la hierarchie">CC: {{ sourceIndicators().currentAccount.label }}</button>
@@ -631,18 +631,25 @@
                 <strong>{{ latestSource('ACCOUNTING_CSV') ? 'Donnees actuelles disponibles' : 'Aucun bilan provisoire importe' }}</strong>
               </div>
               @if (latestSource('ACCOUNTING_CSV')) {
-                <p>{{ latestSource('ACCOUNTING_CSV')?.rawMetadata }}</p>
+                <p>Extraction automatique depuis {{ sourceReference(latestSource('ACCOUNTING_CSV')) }}</p>
                 <div class="source-note">
-                  <span>CA {{ money(latestSource('ACCOUNTING_CSV')?.chiffreAffairesMensuel) }}</span>
-                  <span>Charges {{ money(latestSource('ACCOUNTING_CSV')?.chargesMensuelles) }}</span>
-                  <span>Tresorerie {{ money(latestSource('ACCOUNTING_CSV')?.tresorerie) }}</span>
+                  <span>CA {{ money(latestSource('ACCOUNTING_CSV')?.monthlyRevenue) }}</span>
+                  <span>Charges {{ money(latestSource('ACCOUNTING_CSV')?.monthlyExpenses) }}</span>
+                  <span>Tresorerie {{ money(latestSource('ACCOUNTING_CSV')?.cashBalance) }}</span>
+                  <span>CC dirigeant {{ money(latestSource('ACCOUNTING_CSV')?.directorCurrentAccountBalance) }}</span>
                 </div>
+                @for (warning of latestSource('ACCOUNTING_CSV')?.warnings || []; track warning) {
+                  <span class="warning soft">{{ warning }}</span>
+                }
+                @if ((latestSource('ACCOUNTING_CSV')?.missingFields || []).length > 0) {
+                  <span class="warning soft">Champs a verifier: {{ latestSource('ACCOUNTING_CSV')?.missingFields?.join(', ') }}</span>
+                }
               }
               <label class="btn btn-primary">
                 {{ latestSource('ACCOUNTING_CSV') ? 'Ecraser par un fichier plus recent' : 'Importer un bilan provisoire' }}
                 <input type="file" accept=".csv,text/csv,.xlsx,.xls,.pdf,.doc,.docx,image/*" (change)="onAccountingCsvSelected($event)">
               </label>
-              <span class="warning soft">Formats metier acceptes: CSV, Excel, PDF, Word ou image. Parsing actuel: CSV comptable accountCode,label,amount. Les autres formats seront traites par extraction IA/OCR.</span>
+              <span class="warning soft">Extraction automatique: PDF texte de bilan provisoire et CSV comptable accountCode,label,amount. Word, Excel scanne ou image necessitent OCR/IA si le texte n'est pas lisible.</span>
             </div>
           }
 
@@ -655,7 +662,7 @@
               @if (latestSource('BANK_CSV')) {
                 <p>{{ latestSource('BANK_CSV')?.rawMetadata }}</p>
                 <div class="source-note">
-                  <span>Tresorerie {{ money(latestSource('BANK_CSV')?.tresorerie) }}</span>
+                  <span>Tresorerie {{ money(latestSource('BANK_CSV')?.cashBalance) }}</span>
                   <span>{{ bankTransactions().length }} transaction(s) classee(s)</span>
                 </div>
               }

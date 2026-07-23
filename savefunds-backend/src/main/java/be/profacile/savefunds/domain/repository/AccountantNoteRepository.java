@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface AccountantNoteRepository extends JpaRepository<AccountantNote, Long> {
-    Optional<AccountantNote> findFirstByEntrepriseIdOrderByUpdatedAtDescCreatedAtDesc(Long entrepriseId);
+    Optional<AccountantNote> findFirstByCompanyIdOrderByUpdatedAtDescCreatedAtDesc(Long companyId);
 }

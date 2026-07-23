@@ -11,9 +11,9 @@ import be.profacile.savefunds.domain.entity.User;
 public interface AccountantDashboardService {
     AccountantDashboardResponse dashboard(User accountant);
 
-    AccountantNoteResponse addNote(User accountant, Long entrepriseId, CreateAccountantNoteRequest request);
+    AccountantNoteResponse addNote(User accountant, Long companyId, CreateAccountantNoteRequest request);
 
-    ValidationDecisionResponse createValidationRequest(User requester, Long entrepriseId, CreateValidationDecisionRequest request);
+    ValidationDecisionResponse createValidationRequest(User requester, Long companyId, CreateValidationDecisionRequest request);
 
     ValidationDecisionResponse decide(User accountant, Long validationId, DecideValidationRequest request);
 }

@@ -1,12 +1,12 @@
 package be.profacile.savefunds.domain.service.impl;
 
 import be.profacile.savefunds.domain.entity.AuditLog;
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.entity.User;
 import be.profacile.savefunds.domain.enums.AuditAction;
 import be.profacile.savefunds.domain.enums.AuditOutcome;
 import be.profacile.savefunds.domain.repository.AuditLogRepository;
-import be.profacile.savefunds.domain.repository.EntrepriseRepository;
+import be.profacile.savefunds.domain.repository.CompanyRepository;
 import be.profacile.savefunds.domain.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,13 @@ import java.util.List;
 public class AuditLogServiceImpl implements AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
-    private final EntrepriseRepository entrepriseRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AuditLog record(
             User user,
-            Long entrepriseId,
+            Long companyId,
             AuditAction action,
             AuditOutcome outcome,
             String resourceType,
@@ -36,7 +36,7 @@ public class AuditLogServiceImpl implements AuditLogService {
         AuditLog auditLog = new AuditLog();
         auditLog.setUserId(user.getId());
         auditLog.setUserEmail(user.getEmail());
-        auditLog.setEntreprise(resolveEntreprise(entrepriseId));
+        auditLog.setCompany(resolveCompany(companyId));
         auditLog.setAction(action);
         auditLog.setOutcome(outcome);
         auditLog.setResourceType(resourceType);
@@ -46,14 +46,14 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public List<AuditLog> findLastForEntreprise(Long entrepriseId) {
-        return auditLogRepository.findTop50ByEntrepriseIdOrderByCreatedAtDesc(entrepriseId);
+    public List<AuditLog> findLastForCompany(Long companyId) {
+        return auditLogRepository.findTop50ByCompanyIdOrderByCreatedAtDesc(companyId);
     }
 
-    private Entreprise resolveEntreprise(Long entrepriseId) {
-        if (entrepriseId == null) {
+    private Company resolveCompany(Long companyId) {
+        if (companyId == null) {
             return null;
         }
-        return entrepriseRepository.findById(entrepriseId).orElse(null);
+        return companyRepository.findById(companyId).orElse(null);
     }
 }

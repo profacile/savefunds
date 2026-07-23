@@ -1,6 +1,6 @@
 package be.profacile.savefunds.domain.service.financial;
 
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.enums.FinancialSnapshotSource;
 
 public interface ExternalFinancialDataProvider {
@@ -10,5 +10,5 @@ public interface ExternalFinancialDataProvider {
 
     String providerVersion();
 
-    ExtractedFinancialData fetch(Entreprise entreprise);
+    ExtractedFinancialData fetch(Company company);
 }

@@ -25,9 +25,10 @@ class BankCsvFinancialDataExtractorTest {
 
         ExtractedFinancialData data = extractor.extract(file);
 
-        assertThat(data.getChiffreAffairesMensuel()).isEqualByComparingTo("5000");
-        assertThat(data.getChargesMensuelles()).isEqualByComparingTo("3700");
-        assertThat(data.getTresorerie()).isEqualByComparingTo("8300");
+        assertThat(data.getMonthlyRevenue()).isEqualByComparingTo("5000");
+        assertThat(data.getMonthlyExpenses()).isEqualByComparingTo("3700");
+        assertThat(data.getCashBalance()).isEqualByComparingTo("8300");
         assertThat(data.getConfidenceScore()).isEqualTo(80);
     }
 }
+

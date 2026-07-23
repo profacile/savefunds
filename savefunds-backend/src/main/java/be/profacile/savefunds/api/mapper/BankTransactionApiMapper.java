@@ -10,7 +10,7 @@ public class BankTransactionApiMapper {
     public BankTransactionResponse toResponse(BankTransaction transaction) {
         return BankTransactionResponse.builder()
                 .id(transaction.getId())
-                .entrepriseId(transaction.getEntreprise().getId())
+                .companyId(transaction.getCompany().getId())
                 .financialSnapshotId(transaction.getFinancialSnapshot() == null ? null : transaction.getFinancialSnapshot().getId())
                 .transactionDate(transaction.getTransactionDate())
                 .description(transaction.getDescription())

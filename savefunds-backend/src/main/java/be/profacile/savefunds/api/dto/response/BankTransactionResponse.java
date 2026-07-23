@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BankTransactionResponse {
     private Long id;
-    private Long entrepriseId;
+    private Long companyId;
     private Long financialSnapshotId;
     private LocalDate transactionDate;
     private String description;
