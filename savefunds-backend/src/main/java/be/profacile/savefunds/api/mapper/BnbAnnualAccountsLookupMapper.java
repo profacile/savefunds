@@ -10,7 +10,7 @@ public class BnbAnnualAccountsLookupMapper {
     public BnbAnnualAccountsLookupResponse toResponse(BnbAnnualAccountsLookup lookup) {
         return BnbAnnualAccountsLookupResponse.builder()
                 .id(lookup.getId())
-                .entrepriseId(lookup.getEntreprise().getId())
+                .companyId(lookup.getCompany().getId())
                 .enterpriseNumber(lookup.getEnterpriseNumber())
                 .status(lookup.getStatus())
                 .consultUrl(lookup.getConsultUrl())

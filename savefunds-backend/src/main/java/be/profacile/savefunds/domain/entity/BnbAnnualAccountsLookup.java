@@ -18,7 +18,7 @@ public class BnbAnnualAccountsLookup {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "entreprise_id", nullable = false)
-    private Entreprise entreprise;
+    private Company company;
 
     @Column(name = "enterprise_number", nullable = false)
     private String enterpriseNumber;

@@ -26,13 +26,13 @@ public class RegisterRequest {
     @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
     private String password;
 
-    @NotBlank(message = "Le nom est obligatoire")
-    @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caractères")
-    private String nom;
+    @NotBlank(message = "Le lastName est obligatoire")
+    @Size(min = 2, max = 100, message = "Le lastName doit contenir entre 2 et 100 caractères")
+    private String lastName;
 
     @NotBlank(message = "Le prénom est obligatoire")
     @Size(min = 2, max = 100, message = "Le prénom doit contenir entre 2 et 100 caractères")
-    private String prenom;
+    private String firstName;
 
     private Role role = Role.DIRIGEANT;
 }

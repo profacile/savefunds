@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ImportJobResponse {
     private Long id;
-    private Long entrepriseId;
+    private Long companyId;
     private Long snapshotId;
     private FinancialSnapshotSource source;
     private ImportJobStatus status;

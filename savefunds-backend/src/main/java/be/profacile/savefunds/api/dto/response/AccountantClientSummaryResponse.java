@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @Builder
 public class AccountantClientSummaryResponse {
-    private Long entrepriseId;
+    private Long companyId;
     private String companyName;
     private String companyNumber;
     private Decision status;

@@ -20,13 +20,13 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Requête pour mettre à jour un utilisateur (mise à jour partielle)")
 public class UpdateUserRequest {
 
-    @Size(min = 2, max = 100, message = "Le nom doit contenir entre 2 et 100 caractères")
+    @Size(min = 2, max = 100, message = "Le lastName doit contenir entre 2 et 100 caractères")
     @Schema(description = "Nom de l'utilisateur", example = "SANDJONG MOTIO")
-    private String nom;
+    private String lastName;
 
     @Size(min = 2, max = 100, message = "Le prénom doit contenir entre 2 et 100 caractères")
     @Schema(description = "Prénom de l'utilisateur", example = "Christian")
-    private String prenom;
+    private String firstName;
 
     @Schema(description = "Statut de vérification de l'email", example = "true")
     private Boolean emailVerified;

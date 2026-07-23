@@ -39,13 +39,13 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/register - inscription réussie")
+    @DisplayName("POST /auth/register - inscription rÃ©ussie")
     void shouldRegister() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@profacile.be");
         request.setPassword("password123");
-        request.setNom("Doe");
-        request.setPrenom("John");
+        request.setLastName("Doe");
+        request.setFirstName("John");
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,24 +54,24 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.user.email").value("test@profacile.be"))
-                .andExpect(jsonPath("$.user.nom").value("Doe"));
+                .andExpect(jsonPath("$.user.lastName").value("Doe"));
     }
 
     @Test
-    @DisplayName("POST /auth/register - 400 si email déjà utilisé")
+    @DisplayName("POST /auth/register - 400 si email dÃ©jÃ  utilisÃ©")
     void shouldReturn400OnDuplicateEmail() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@profacile.be");
         request.setPassword("password123");
-        request.setNom("Doe");
-        request.setPrenom("John");
+        request.setLastName("Doe");
+        request.setFirstName("John");
 
         // Premier enregistrement
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
-        // Deuxième avec le même email
+        // DeuxiÃ¨me avec le mÃªme email
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -79,12 +79,12 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/register - 400 si données invalides")
+    @DisplayName("POST /auth/register - 400 si Données invalides")
     void shouldReturn400OnInvalidData() throws Exception {
         RegisterRequest request = new RegisterRequest();
-        request.setEmail("email-invalide");   // ← format invalide
-        request.setPassword("123");           // ← trop court
-        request.setNom("D");                  // ← trop court
+        request.setEmail("email-invalide");   // â† format invalide
+        request.setPassword("123");           // â† trop court
+        request.setLastName("D");                  // â† trop court
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,14 +93,14 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - connexion réussie")
+    @DisplayName("POST /auth/login - connexion rÃ©ussie")
     void shouldLogin() throws Exception {
         // D'abord s'inscrire
         RegisterRequest register = new RegisterRequest();
         register.setEmail("test@profacile.be");
         register.setPassword("password123");
-        register.setNom("Doe");
-        register.setPrenom("John");
+        register.setLastName("Doe");
+        register.setFirstName("John");
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(register)));
@@ -124,8 +124,8 @@ class AuthControllerTest {
         RegisterRequest register = new RegisterRequest();
         register.setEmail("test@profacile.be");
         register.setPassword("correctPassword");
-        register.setNom("Doe");
-        register.setPrenom("John");
+        register.setLastName("Doe");
+        register.setFirstName("John");
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(register)));

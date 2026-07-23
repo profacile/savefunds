@@ -80,26 +80,26 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
         BelgianAccountingMapper.AccountingBuckets buckets = accountingMapper.map(balances);
         List<String> missing = new ArrayList<>();
         if (buckets.getRevenue().signum() == 0) {
-            missing.add("chiffreAffairesMensuel");
+            missing.add("monthlyRevenue");
         }
         if (buckets.getExpenses().signum() == 0) {
-            missing.add("chargesMensuelles");
+            missing.add("monthlyExpenses");
         }
         if (buckets.getCash().signum() == 0) {
-            missing.add("tresorerie");
+            missing.add("cashBalance");
         }
         if (!buckets.getIgnoredAccounts().isEmpty()) {
             warnings.add("Comptes non exploites: " + buckets.getIgnoredAccounts().keySet());
         }
 
         return ExtractedFinancialData.builder()
-                .chiffreAffairesMensuel(buckets.getRevenue())
-                .chargesMensuelles(buckets.getExpenses())
-                .tresorerie(buckets.getCash())
-                .soldeCompteCourant(buckets.getCurrentAccount())
-                .dettesCourtTerme(buckets.getSupplierDebt())
-                .creancesClients(buckets.getCustomerReceivables())
-                .dureeCompteCourantDebiteur(buckets.getCurrentAccount().signum() < 0 ? 31 : 0)
+                .monthlyRevenue(buckets.getRevenue())
+                .monthlyExpenses(buckets.getExpenses())
+                .cashBalance(buckets.getCash())
+                .directorCurrentAccountBalance(buckets.getCurrentAccount())
+                .shortTermDebt(buckets.getSupplierDebt())
+                .customerReceivables(buckets.getCustomerReceivables())
+                .directorCurrentAccountDebtorDays(buckets.getCurrentAccount().signum() < 0 ? 31 : 0)
                 .snapshotDate(LocalDate.now())
                 .confidenceScore(missing.isEmpty() ? 85 : 60)
                 .warnings(warnings)
@@ -156,7 +156,7 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
             ));
             BigDecimal taxes = findAmount(text, List.of(
                     Pattern.compile("(?im)^\\s*Impôts sur le résultat.*?67/77\\s+(.+?)\\s*$"),
-                    Pattern.compile("(?im)^\\s*Impots sur le resultat.*?67/77\\s+(.+?)\\s*$")
+                    Pattern.compile("(?im)^\\s*Impots sur le result.*?67/77\\s+(.+?)\\s*$")
             ));
             BigDecimal cash = findAmount(text, List.of(
                     Pattern.compile("(?im)^\\s*Valeurs disponibles\\s+54/58\\s+(.+?)\\s*$"),
@@ -186,13 +186,13 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
             }
 
             return ExtractedFinancialData.builder()
-                    .chiffreAffairesMensuel(monthly(revenue, months))
-                    .chargesMensuelles(monthly(expenses, months))
-                    .tresorerie(cash)
-                    .soldeCompteCourant(currentAccount == null ? null : currentAccount.abs().negate())
-                    .dettesCourtTerme(shortTermDebt)
-                    .creancesClients(receivables)
-                    .dureeCompteCourantDebiteur(currentAccount != null && currentAccount.signum() != 0 ? 31 : 0)
+                    .monthlyRevenue(monthly(revenue, months))
+                    .monthlyExpenses(monthly(expenses, months))
+                    .cashBalance(cash)
+                    .directorCurrentAccountBalance(currentAccount == null ? null : currentAccount.abs().negate())
+                    .shortTermDebt(shortTermDebt)
+                    .customerReceivables(receivables)
+                    .directorCurrentAccountDebtorDays(currentAccount != null && currentAccount.signum() != 0 ? 31 : 0)
                     .snapshotDate(LocalDate.now())
                     .confidenceScore(missing.isEmpty() ? 78 : 55)
                     .warnings(warnings)
@@ -247,16 +247,16 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
     private List<String> missingFields(BigDecimal revenue, BigDecimal expenses, BigDecimal cash, BigDecimal currentAccount) {
         List<String> missing = new ArrayList<>();
         if (revenue == null) {
-            missing.add("chiffreAffairesMensuel");
+            missing.add("monthlyRevenue");
         }
         if (expenses == null) {
-            missing.add("chargesMensuelles");
+            missing.add("monthlyExpenses");
         }
         if (cash == null) {
-            missing.add("tresorerie");
+            missing.add("cashBalance");
         }
         if (currentAccount == null) {
-            missing.add("soldeCompteCourant");
+            missing.add("directorCurrentAccountBalance");
         }
         return missing;
     }
@@ -271,10 +271,10 @@ public class AccountingCsvFinancialDataExtractor implements FinancialDataExtract
                         "Extraction automatique non encore effectuee pour ce format. Le document doit etre relu par le comptable ou traite par le connecteur IA/OCR."
                 ))
                 .missingFields(List.of(
-                        "chiffreAffairesMensuel",
-                        "chargesMensuelles",
-                        "tresorerie",
-                        "soldeCompteCourant"
+                        "monthlyRevenue",
+                        "monthlyExpenses",
+                        "cashBalance",
+                        "directorCurrentAccountBalance"
                 ))
                 .rawMetadata("documentReceived=true;filename=" + filename + ";parserStatus=AWAITING_REVIEW;expectedParser=IA_OCR_OR_ACCOUNTANT_VALIDATION")
                 .build();

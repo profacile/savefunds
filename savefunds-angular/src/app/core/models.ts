@@ -1,8 +1,8 @@
 export interface User {
   id: number;
   email: string;
-  nom: string;
-  prenom: string;
+  lastName: string;
+  firstName: string;
   role: string;
   photoUrl?: string;
 }
@@ -19,27 +19,27 @@ export interface MessageResponse {
 export interface Enterprise {
   id: number;
   userId: number;
-  raisonSociale: string;
-  numeroEntreprise: string;
-  formeJuridique?: string;
-  secteurActivite?: string;
-  tresorerie: number;
-  soldeCompteCourant?: number;
-  chiffreAffairesMensuel: number;
-  chargesMensuelles: number;
-  statut?: string;
+  legalName: string;
+  enterpriseNumber: string;
+  legalForm?: string;
+  activitySector?: string;
+  cashBalance: number;
+  directorCurrentAccountBalance?: number;
+  monthlyRevenue: number;
+  monthlyExpenses: number;
+  status?: string;
 }
 
 export interface CreateEnterpriseRequest {
   userId: number;
-  raisonSociale: string;
-  numeroEntreprise: string;
-  formeJuridique: string;
-  secteurActivite: string;
-  tresorerie: number | null;
-  soldeCompteCourant: number | null;
-  chiffreAffairesMensuel: number | null;
-  chargesMensuelles: number | null;
+  legalName: string;
+  enterpriseNumber: string;
+  legalForm: string;
+  activitySector: string;
+  cashBalance: number | null;
+  directorCurrentAccountBalance: number | null;
+  monthlyRevenue: number | null;
+  monthlyExpenses: number | null;
 }
 
 export interface CompanyRegistryCompany {
@@ -64,7 +64,7 @@ export interface CompanyRegistryImportResult {
 
 export interface BnbAnnualAccountsLookup {
   id: number;
-  entrepriseId: number;
+  companyId: number;
   enterpriseNumber: string;
   status: 'FOUND' | 'NOT_FOUND' | 'UNAVAILABLE';
   consultUrl: string;
@@ -85,16 +85,16 @@ export interface BnbAnnualAccountsLookup {
 
 export interface FinancialSnapshot {
   id: number;
-  entrepriseId: number;
+  companyId: number;
   source: string;
   sourceReference: string;
-  chiffreAffairesMensuel: number;
-  chargesMensuelles: number;
-  tresorerie: number;
-  soldeCompteCourant: number;
-  dettesCourtTerme: number;
-  creancesClients: number;
-  dureeCompteCourantDebiteur: number;
+  monthlyRevenue: number;
+  monthlyExpenses: number;
+  cashBalance: number;
+  directorCurrentAccountBalance: number;
+  shortTermDebt: number;
+  customerReceivables: number;
+  directorCurrentAccountDebtorDays: number;
   snapshotDate: string;
   confidenceScore: number;
   warnings: string[];
@@ -105,7 +105,7 @@ export interface FinancialSnapshot {
 
 export interface BankTransaction {
   id: number;
-  entrepriseId: number;
+  companyId: number;
   financialSnapshotId?: number;
   transactionDate: string;
   description: string;
@@ -144,7 +144,7 @@ export interface VigilanceResult {
 
 export interface AuditLog {
   id: number;
-  entrepriseId: number;
+  companyId: number;
   userId: number;
   userEmail: string;
   action: string;
@@ -164,7 +164,7 @@ export interface AccountantDashboard {
 }
 
 export interface AccountantClientSummary {
-  entrepriseId: number;
+  companyId: number;
   companyName: string;
   companyNumber: string;
   status: 'VERT' | 'ORANGE' | 'ROUGE';

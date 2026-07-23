@@ -25,7 +25,7 @@ public class ValidationDecision {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "entreprise_id", nullable = false)
-    private Entreprise entreprise;
+    private Company company;
 
     @Column(nullable = false)
     private Long requestedByUserId;

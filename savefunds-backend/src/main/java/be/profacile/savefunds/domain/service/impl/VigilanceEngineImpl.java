@@ -23,9 +23,9 @@ public class VigilanceEngineImpl implements VigilanceEngine {
 
     @Override
     public VigilanceResultResponse simulate(FinancialSnapshot snapshot, SimulateFinancialDecisionRequest request) {
-        BigDecimal cashBefore = positive(snapshot.getTresorerie());
-        BigDecimal expenses = positive(snapshot.getChargesMensuelles());
-        BigDecimal revenue = positive(snapshot.getChiffreAffairesMensuel());
+        BigDecimal cashBefore = positive(snapshot.getCashBalance());
+        BigDecimal expenses = positive(snapshot.getMonthlyExpenses());
+        BigDecimal revenue = positive(snapshot.getMonthlyRevenue());
         BigDecimal requestedAmount = positive(request.getAmount());
         BigDecimal cashAfter = cashBefore.subtract(requestedAmount);
         BigDecimal maxRecommendedAmount = cashBefore.subtract(expenses.multiply(THREE)).max(BigDecimal.ZERO);
@@ -62,7 +62,7 @@ public class VigilanceEngineImpl implements VigilanceEngine {
                 coverage.compareTo(ONE) >= 0 ? Decision.ORANGE : Decision.ROUGE;
         return VigilanceIndicatorResponse.builder()
                 .code("CASH_COVERAGE")
-                .label("Couverture de tresorerie apres decision")
+                .label("Couverture de cashBalance apres decision")
                 .value(coverage)
                 .decision(decision)
                 .details("Tresorerie projetee / charges mensuelles")
@@ -85,8 +85,8 @@ public class VigilanceEngineImpl implements VigilanceEngine {
     }
 
     private VigilanceIndicatorResponse currentAccountIndicator(FinancialSnapshot snapshot) {
-        BigDecimal currentAccount = snapshot.getSoldeCompteCourant() == null ? BigDecimal.ZERO : snapshot.getSoldeCompteCourant();
-        int debtorDays = snapshot.getDureeCompteCourantDebiteur() == null ? 0 : snapshot.getDureeCompteCourantDebiteur();
+        BigDecimal currentAccount = snapshot.getDirectorCurrentAccountBalance() == null ? BigDecimal.ZERO : snapshot.getDirectorCurrentAccountBalance();
+        int debtorDays = snapshot.getDirectorCurrentAccountDebtorDays() == null ? 0 : snapshot.getDirectorCurrentAccountDebtorDays();
         Decision decision = currentAccount.signum() >= 0 ? Decision.VERT :
                 debtorDays <= 30 ? Decision.ORANGE : Decision.ROUGE;
         return VigilanceIndicatorResponse.builder()
@@ -108,7 +108,7 @@ public class VigilanceEngineImpl implements VigilanceEngine {
                 .label("Montant demande vs maximum recommande")
                 .value(requestedAmount)
                 .decision(decision)
-                .details("Maximum recommande = tresorerie - 3 mois de charges")
+                .details("Maximum recommande = cashBalance - 3 mois de charges")
                 .recommendation(decision == Decision.ROUGE ? "Limiter le montant a " + maxRecommendedAmount + " EUR ou attendre." : "Montant compatible avec la reserve cible.")
                 .build();
     }

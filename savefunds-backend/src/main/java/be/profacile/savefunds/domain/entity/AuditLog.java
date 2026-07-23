@@ -22,7 +22,7 @@ public class AuditLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entreprise_id")
-    private Entreprise entreprise;
+    private Company company;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;

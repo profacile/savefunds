@@ -2,11 +2,11 @@ package be.profacile.savefunds.domain.service.impl;
 
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.domain.entity.BankTransaction;
-import be.profacile.savefunds.domain.entity.Entreprise;
+import be.profacile.savefunds.domain.entity.Company;
 import be.profacile.savefunds.domain.entity.FinancialSnapshot;
 import be.profacile.savefunds.domain.enums.TransactionClassificationType;
 import be.profacile.savefunds.domain.repository.BankTransactionRepository;
-import be.profacile.savefunds.domain.repository.EntrepriseRepository;
+import be.profacile.savefunds.domain.repository.CompanyRepository;
 import be.profacile.savefunds.domain.repository.FinancialSnapshotRepository;
 import be.profacile.savefunds.domain.service.BankTransactionService;
 import be.profacile.savefunds.domain.service.transaction.TransactionClassificationResult;
@@ -27,28 +27,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BankTransactionServiceImpl implements BankTransactionService {
 
-    private final EntrepriseRepository entrepriseRepository;
+    private final CompanyRepository companyRepository;
     private final BankTransactionRepository bankTransactionRepository;
     private final FinancialSnapshotRepository financialSnapshotRepository;
     private final TransactionClassifierService transactionClassifierService;
 
     @Override
-    public List<BankTransaction> importAndClassify(Long entrepriseId, FinancialSnapshot snapshot, MultipartFile file) {
-        Entreprise entreprise = entrepriseRepository.findById(entrepriseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable: " + entrepriseId));
+    public List<BankTransaction> importAndClassify(Long companyId, FinancialSnapshot snapshot, MultipartFile file) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company introuvable: " + companyId));
 
-        List<BankTransaction> transactions = parseTransactions(entreprise, snapshot, file);
+        List<BankTransaction> transactions = parseTransactions(company, snapshot, file);
         List<BankTransaction> saved = bankTransactionRepository.saveAll(transactions);
         applyDirectorCurrentAccountImpact(snapshot, saved);
         return saved;
     }
 
     @Override
-    public List<BankTransaction> findByEntreprise(Long entrepriseId) {
-        return bankTransactionRepository.findByEntrepriseIdOrderByTransactionDateDescIdDesc(entrepriseId);
+    public List<BankTransaction> findByCompany(Long companyId) {
+        return bankTransactionRepository.findByCompanyIdOrderByTransactionDateDescIdDesc(companyId);
     }
 
-    private List<BankTransaction> parseTransactions(Entreprise entreprise, FinancialSnapshot snapshot, MultipartFile file) {
+    private List<BankTransaction> parseTransactions(Company company, FinancialSnapshot snapshot, MultipartFile file) {
         List<BankTransaction> transactions = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             String header = reader.readLine();
@@ -69,10 +69,10 @@ public class BankTransactionServiceImpl implements BankTransactionService {
                 String description = clean(columns[1]);
                 BigDecimal amount = parseAmount(columns[2]);
                 BigDecimal balance = parseAmount(columns[3]);
-                TransactionClassificationResult classification = transactionClassifierService.classify(entreprise, date, description, amount);
+                TransactionClassificationResult classification = transactionClassifierService.classify(company, date, description, amount);
 
                 BankTransaction transaction = new BankTransaction();
-                transaction.setEntreprise(entreprise);
+                transaction.setCompany(company);
                 transaction.setFinancialSnapshot(snapshot);
                 transaction.setTransactionDate(date != null ? date : snapshot.getSnapshotDate());
                 transaction.setDescription(description);
@@ -98,8 +98,8 @@ public class BankTransactionServiceImpl implements BankTransactionService {
                 .filter(value -> value != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         if (impact.signum() > 0) {
-            snapshot.setSoldeCompteCourant(impact.negate());
-            snapshot.setDureeCompteCourantDebiteur(firstDebtorDayEstimate(transactions));
+            snapshot.setDirectorCurrentAccountBalance(impact.negate());
+            snapshot.setDirectorCurrentAccountDebtorDays(firstDebtorDayEstimate(transactions));
             String warning = "Compte courant dirigeant estime depuis transactions bancaires classees, a valider par le comptable.";
             snapshot.setWarnings(appendLine(snapshot.getWarnings(), warning));
             financialSnapshotRepository.save(snapshot);

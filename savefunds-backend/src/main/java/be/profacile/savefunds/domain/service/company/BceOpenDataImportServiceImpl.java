@@ -65,9 +65,9 @@ public class BceOpenDataImportServiceImpl implements CompanyRegistryImportServic
 
     private CompanyRegistryEntry toEntry(List<String> values, Map<String, Integer> columns) {
         String enterpriseNumber = normalizeEnterpriseNumber(value(values, columns,
-                "enterpriseNumber", "EnterpriseNumber", "EntityNumber", "entity_number", "numeroEntreprise", "Number"));
+                "enterpriseNumber", "EnterpriseNumber", "EntityNumber", "entity_number", "enterpriseNumber", "Number"));
         if (enterpriseNumber.isBlank()) {
-            throw new IllegalArgumentException("Numero d'entreprise manquant");
+            throw new IllegalArgumentException("Numero d'company manquant");
         }
 
         CompanyRegistryEntry entry = companyRegistryEntryRepository.findByEnterpriseNumber(enterpriseNumber)
@@ -76,11 +76,11 @@ public class BceOpenDataImportServiceImpl implements CompanyRegistryImportServic
         String name = firstNonBlank(
                 value(values, columns, "name", "Name", "denomination", "Denomination", "EntityName"),
                 entry.getName(),
-                "Entreprise BCE " + enterpriseNumber
+                "Company BCE " + enterpriseNumber
         );
 
-        String status = firstNonBlank(value(values, columns, "status", "Status", "statut", "JuridicalSituation"), entry.getStatus(), "ACTIF");
-        String legalForm = firstNonBlank(value(values, columns, "legalForm", "LegalForm", "formeJuridique", "JuridicalForm", "JuridicalFormCAC"), entry.getLegalForm(), "");
+        String status = firstNonBlank(value(values, columns, "status", "Status", "status", "JuridicalSituation"), entry.getStatus(), "ACTIF");
+        String legalForm = firstNonBlank(value(values, columns, "legalForm", "LegalForm", "legalForm", "JuridicalForm", "JuridicalFormCAC"), entry.getLegalForm(), "");
         String address = firstNonBlank(buildAddress(values, columns), entry.getAddress(), "");
         String postalCode = firstNonBlank(value(values, columns, "postalCode", "Zipcode", "zipcode", "codePostal"), entry.getPostalCode(), "");
         String city = firstNonBlank(value(values, columns, "city", "Municipality", "MunicipalityFR", "MunicipalityNL", "commune"), entry.getCity(), "");

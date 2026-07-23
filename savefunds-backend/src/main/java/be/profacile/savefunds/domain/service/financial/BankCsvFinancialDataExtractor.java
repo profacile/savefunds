@@ -72,19 +72,19 @@ public class BankCsvFinancialDataExtractor implements FinancialDataExtractor {
 
         List<String> missing = new ArrayList<>();
         if (finalBalance == null) {
-            missing.add("tresorerie");
+            missing.add("cashBalance");
             finalBalance = BigDecimal.ZERO;
         }
         if (outgoing.signum() == 0) {
-            missing.add("chargesMensuelles");
+            missing.add("monthlyExpenses");
             warnings.add("Aucune sortie bancaire detectee: les charges mensuelles seront a verifier.");
         }
 
         return ExtractedFinancialData.builder()
-                .chiffreAffairesMensuel(incoming)
-                .chargesMensuelles(outgoing)
-                .tresorerie(finalBalance)
-                .soldeCompteCourant(BigDecimal.ZERO)
+                .monthlyRevenue(incoming)
+                .monthlyExpenses(outgoing)
+                .cashBalance(finalBalance)
+                .directorCurrentAccountBalance(BigDecimal.ZERO)
                 .snapshotDate(lastDate != null ? lastDate : LocalDate.now())
                 .confidenceScore(missing.isEmpty() ? 80 : 55)
                 .warnings(warnings)

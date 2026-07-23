@@ -63,8 +63,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setNom(request.getNom());
-        user.setPrenom(request.getPrenom());
+        user.setLastName(request.getLastName());
+        user.setFirstName(request.getFirstName());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(resolvePublicRegistrationRole(request.getRole()));
         user.setEmailVerified(false);
@@ -76,8 +76,8 @@ public class AuthServiceImpl implements AuthService {
         UserResponse userResponse = new UserResponse(
                 saved.getId(),
                 saved.getEmail(),
-                saved.getNom(),
-                saved.getPrenom(),
+                saved.getLastName(),
+                saved.getFirstName(),
                 saved.getRole(),
                 saved.getEmailVerified(),
                 saved.getPhotoUrl()
@@ -107,8 +107,8 @@ public class AuthServiceImpl implements AuthService {
         UserResponse userResponse = new UserResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getNom(),
-                user.getPrenom(),
+                user.getLastName(),
+                user.getFirstName(),
                 user.getRole(),
                 user.getEmailVerified(),
                 user.getPhotoUrl()

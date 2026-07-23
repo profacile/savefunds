@@ -10,8 +10,8 @@ import { AuthService } from '../../core/auth.service';
   styleUrl: '../login/login.component.css'
 })
 export class RegisterComponent {
-  prenom = 'Steve';
-  nom = 'Monthe';
+  firstName = 'Steve';
+  lastName = 'Monthe';
   email = `demo${Date.now()}@savefunds.be`;
   password = 'password';
   role: 'DIRIGEANT' | 'COMPTABLE' = 'DIRIGEANT';
@@ -33,7 +33,7 @@ export class RegisterComponent {
     this.loading.set(true);
     this.error.set('');
 
-    this.auth.register(this.email, this.password, this.nom, this.prenom, this.role).subscribe({
+    this.auth.register(this.email, this.password, this.lastName, this.firstName, this.role).subscribe({
       next: () => {
         this.loading.set(false);
         void this.router.navigateByUrl('/');

@@ -159,7 +159,7 @@ public class BcePublicSearchClient {
             return normalizedQuery.toUpperCase();
         }
         String[] chunks = rowText.split("\\s{2,}");
-        return chunks.length > 0 ? chunks[chunks.length - 1].trim() : "Entreprise BCE";
+        return chunks.length > 0 ? chunks[chunks.length - 1].trim() : "Company BCE";
     }
 
     private String extractAddress(String rowText) {

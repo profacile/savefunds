@@ -35,11 +35,11 @@ class AccountingCsvFinancialDataExtractorTest {
 
         ExtractedFinancialData data = extractor.extract(file);
 
-        assertThat(data.getChiffreAffairesMensuel()).isEqualByComparingTo("120000");
-        assertThat(data.getChargesMensuelles()).isEqualByComparingTo("70000");
-        assertThat(data.getTresorerie()).isEqualByComparingTo("15000");
-        assertThat(data.getSoldeCompteCourant()).isEqualByComparingTo("-3000");
-        assertThat(data.getDureeCompteCourantDebiteur()).isEqualTo(31);
+        assertThat(data.getMonthlyRevenue()).isEqualByComparingTo("120000");
+        assertThat(data.getMonthlyExpenses()).isEqualByComparingTo("70000");
+        assertThat(data.getCashBalance()).isEqualByComparingTo("15000");
+        assertThat(data.getDirectorCurrentAccountBalance()).isEqualByComparingTo("-3000");
+        assertThat(data.getDirectorCurrentAccountDebtorDays()).isEqualTo(31);
     }
 
     @Test
@@ -57,10 +57,10 @@ class AccountingCsvFinancialDataExtractorTest {
         assertThat(data.getWarnings()).anySatisfy(warning ->
                 assertThat(warning).contains("Document bilan provisoire recu"));
         assertThat(data.getMissingFields()).contains(
-                "chiffreAffairesMensuel",
-                "chargesMensuelles",
-                "tresorerie",
-                "soldeCompteCourant"
+                "monthlyRevenue",
+                "monthlyExpenses",
+                "cashBalance",
+                "directorCurrentAccountBalance"
         );
         assertThat(data.getRawMetadata()).contains("parserStatus=AWAITING_REVIEW");
     }
@@ -69,15 +69,15 @@ class AccountingCsvFinancialDataExtractorTest {
     void extractsHorusLikeProvisionalBalanceSheetPdf() throws Exception {
         String text = """
                 PROFACILE MARTINS ACCOUNTING
-                Bilan et comptes de résultats du 10/2025 au 12/2025
-                Créances commerciales 40 12 632,40
+                Bilan et comptes de resultats du 10/2025 au 12/2025
+                Creances commerciales 40 12 632,40
                 416101 Compte courant CR Administrateurs/Actionnaires 22 349,89
                 Valeurs disponibles 54/58 480,75
-                Dettes à un an au plus 42/48 12 937,88
+                Dettes a un an au plus 42/48 12 937,88
                 Chiffre d'affaires 70 33 060,00
                 Approvisionnements, marchandises, services et biens divers 60/61 5 961,22
-                Charges financières 65/66B 5,37
-                Impôts sur le résultat (+)/(-) 67/77 5 722,61
+                Charges financieres 65/66B 5,37
+                Impots sur le result (+)/(-) 67/77 5 722,61
                 """;
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -88,13 +88,13 @@ class AccountingCsvFinancialDataExtractorTest {
 
         ExtractedFinancialData data = extractor.extract(file);
 
-        assertThat(data.getChiffreAffairesMensuel()).isEqualByComparingTo("11020.00");
-        assertThat(data.getChargesMensuelles()).isEqualByComparingTo("3896.40");
-        assertThat(data.getTresorerie()).isEqualByComparingTo("480.75");
-        assertThat(data.getSoldeCompteCourant()).isEqualByComparingTo("-22349.89");
-        assertThat(data.getDureeCompteCourantDebiteur()).isEqualTo(31);
-        assertThat(data.getDettesCourtTerme()).isEqualByComparingTo("12937.88");
-        assertThat(data.getCreancesClients()).isEqualByComparingTo("12632.40");
+        assertThat(data.getMonthlyRevenue()).isEqualByComparingTo("11020.00");
+        assertThat(data.getMonthlyExpenses()).isEqualByComparingTo("3896.40");
+        assertThat(data.getCashBalance()).isEqualByComparingTo("480.75");
+        assertThat(data.getDirectorCurrentAccountBalance()).isEqualByComparingTo("-22349.89");
+        assertThat(data.getDirectorCurrentAccountDebtorDays()).isEqualTo(31);
+        assertThat(data.getShortTermDebt()).isEqualByComparingTo("12937.88");
+        assertThat(data.getCustomerReceivables()).isEqualByComparingTo("12632.40");
         assertThat(data.getMissingFields()).isEmpty();
     }
 
@@ -119,3 +119,4 @@ class AccountingCsvFinancialDataExtractorTest {
         }
     }
 }
+
