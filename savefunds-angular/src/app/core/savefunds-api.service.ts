@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AccountantDashboard,
+  AccountantClientAccess,
   AuditLog,
   BankTransaction,
   BnbAnnualAccountsLookup,
@@ -155,6 +156,24 @@ export class SaveFundsApiService {
 
   getAccountantDashboard(): Observable<AccountantDashboard> {
     return this.http.get<AccountantDashboard>(`${API_URL}/api/v1/accountants/me/dashboard`);
+  }
+
+  requestAccountantClientAccess(enterpriseNumber: string, requestNote: string): Observable<AccountantClientAccess> {
+    return this.http.post<AccountantClientAccess>(`${API_URL}/api/v1/accountants/client-access-requests`, {
+      enterpriseNumber,
+      requestNote
+    });
+  }
+
+  getAccountantClientAccessRequests(): Observable<AccountantClientAccess[]> {
+    return this.http.get<AccountantClientAccess[]>(`${API_URL}/api/v1/accountants/client-access-requests`);
+  }
+
+  decideAccountantClientAccess(accessId: number, status: 'ACTIVE' | 'REJECTED' | 'REVOKED', responseNote = ''): Observable<AccountantClientAccess> {
+    return this.http.put<AccountantClientAccess>(`${API_URL}/api/v1/accountants/client-access-requests/${accessId}/decision`, {
+      status,
+      responseNote
+    });
   }
 
   updateUser(userId: number, request: Partial<User>): Observable<User> {

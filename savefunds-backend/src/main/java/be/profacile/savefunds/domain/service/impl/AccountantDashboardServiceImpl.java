@@ -2,7 +2,10 @@ package be.profacile.savefunds.domain.service.impl;
 
 import be.profacile.savefunds.api.dto.request.CreateAccountantNoteRequest;
 import be.profacile.savefunds.api.dto.request.CreateValidationDecisionRequest;
+import be.profacile.savefunds.api.dto.request.DecideAccountantClientAccessRequest;
 import be.profacile.savefunds.api.dto.request.DecideValidationRequest;
+import be.profacile.savefunds.api.dto.request.RequestAccountantClientAccessRequest;
+import be.profacile.savefunds.api.dto.response.AccountantClientAccessResponse;
 import be.profacile.savefunds.api.dto.response.AccountantClientSummaryResponse;
 import be.profacile.savefunds.api.dto.response.AccountantDashboardResponse;
 import be.profacile.savefunds.api.dto.response.AccountantNoteResponse;
@@ -40,12 +43,17 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     private final FinancialObligationRepository financialObligationRepository;
     private final AccountantNoteRepository accountantNoteRepository;
     private final ValidationDecisionRepository validationDecisionRepository;
+    private final AccountantClientAccessRepository accountantClientAccessRepository;
+    private final UserRepository userRepository;
 
     @Override
     public AccountantDashboardResponse dashboard(User accountant) {
         assertAccountant(accountant);
 
-        List<AccountantClientSummaryResponse> clients = companyRepository.findAll().stream()
+        List<AccountantClientSummaryResponse> clients = accountantClientAccessRepository
+                .findByAccountantIdAndStatusOrderByUpdatedAtDescCreatedAtDesc(accountant.getId(), AccountantClientAccessStatus.ACTIVE)
+                .stream()
+                .map(AccountantClientAccess::getCompany)
                 .map(this::toClientSummary)
                 .sorted(Comparator.comparing(AccountantClientSummaryResponse::getRiskScore).reversed())
                 .toList();
@@ -60,9 +68,79 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     }
 
     @Override
+    public AccountantClientAccessResponse requestClientAccess(User accountant, RequestAccountantClientAccessRequest request) {
+        assertAccountant(accountant);
+        String digits = digitsOnly(request.getEnterpriseNumber());
+        if (digits.length() != 10) {
+            throw new IllegalArgumentException("Numero BCE invalide: " + request.getEnterpriseNumber());
+        }
+
+        Company company = companyRepository.findFirstByEnterpriseNumberDigits(digits)
+                .orElseThrow(() -> new ResourceNotFoundException("Entreprise introuvable dans SaveFunds: " + request.getEnterpriseNumber()));
+
+        AccountantClientAccess access = accountantClientAccessRepository
+                .findByAccountantIdAndCompanyId(accountant.getId(), company.getId())
+                .orElseGet(AccountantClientAccess::new);
+        access.setAccountantId(accountant.getId());
+        access.setCompany(company);
+        access.setRequestNote(request.getRequestNote());
+        access.setResponseNote(null);
+        access.setDecidedAt(null);
+        access.setDecidedByUserId(null);
+        access.setStatus(AccountantClientAccessStatus.PENDING);
+
+        return toAccessResponse(accountantClientAccessRepository.save(access));
+    }
+
+    @Override
+    public List<AccountantClientAccessResponse> myClientAccessRequests(User user) {
+        List<AccountantClientAccessStatus> visibleStatuses = List.of(
+                AccountantClientAccessStatus.PENDING,
+                AccountantClientAccessStatus.ACTIVE,
+                AccountantClientAccessStatus.REJECTED,
+                AccountantClientAccessStatus.REVOKED
+        );
+        if (user.getRole() == Role.COMPTABLE) {
+            return accountantClientAccessRepository
+                    .findByAccountantIdOrderByUpdatedAtDescCreatedAtDesc(user.getId())
+                    .stream()
+                    .map(this::toAccessResponse)
+                    .toList();
+        }
+        return accountantClientAccessRepository
+                .findByCompany_UserIdAndStatusInOrderByCreatedAtDesc(user.getId(), visibleStatuses)
+                .stream()
+                .map(this::toAccessResponse)
+                .toList();
+    }
+
+    @Override
+    public AccountantClientAccessResponse decideClientAccess(User director, Long accessId, DecideAccountantClientAccessRequest request) {
+        if (request.getStatus() != AccountantClientAccessStatus.ACTIVE
+                && request.getStatus() != AccountantClientAccessStatus.REJECTED
+                && request.getStatus() != AccountantClientAccessStatus.REVOKED) {
+            throw new IllegalArgumentException("Statut de decision invalide: " + request.getStatus());
+        }
+
+        AccountantClientAccess access = accountantClientAccessRepository.findById(accessId)
+                .orElseThrow(() -> new ResourceNotFoundException("Demande d'acces introuvable: " + accessId));
+        if (!director.getId().equals(access.getCompany().getUserId()) && director.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Seul le dirigeant proprietaire peut accepter cette demande");
+        }
+
+        access.setStatus(request.getStatus());
+        access.setResponseNote(request.getResponseNote());
+        access.setDecidedByUserId(director.getId());
+        access.setDecidedAt(LocalDateTime.now());
+
+        return toAccessResponse(accountantClientAccessRepository.save(access));
+    }
+
+    @Override
     public AccountantNoteResponse addNote(User accountant, Long companyId, CreateAccountantNoteRequest request) {
         assertAccountant(accountant);
         Company company = findCompany(companyId);
+        assertActiveClientAccess(accountant, company.getId());
 
         AccountantNote note = new AccountantNote();
         note.setCompany(company);
@@ -99,6 +177,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
 
         ValidationDecision validation = validationDecisionRepository.findById(validationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Validation introuvable: " + validationId));
+        assertActiveClientAccess(accountant, validation.getCompany().getId());
         validation.setStatus(request.getStatus());
         validation.setConditionText(request.getConditionText());
         validation.setComment(request.getComment());
@@ -267,6 +346,30 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
                 .build();
     }
 
+    private AccountantClientAccessResponse toAccessResponse(AccountantClientAccess access) {
+        User accountant = userRepository.findById(access.getAccountantId()).orElse(null);
+        String accountantName = accountant == null
+                ? "Comptable inconnu"
+                : accountant.getFirstName() + " " + accountant.getLastName();
+        String accountantEmail = accountant == null ? "" : accountant.getEmail();
+        Company company = access.getCompany();
+        return AccountantClientAccessResponse.builder()
+                .id(access.getId())
+                .accountantId(access.getAccountantId())
+                .accountantName(accountantName)
+                .accountantEmail(accountantEmail)
+                .companyId(company.getId())
+                .companyName(company.getLegalName())
+                .enterpriseNumber(company.getEnterpriseNumber())
+                .status(access.getStatus())
+                .requestNote(access.getRequestNote())
+                .responseNote(access.getResponseNote())
+                .decidedAt(access.getDecidedAt())
+                .createdAt(access.getCreatedAt())
+                .updatedAt(access.getUpdatedAt())
+                .build();
+    }
+
     private ValidationDecisionResponse toValidationResponse(ValidationDecision validation) {
         return ValidationDecisionResponse.builder()
                 .id(validation.getId())
@@ -292,6 +395,22 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         if (user.getRole() != Role.COMPTABLE && user.getRole() != Role.ADMIN) {
             throw new AccessDeniedException("Acces reserve aux comptables");
         }
+    }
+
+    private void assertActiveClientAccess(User accountant, Long companyId) {
+        if (accountant.getRole() == Role.ADMIN) {
+            return;
+        }
+        AccountantClientAccess access = accountantClientAccessRepository
+                .findByAccountantIdAndCompanyId(accountant.getId(), companyId)
+                .orElseThrow(() -> new AccessDeniedException("Aucun mandat comptable actif pour cette entreprise"));
+        if (access.getStatus() != AccountantClientAccessStatus.ACTIVE) {
+            throw new AccessDeniedException("Mandat comptable non actif pour cette entreprise");
+        }
+    }
+
+    private String digitsOnly(String value) {
+        return value == null ? "" : value.replaceAll("\\D", "");
     }
 
     private BigDecimal divide(BigDecimal left, BigDecimal right) {

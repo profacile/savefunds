@@ -101,7 +101,7 @@
                     <div class="panel-head">
                         <div>
                             <p class="eyebrow">Responsabilites</p>
-                            <h2>{{ isAccountant() ? 'Pilotage portefeuille' : 'Pilotage company' }}</h2>
+                            <h2>{{ isAccountant() ? 'Pilotage portefeuille' : 'Pilotage entreprise' }}</h2>
                         </div>
                     </div>
                     @if (isAccountant()) {
@@ -119,12 +119,74 @@
                     }
                 </article>
             </section>
+            @if (isAccountant()) {
+                <section class="panel access-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">Mandats clients</p>
+                            <h2>Demander l'acces a un dossier</h2>
+                        </div>
+                    </div>
+                    <div class="access-form">
+                        <div class="field">
+                            <label>Numero d'entreprise du client</label>
+                            <input type="text" [(ngModel)]="accountantAccessEnterpriseNumber" placeholder="BE 1029.610.755">
+                        </div>
+                        <div class="field">
+                            <label>Message au dirigeant</label>
+                            <input type="text" [(ngModel)]="accountantAccessNote" placeholder="Je suis votre comptable et souhaite suivre votre dossier SaveFunds.">
+                        </div>
+                        <button class="btn btn-primary" type="button" (click)="requestClientAccess()">Envoyer la demande</button>
+                    </div>
+
+                    <div class="access-list">
+                        @for (access of clientAccesses(); track access.id) {
+                            <div class="access-row">
+                                <span>
+                                    <strong>{{ access.companyName }}</strong>
+                                    <small>{{ access.enterpriseNumber }}</small>
+                                </span>
+                                <span class="status-pill">{{ access.status }}</span>
+                            </div>
+                        } @empty {
+                            <p class="muted">Aucune demande envoyee.</p>
+                        }
+                    </div>
+                </section>
+            }
             @if (!isAccountant()) {
+                <section class="panel access-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">Acces comptable</p>
+                            <h2>Demandes recues</h2>
+                        </div>
+                    </div>
+                    <div class="access-list">
+                        @for (access of clientAccesses(); track access.id) {
+                            <div class="access-row">
+                                <span>
+                                    <strong>{{ access.accountantName }}</strong>
+                                    <small>{{ access.accountantEmail }} demande l'acces a {{ access.companyName }}</small>
+                                </span>
+                                <span class="status-pill">{{ access.status }}</span>
+                                @if (access.status === 'PENDING') {
+                                    <button class="btn btn-primary" type="button" (click)="decideClientAccess(access, 'ACTIVE')">Accepter</button>
+                                    <button class="btn btn-ghost" type="button" (click)="decideClientAccess(access, 'REJECTED')">Refuser</button>
+                                } @else if (access.status === 'ACTIVE') {
+                                    <button class="btn btn-ghost" type="button" (click)="decideClientAccess(access, 'REVOKED')">Revoquer</button>
+                                }
+                            </div>
+                        } @empty {
+                            <p class="muted">Aucune demande comptable recue.</p>
+                        }
+                    </div>
+                </section>
                 <section class="companies-home profile-companies">
                     <div class="panel-head">
                         <div>
                             <p class="eyebrow">Portefeuille dirigeant</p>
-                            <h2>Mes companies</h2>
+                            <h2>Mes entreprises</h2>
                         </div>
                     </div>
 

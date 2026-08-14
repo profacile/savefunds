@@ -5,6 +5,7 @@ import { AuthService } from '../../core/auth.service';
 import { SaveFundsApiService } from '../../core/savefunds-api.service';
 import { LanguageService } from '../../core/language.service';
 import {
+  AccountantClientAccess,
   AccountantClientSummary,
   AuditLog,
   BankTransaction,
@@ -59,6 +60,7 @@ export class DashboardComponent implements OnInit {
   loading = signal('');
   error = signal('');
   selectedClient = signal<AccountantClient | null>(null);
+  clientAccesses = signal<AccountantClientAccess[]>([]);
   accountantFilter = signal<'ALL' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'>('ALL');
   currentView = signal<DashboardView>('PROFILE');
   sourceTab = signal<SourceTab>('BNB');
@@ -78,6 +80,8 @@ export class DashboardComponent implements OnInit {
 
   withdrawalAmount = 3000;
   decisionType = 'RETRAIT_DIRIGEANT';
+  accountantAccessEnterpriseNumber = '';
+  accountantAccessNote = '';
 
   accountantClients = signal<AccountantClient[]>([
     {
@@ -328,10 +332,12 @@ export class DashboardComponent implements OnInit {
     if (user.role === 'COMPTABLE') {
       this.selectedClient.set(this.accountantClients()[0]);
       this.loadAccountantDashboard();
+      this.loadClientAccessRequests();
       return;
     }
     this.enterpriseForm.userId = user.id;
     this.loadEnterprises();
+    this.loadClientAccessRequests();
   }
 
   selectClient(client: AccountantClient): void {
@@ -496,6 +502,40 @@ export class DashboardComponent implements OnInit {
   setAccountantFilter(filter: 'ALL' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'): void {
     this.accountantFilter.set(filter);
     this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
+  }
+
+  requestClientAccess(): void {
+    const enterpriseNumber = this.accountantAccessEnterpriseNumber.trim();
+    if (!enterpriseNumber) {
+      this.fail("Encodez le numero d'entreprise du client.");
+      return;
+    }
+
+    this.setLoading("Demande d'acces comptable en cours...");
+    this.api.requestAccountantClientAccess(enterpriseNumber, this.accountantAccessNote.trim()).subscribe({
+      next: () => {
+        this.error.set('');
+        this.loading.set("Demande envoyee au dirigeant. Le client apparaitra apres acceptation.");
+        this.accountantAccessEnterpriseNumber = '';
+        this.accountantAccessNote = '';
+        this.loadClientAccessRequests();
+      },
+      error: (error) => this.fail(this.apiErrorMessage(error, "Demande impossible. Verifiez que l'entreprise existe deja dans SaveFunds."))
+    });
+  }
+
+  decideClientAccess(access: AccountantClientAccess, status: 'ACTIVE' | 'REJECTED' | 'REVOKED'): void {
+    const responseNote = status === 'ACTIVE'
+      ? 'Mandat applicatif accepte par le dirigeant.'
+      : 'Demande refusee par le dirigeant.';
+    this.setLoading('Mise a jour de la demande comptable...');
+    this.api.decideAccountantClientAccess(access.id, status, responseNote).subscribe({
+      next: () => {
+        this.loading.set('');
+        this.loadClientAccessRequests();
+      },
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Decision impossible.'))
+    });
   }
 
   onRegistryQueryChange(value: string): void {
@@ -906,6 +946,13 @@ export class DashboardComponent implements OnInit {
       error: () => {
         this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
       }
+    });
+  }
+
+  private loadClientAccessRequests(): void {
+    this.api.getAccountantClientAccessRequests().subscribe({
+      next: (requests) => this.clientAccesses.set(requests),
+      error: () => this.clientAccesses.set([])
     });
   }
 

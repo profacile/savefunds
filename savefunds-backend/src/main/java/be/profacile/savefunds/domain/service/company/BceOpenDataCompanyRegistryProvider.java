@@ -25,32 +25,48 @@ public class BceOpenDataCompanyRegistryProvider implements CompanyRegistryProvid
         if (query == null || query.trim().length() < 2) {
             return List.of();
         }
-        try {
-            List<CompanyRegistryCompanyResponse> localResults = companyRegistryEntryRepository.search(query.trim()).stream()
-                    .limit(20)
-                    .map(this::toResponse)
-                    .toList();
-            if (!localResults.isEmpty()) {
-                return localResults;
-            }
-        } catch (Exception ex) {
-            log.warn("Recherche BCE Open Data locale indisponible, fallback Public Search: {}", ex.getMessage());
+        String normalizedQuery = query.trim();
+
+        List<CompanyRegistryCompanyResponse> liveResults = bcePublicSearchClient.search(normalizedQuery);
+        if (!liveResults.isEmpty()) {
+            return liveResults;
         }
-        return bcePublicSearchClient.search(query.trim());
+
+        log.info("Aucun resultat BCE live pour '{}'. Consultation du cache Open Data local.", normalizedQuery);
+        return searchLocal(normalizedQuery);
     }
 
     @Override
     public Optional<CompanyRegistryCompanyResponse> findByEnterpriseNumber(String enterpriseNumber) {
-        try {
-            Optional<CompanyRegistryCompanyResponse> localResult = companyRegistryEntryRepository.findByEnterpriseNumber(normalizeEnterpriseNumber(enterpriseNumber))
-                    .map(this::toResponse);
-            if (localResult.isPresent()) {
-                return localResult;
-            }
-        } catch (Exception ex) {
-            log.warn("Recherche BCE Open Data locale par numero indisponible, fallback Public Search: {}", ex.getMessage());
+        Optional<CompanyRegistryCompanyResponse> liveResult = bcePublicSearchClient.findByEnterpriseNumber(enterpriseNumber);
+        if (liveResult.isPresent()) {
+            return liveResult;
         }
-        return bcePublicSearchClient.findByEnterpriseNumber(enterpriseNumber);
+
+        log.info("Aucun resultat BCE live pour le numero '{}'. Consultation du cache Open Data local.", enterpriseNumber);
+        return findLocalByEnterpriseNumber(enterpriseNumber);
+    }
+
+    private List<CompanyRegistryCompanyResponse> searchLocal(String query) {
+        try {
+            return companyRegistryEntryRepository.search(query).stream()
+                    .limit(20)
+                    .map(this::toResponse)
+                    .toList();
+        } catch (Exception ex) {
+            log.warn("Recherche BCE Open Data locale indisponible: {}", ex.getMessage());
+            return List.of();
+        }
+    }
+
+    private Optional<CompanyRegistryCompanyResponse> findLocalByEnterpriseNumber(String enterpriseNumber) {
+        try {
+            return companyRegistryEntryRepository.findByEnterpriseNumber(normalizeEnterpriseNumber(enterpriseNumber))
+                    .map(this::toResponse);
+        } catch (Exception ex) {
+            log.warn("Recherche BCE Open Data locale par numero indisponible: {}", ex.getMessage());
+            return Optional.empty();
+        }
     }
 
     private CompanyRegistryCompanyResponse toResponse(CompanyRegistryEntry entry) {

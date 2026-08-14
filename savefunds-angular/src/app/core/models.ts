@@ -163,6 +163,22 @@ export interface AccountantDashboard {
   clients: AccountantClientSummary[];
 }
 
+export interface AccountantClientAccess {
+  id: number;
+  accountantId: number;
+  accountantName: string;
+  accountantEmail: string;
+  companyId: number;
+  companyName: string;
+  enterpriseNumber: string;
+  status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'REVOKED';
+  requestNote?: string;
+  responseNote?: string;
+  decidedAt?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface AccountantClientSummary {
   companyId: number;
   companyName: string;

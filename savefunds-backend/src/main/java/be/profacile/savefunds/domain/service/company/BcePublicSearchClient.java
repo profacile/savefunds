@@ -26,6 +26,7 @@ public class BcePublicSearchClient {
     private static final Pattern ENTERPRISE_NUMBER_PATTERN = Pattern.compile("(\\d{4}\\.\\d{3}\\.\\d{3})");
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
+            .followRedirects(HttpClient.Redirect.NORMAL)
             .build();
 
     public List<CompanyRegistryCompanyResponse> search(String query) {
@@ -40,6 +41,7 @@ public class BcePublicSearchClient {
                     + "&rechtsvormFonetic=ALL"
                     + "&vest=true&_vest=on"
                     + "&filterEnkelActieve=true"
+                    + "&_filterEnkelActieve=on"
                     + "&actionNPRP=Rechercher";
             return parseSearchRows(fetch(url), query);
         } catch (Exception ex) {
@@ -68,6 +70,8 @@ public class BcePublicSearchClient {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .timeout(Duration.ofSeconds(8))
                 .header("User-Agent", "SaveFunds-TFE/1.0")
+                .header("Accept", "text/html,application/xhtml+xml")
+                .header("Accept-Language", "fr-BE,fr;q=0.9,nl-BE;q=0.8,en;q=0.7")
                 .GET()
                 .build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));

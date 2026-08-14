@@ -49,7 +49,7 @@ public class AnalysisResult {
     @Column(columnDefinition = "TEXT", name = "details_decision_globale")
     private String globalDecisionDetails;
 
-    @Column(columnDefinition = "TEXT", name = "recommendation_globale")
+    @Column(columnDefinition = "TEXT", name = "recommandation_globale")
     private String globalRecommendation;
 
     // ==================== SCORES (valeurs calculées) ====================
@@ -93,13 +93,13 @@ public class AnalysisResult {
 
     // ==================== RECOMMANDATIONS PAR CRITÈRE ====================
 
-    @Column(columnDefinition = "TEXT", name = "recommendation_tresorerie")
+    @Column(columnDefinition = "TEXT", name = "recommandation_tresorerie")
     private String cashRecommendation;
 
-    @Column(columnDefinition = "TEXT", name = "recommendation_ratio_ca_charges")
+    @Column(columnDefinition = "TEXT", name = "recommandation_ratio_ca_charges")
     private String revenueExpensesRatioRecommendation;
 
-    @Column(columnDefinition = "TEXT", name = "recommendation_compte_courant")
+    @Column(columnDefinition = "TEXT", name = "recommandation_compte_courant")
     private String directorCurrentAccountRecommendation;
 
     // ==================== MÉTADONNÉES ====================
