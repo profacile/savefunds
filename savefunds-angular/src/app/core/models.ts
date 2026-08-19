@@ -142,6 +142,20 @@ export interface VigilanceResult {
   indicators: VigilanceIndicator[];
 }
 
+export interface ValidationDecision {
+  id: number;
+  companyId: number;
+  decisionType: string;
+  requestedAmount: number;
+  status: 'PENDING' | 'APPROVED' | 'APPROVED_WITH_CONDITION' | 'CORRECTION_REQUESTED' | 'POSTPONED' | 'REJECTED';
+  conditionText?: string;
+  comment?: string;
+  requestedByUserId: number;
+  decidedByAccountantId?: number;
+  decidedAt?: string;
+  createdAt: string;
+}
+
 export interface AuditLog {
   id: number;
   companyId: number;

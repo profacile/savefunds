@@ -13,6 +13,7 @@ import {
   Enterprise,
   FinancialSnapshot,
   User,
+  ValidationDecision,
   VigilanceResult
 } from './models';
 
@@ -154,6 +155,10 @@ export class SaveFundsApiService {
     return this.http.get<AuditLog[]>(`${API_URL}/api/v1/companies/${enterpriseId}/audit-logs`);
   }
 
+  getAccountantCompanyAuditLogs(enterpriseId: number): Observable<AuditLog[]> {
+    return this.http.get<AuditLog[]>(`${API_URL}/api/v1/accountants/companies/${enterpriseId}/audit-logs`);
+  }
+
   getAccountantDashboard(): Observable<AccountantDashboard> {
     return this.http.get<AccountantDashboard>(`${API_URL}/api/v1/accountants/me/dashboard`);
   }
@@ -173,6 +178,31 @@ export class SaveFundsApiService {
     return this.http.put<AccountantClientAccess>(`${API_URL}/api/v1/accountants/client-access-requests/${accessId}/decision`, {
       status,
       responseNote
+    });
+  }
+
+  requestAccountantAdvice(enterpriseId: number, decisionType: string, requestedAmount: number, comment: string): Observable<ValidationDecision> {
+    return this.http.post<ValidationDecision>(`${API_URL}/api/v1/accountants/companies/${enterpriseId}/validation-requests`, {
+      decisionType,
+      requestedAmount,
+      comment
+    });
+  }
+
+  getAccountantValidationRequests(enterpriseId: number): Observable<ValidationDecision[]> {
+    return this.http.get<ValidationDecision[]>(`${API_URL}/api/v1/accountants/companies/${enterpriseId}/validation-requests`);
+  }
+
+  decideValidationRequest(
+    validationId: number,
+    status: ValidationDecision['status'],
+    conditionText = '',
+    comment = ''
+  ): Observable<ValidationDecision> {
+    return this.http.put<ValidationDecision>(`${API_URL}/api/v1/accountants/validation-requests/${validationId}/decision`, {
+      status,
+      conditionText,
+      comment
     });
   }
 

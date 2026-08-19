@@ -8,7 +8,9 @@ import be.profacile.savefunds.api.dto.request.RequestAccountantClientAccessReque
 import be.profacile.savefunds.api.dto.response.AccountantClientAccessResponse;
 import be.profacile.savefunds.api.dto.response.AccountantDashboardResponse;
 import be.profacile.savefunds.api.dto.response.AccountantNoteResponse;
+import be.profacile.savefunds.api.dto.response.AuditLogResponse;
 import be.profacile.savefunds.api.dto.response.ValidationDecisionResponse;
+import be.profacile.savefunds.api.mapper.AuditLogApiMapper;
 import be.profacile.savefunds.domain.entity.User;
 import be.profacile.savefunds.domain.service.AccountantDashboardService;
 import be.profacile.savefunds.security.service.CurrentUserService;
@@ -30,6 +32,7 @@ public class AccountantController {
 
     private final AccountantDashboardService accountantDashboardService;
     private final CurrentUserService currentUserService;
+    private final AuditLogApiMapper auditLogMapper;
 
     @GetMapping("/me/dashboard")
     @Operation(summary = "Tableau de bord comptable",
@@ -73,6 +76,26 @@ public class AccountantController {
         User accountant = currentUserService.getCurrentUser();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(accountantDashboardService.addNote(accountant, companyId, request));
+    }
+
+    @GetMapping("/companies/{companyId}/audit-logs")
+    @Operation(summary = "Consulter l'historique du dossier client",
+            description = "Retourne les dernieres simulations et actions auditees d'une entreprise uniquement si le comptable a un mandat actif.")
+    public ResponseEntity<List<AuditLogResponse>> companyAuditLogs(@PathVariable Long companyId) {
+        User accountant = currentUserService.getCurrentUser();
+        List<AuditLogResponse> responses = accountantDashboardService.companyAuditLogs(accountant, companyId)
+                .stream()
+                .map(auditLogMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/companies/{companyId}/validation-requests")
+    @Operation(summary = "Lister les demandes de validation d'un dossier client",
+            description = "Permet au comptable de voir les demandes de retrait ou paiement du dirigeant avant decision.")
+    public ResponseEntity<List<ValidationDecisionResponse>> validationRequests(@PathVariable Long companyId) {
+        User accountant = currentUserService.getCurrentUser();
+        return ResponseEntity.ok(accountantDashboardService.validationRequests(accountant, companyId));
     }
 
     @PostMapping("/companies/{companyId}/validation-requests")

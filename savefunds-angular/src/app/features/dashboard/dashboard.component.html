@@ -378,6 +378,9 @@
                         <button type="button" [class.active]="accountantFilter() === 'ALL'"
                                 (click)="setAccountantFilter('ALL')">Tous
                         </button>
+                        <button type="button" [class.active]="accountantFilter() === 'COMPANIES'"
+                                (click)="setAccountantFilter('COMPANIES')">Entreprises
+                        </button>
                         <button type="button" [class.active]="accountantFilter() === 'ALERTS'"
                                 (click)="setAccountantFilter('ALERTS')">Alertes
                         </button>
@@ -390,6 +393,13 @@
                         <button type="button" [class.active]="accountantFilter() === 'STALE_DATA'"
                                 (click)="setAccountantFilter('STALE_DATA')">Donnees anciennes
                         </button>
+                    </div>
+
+                    <div class="accountant-search">
+                        <label>Rechercher une entreprise</label>
+                        <input type="search" [ngModel]="accountantSearch()"
+                               (ngModelChange)="onAccountantSearchChange($event)"
+                               placeholder="Nom, numero BCE, statut du dossier">
                     </div>
 
                     <div class="client-table">
@@ -425,11 +435,18 @@
                   <small>{{ client.pendingValidation }}</small>
                 </span>
                             </button>
+                        } @empty {
+                            <div class="empty-state">
+                                <strong>Aucun client accessible</strong>
+                                <span>Le comptable ne voit que les entreprises avec un mandat actif accepte par le dirigeant.</span>
+                                <button class="btn btn-primary" type="button" (click)="setView('PROFILE')">Demander un mandat client</button>
+                            </div>
                         }
                     </div>
                 </article>
 
                 <article class="panel client-detail-panel">
+                    @if (selectedClient()) {
                     <div class="panel-head">
                         <div>
                             <p class="eyebrow">Dossier client</p>
@@ -470,11 +487,43 @@
                             de valider ou reporter l'operation.</p>
                     </div>
 
+                    <div class="validation-list">
+                        <small>Demandes de validation du dirigeant</small>
+                        @for (validation of selectedClientValidations().slice(0, 5); track validation.id) {
+                            <div class="validation-row">
+                                <div>
+                                    <strong>{{ validation.decisionType }} - {{ money(validation.requestedAmount) }}</strong>
+                                    <span>{{ validation.createdAt | date:'dd/MM/yyyy HH:mm' }} - {{ validation.status }}</span>
+                                    @if (validation.comment) {
+                                        <p>{{ validation.comment }}</p>
+                                    }
+                                    @if (validation.conditionText) {
+                                        <p class="muted">{{ validation.conditionText }}</p>
+                                    }
+                                </div>
+                            </div>
+                        } @empty {
+                            <p class="muted">Aucune demande formelle du dirigeant pour ce dossier.</p>
+                        }
+                    </div>
+
                     <div class="accountant-actions">
-                        <button class="btn btn-primary" type="button">Valider</button>
-                        <button class="btn btn-secondary" type="button">Valider sous condition</button>
-                        <button class="btn btn-ghost" type="button">Demander correction</button>
-                        <button class="btn btn-ghost" type="button">Reporter</button>
+                        <button class="btn btn-primary" type="button"
+                                [disabled]="selectedClientPendingValidations().length === 0"
+                                (click)="decideSelectedValidation('APPROVED')">Valider
+                        </button>
+                        <button class="btn btn-secondary" type="button"
+                                [disabled]="selectedClientPendingValidations().length === 0"
+                                (click)="decideSelectedValidation('APPROVED_WITH_CONDITION')">Valider sous condition
+                        </button>
+                        <button class="btn btn-ghost" type="button"
+                                [disabled]="selectedClientPendingValidations().length === 0"
+                                (click)="decideSelectedValidation('CORRECTION_REQUESTED')">Demander correction
+                        </button>
+                        <button class="btn btn-ghost" type="button"
+                                [disabled]="selectedClientPendingValidations().length === 0"
+                                (click)="decideSelectedValidation('POSTPONED')">Reporter
+                        </button>
                     </div>
 
                     <div class="internal-note">
@@ -489,10 +538,29 @@
                         }
                     </div>
 
+                    <div class="simulation-history compact">
+                        <small>Historique des simulations du dirigeant</small>
+                        @for (log of selectedClientSimulationHistory(); track log.id) {
+                            <div class="history-row">
+                                <time>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</time>
+                                <strong>{{ log.details }}</strong>
+                                <small>{{ log.userEmail }}</small>
+                            </div>
+                        } @empty {
+                            <p class="muted">Aucune simulation de retrait ou depense n'a encore ete lancee par le dirigeant.</p>
+                        }
+                    </div>
+
                     <div class="source-note">
                         <span>Derniere source : {{ selectedClient()?.lastSource }}</span>
                         <span>{{ selectedClient()?.lastUpdate }}</span>
                     </div>
+                    } @else {
+                        <div class="empty-state">
+                            <strong>Aucun dossier selectionne</strong>
+                            <span>Demandez un mandat client ou selectionnez une entreprise du portefeuille.</span>
+                        </div>
+                    }
                 </article>
 
                 <article class="panel audit-panel">
@@ -503,11 +571,14 @@
                         </div>
                     </div>
                     <div class="accountant-alerts">
-                        <div><strong>Atelier Verhaegen SRL</strong><span>Compte courant debiteur depuis 48 jours.</span>
-                        </div>
-                        <div><strong>Studio Delta SRL</strong><span>Couverture cashBalance sous 1,5 mois.</span></div>
-                        <div><strong>MecaNord SRL</strong><span>Depense exceptionnelle a valider avant paiement.</span>
-                        </div>
+                        @for (client of filteredAccountantClients().slice(0, 4); track client.companyNumber) {
+                            <div>
+                                <strong>{{ client.name }}</strong>
+                                <span>{{ client.dossierStatus }} - {{ client.pendingValidation }}</span>
+                            </div>
+                        } @empty {
+                            <div><strong>Aucune alerte</strong><span>Aucun client actif ne correspond au filtre courant.</span></div>
+                        }
                     </div>
                 </article>
             </section>
@@ -533,11 +604,17 @@
                     }
                 </div>
                 <div class="accountant-alerts">
-                    <div><strong>Atelier Verhaegen SRL</strong><span>Compte courant debiteur depuis 48 jours.</span>
-                    </div>
-                    <div><strong>Studio Delta SRL</strong><span>Validation sous condition recommandee.</span></div>
-                    <div><strong>MecaNord SRL</strong><span>Donnees bancaires a rafraichir avant avis comptable.</span>
-                    </div>
+                    @for (client of filteredAccountantClients().slice(0, 6); track client.companyNumber) {
+                        <div>
+                            <strong>{{ client.name }}</strong>
+                            <span>{{ client.status }} - {{ client.pendingValidation }}</span>
+                        </div>
+                    } @empty {
+                        <div>
+                            <strong>Aucun flux comptable</strong>
+                            <span>Les alertes apparaitront apres acceptation d'un mandat client.</span>
+                        </div>
+                    }
                 </div>
             </section>
         } @else if (!enterprise()) {
@@ -545,7 +622,7 @@
                 <div>
                     <p class="eyebrow">Premiere etape</p>
                     <h2>Retrouver l'entreprise via la BCE</h2>
-                    <p class="muted">Le dirigeant recherche son company officielle, verifie le status actif, puis
+                    <p class="muted">Le dirigeant recherche son entreprise officielle, verifie le statut actif, puis
                         confirme le rattachement dans SaveFunds.</p>
                 </div>
 
@@ -890,6 +967,10 @@
                             </div>
 
                             <p class="decision-text">{{ result()?.globalExplanation }}</p>
+                            <p class="decision-text warning-text">
+                                Le montant maximum recommande est une borne indicative, pas une autorisation automatique.
+                                La decision reste conditionnee par la fraicheur des donnees, les echeances fiscales et l'avis comptable.
+                            </p>
 
                             <div class="indicator-list">
                                 @for (indicator of result()?.indicators || []; track indicator.code) {
@@ -902,7 +983,35 @@
                                     </div>
                                 }
                             </div>
+
+                            <div class="advice-box">
+                                <div class="field">
+                                    <label>Message au comptable</label>
+                                    <textarea rows="3" [(ngModel)]="adviceComment"></textarea>
+                                </div>
+                                <button class="btn btn-secondary" type="button" (click)="requestAccountantAdvice()">
+                                    Demander l'avis de mon comptable
+                                </button>
+                            </div>
                         }
+
+                        <div class="simulation-history">
+                            <div class="panel-head">
+                                <div>
+                                    <p class="eyebrow">Historique</p>
+                                    <h2>Simulations recentes</h2>
+                                </div>
+                            </div>
+                            @for (log of simulationHistory(); track log.id) {
+                                <div class="history-row">
+                                    <time>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</time>
+                                    <strong>{{ log.details }}</strong>
+                                    <small>{{ log.userEmail }}</small>
+                                </div>
+                            } @empty {
+                                <p class="muted">Aucune simulation enregistree pour cette entreprise.</p>
+                            }
+                        </div>
                     </article>
                 }
 

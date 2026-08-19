@@ -14,6 +14,7 @@ import {
   CreateEnterpriseRequest,
   Enterprise,
   FinancialSnapshot,
+  ValidationDecision,
   VigilanceResult
 } from '../../core/models';
 
@@ -22,6 +23,7 @@ type DashboardView = 'PROFILE' | 'DETAIL' | 'SOURCES' | 'DASHBOARD' | 'AUDIT';
 type SourceTab = 'BNB' | 'BALANCE' | 'BANK';
 
 interface AccountantClient {
+  companyId: number;
   name: string;
   companyNumber: string;
   status: 'VERT' | 'ORANGE' | 'ROUGE';
@@ -60,8 +62,11 @@ export class DashboardComponent implements OnInit {
   loading = signal('');
   error = signal('');
   selectedClient = signal<AccountantClient | null>(null);
+  selectedClientAuditLogs = signal<AuditLog[]>([]);
+  selectedClientValidations = signal<ValidationDecision[]>([]);
   clientAccesses = signal<AccountantClientAccess[]>([]);
-  accountantFilter = signal<'ALL' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'>('ALL');
+  accountantFilter = signal<'ALL' | 'COMPANIES' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'>('ALL');
+  accountantSearch = signal('');
   currentView = signal<DashboardView>('PROFILE');
   sourceTab = signal<SourceTab>('BNB');
   selectedSource = signal<string>('AUTO');
@@ -82,93 +87,21 @@ export class DashboardComponent implements OnInit {
   decisionType = 'RETRAIT_DIRIGEANT';
   accountantAccessEnterpriseNumber = '';
   accountantAccessNote = '';
+  adviceComment = '';
 
-  accountantClients = signal<AccountantClient[]>([
-    {
-      name: 'Atelier Verhaegen SRL',
-      companyNumber: 'BE 0734.221.908',
-      status: 'ROUGE',
-      dossierStatus: 'Action comptable requise',
-      riskScore: 8.7,
-      cash: 8200,
-      coverageMonths: 0.7,
-      currentAccountDays: 48,
-      trend: 'DOWN',
-      dataAgeDays: 1,
-      nextObligation: 'TVA',
-      nextObligationDate: '2026-07-20',
-      validationCount: 2,
-      pendingValidation: 'Retrait dirigeant 4 000 EUR',
-      lastSource: 'Banque PSD2 mock',
-      lastUpdate: 'Aujourd hui',
-      internalNote: 'Attendre encaissement facture client avant tout retrait.',
-      activity: ['26/06 - Demande retrait 4 000 EUR', '25/06 - Import bancaire mock', '21/06 - Alerte CC debiteur']
-    },
-    {
-      name: 'Studio Delta SRL',
-      companyNumber: 'BE 0791.554.120',
-      status: 'ORANGE',
-      dossierStatus: 'Analyse a revoir',
-      riskScore: 5.9,
-      cash: 18450,
-      coverageMonths: 1.4,
-      currentAccountDays: 21,
-      trend: 'DOWN',
-      dataAgeDays: 9,
-      nextObligation: 'ONSS',
-      nextObligationDate: '2026-07-05',
-      validationCount: 1,
-      pendingValidation: 'Paiement fournisseur 6 500 EUR',
-      lastSource: 'Bilan PDF mock',
-      lastUpdate: 'Hier',
-      internalNote: 'Verifier creances clients ouvertes avant paiement fournisseur.',
-      activity: ['25/06 - Parsing bilan mock', '24/06 - Simulation paiement fournisseur', '18/06 - Note comptable ajoutee']
-    },
-    {
-      name: 'Profacile SRL',
-      companyNumber: 'BE 0123.456.789',
-      status: 'VERT',
-      dossierStatus: 'A jour',
-      riskScore: 2.1,
-      cash: 42400,
-      coverageMonths: 3.1,
-      currentAccountDays: 0,
-      trend: 'UP',
-      dataAgeDays: 2,
-      nextObligation: 'Precompte',
-      nextObligationDate: '2026-07-15',
-      validationCount: 0,
-      pendingValidation: 'Aucune',
-      lastSource: 'BNB mock',
-      lastUpdate: 'Il y a 2 jours',
-      internalNote: 'Dossier stable. Revoir apres declaration TVA.',
-      activity: ['24/06 - Snapshot BNB mock', '22/06 - Analyse verte', '15/06 - TVA preparee']
-    },
-    {
-      name: 'MecaNord SRL',
-      companyNumber: 'BE 0668.441.330',
-      status: 'ORANGE',
-      dossierStatus: 'En attente client',
-      riskScore: 6.4,
-      cash: 15100,
-      coverageMonths: 1.1,
-      currentAccountDays: 36,
-      trend: 'STABLE',
-      dataAgeDays: 42,
-      nextObligation: 'TVA',
-      nextObligationDate: '2026-07-20',
-      validationCount: 1,
-      pendingValidation: 'Depense exceptionnelle 2 800 EUR',
-      lastSource: 'CSV comptable',
-      lastUpdate: 'Il y a 42 jours',
-      internalNote: 'Relancer le dirigeant pour un extrait bancaire recent.',
-      activity: ['15/05 - CSV comptable importe', '16/05 - Alerte donnees anciennes', '20/05 - Relance client']
-    }
-  ]);
+  accountantClients = signal<AccountantClient[]>([]);
 
   filteredAccountantClients = computed(() => {
     const filter = this.accountantFilter();
+    const search = this.accountantSearch().trim().toLowerCase();
     return this.accountantClients().filter((client) => {
+      const matchesSearch = !search
+        || client.name.toLowerCase().includes(search)
+        || client.companyNumber.toLowerCase().includes(search)
+        || client.dossierStatus.toLowerCase().includes(search);
+      if (!matchesSearch) {
+        return false;
+      }
       if (filter === 'ALERTS') {
         return client.status !== 'VERT';
       }
@@ -181,12 +114,29 @@ export class DashboardComponent implements OnInit {
       if (filter === 'STALE_DATA') {
         return client.dataAgeDays > 30;
       }
+      if (filter === 'COMPANIES') {
+        return true;
+      }
       return true;
-    }).sort((a, b) => b.riskScore - a.riskScore);
+    }).sort((a, b) => filter === 'COMPANIES' ? a.name.localeCompare(b.name) : b.riskScore - a.riskScore);
   });
 
   visibleAuditLogs = computed(() => this.auditLogs()
     .filter((log) => log.action !== 'AUDIT_LOG_VIEWED')
+  );
+
+  simulationHistory = computed(() => this.visibleAuditLogs()
+    .filter((log) => log.action === 'FINANCIAL_DECISION_SIMULATED')
+    .slice(0, 8)
+  );
+
+  selectedClientSimulationHistory = computed(() => this.selectedClientAuditLogs()
+    .filter((log) => log.action === 'FINANCIAL_DECISION_SIMULATED')
+    .slice(0, 12)
+  );
+
+  selectedClientPendingValidations = computed(() => this.selectedClientValidations()
+    .filter((validation) => validation.status === 'PENDING')
   );
 
   sourceIndicators = computed(() => {
@@ -330,7 +280,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
     if (user.role === 'COMPTABLE') {
-      this.selectedClient.set(this.accountantClients()[0]);
+      this.selectedClient.set(null);
       this.loadAccountantDashboard();
       this.loadClientAccessRequests();
       return;
@@ -342,6 +292,7 @@ export class DashboardComponent implements OnInit {
 
   selectClient(client: AccountantClient): void {
     this.selectedClient.set(client);
+    this.loadSelectedClientDossier(client.companyId);
   }
 
   setView(view: DashboardView): void {
@@ -499,9 +450,18 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  setAccountantFilter(filter: 'ALL' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'): void {
+  setAccountantFilter(filter: 'ALL' | 'COMPANIES' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'): void {
     this.accountantFilter.set(filter);
-    this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
+    const client = this.filteredAccountantClients()[0] ?? null;
+    this.selectedClient.set(client);
+    this.loadSelectedClientDossier(client?.companyId);
+  }
+
+  onAccountantSearchChange(value: string): void {
+    this.accountantSearch.set(value);
+    const client = this.filteredAccountantClients()[0] ?? null;
+    this.selectedClient.set(client);
+    this.loadSelectedClientDossier(client?.companyId);
   }
 
   requestClientAccess(): void {
@@ -801,6 +761,7 @@ export class DashboardComponent implements OnInit {
     this.api.simulateDecision(enterprise.id, this.withdrawalAmount, this.decisionType, forcedSource).subscribe({
       next: (result) => {
         this.result.set(result);
+        this.adviceComment = this.defaultAdviceComment(result);
         this.clearLoading();
         this.refreshAudit();
       },
@@ -941,11 +902,84 @@ export class DashboardComponent implements OnInit {
       next: (dashboard) => {
         const clients = dashboard.clients.map((client) => this.toAccountantClient(client));
         this.accountantClients.set(clients);
-        this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
+        const selected = this.filteredAccountantClients()[0] ?? null;
+        this.selectedClient.set(selected);
+        this.loadSelectedClientDossier(selected?.companyId);
       },
       error: () => {
-        this.selectedClient.set(this.filteredAccountantClients()[0] ?? null);
+        this.accountantClients.set([]);
+        this.selectedClient.set(null);
+        this.selectedClientAuditLogs.set([]);
+        this.selectedClientValidations.set([]);
+        this.fail("Portefeuille comptable indisponible. Verifiez le backend ou vos droits d'acces.");
       }
+    });
+  }
+
+  private loadSelectedClientDossier(companyId?: number): void {
+    if (!companyId) {
+      this.selectedClientAuditLogs.set([]);
+      this.selectedClientValidations.set([]);
+      return;
+    }
+
+    this.api.getAccountantCompanyAuditLogs(companyId).subscribe({
+      next: (logs) => this.selectedClientAuditLogs.set(logs),
+      error: () => this.selectedClientAuditLogs.set([])
+    });
+    this.api.getAccountantValidationRequests(companyId).subscribe({
+      next: (validations) => this.selectedClientValidations.set(validations),
+      error: () => this.selectedClientValidations.set([])
+    });
+  }
+
+  decideSelectedValidation(status: ValidationDecision['status']): void {
+    const validation = this.selectedClientPendingValidations()[0];
+    const client = this.selectedClient();
+    if (!validation || !client) {
+      this.fail("Aucune demande de validation en attente pour ce dossier.");
+      return;
+    }
+
+    const labels: Record<string, string> = {
+      APPROVED: "Validation comptable accordee.",
+      APPROVED_WITH_CONDITION: "Validation sous condition: respecter les limites de tresorerie et les echeances fiscales.",
+      CORRECTION_REQUESTED: "Correction demandee: merci de fournir une source financiere plus recente ou de revoir le montant.",
+      POSTPONED: "Decision reportee: attendre la prochaine mise a jour de tresorerie.",
+      REJECTED: "Demande refusee au vu des indicateurs actuels."
+    };
+    this.setLoading("Decision comptable en cours...");
+    this.api.decideValidationRequest(validation.id, status, labels[status] ?? '', labels[status] ?? '').subscribe({
+      next: () => {
+        this.clearLoading();
+        this.loadAccountantDashboard();
+        this.loadSelectedClientDossier(client.companyId);
+      },
+      error: (error) => this.fail(this.apiErrorMessage(error, "Decision comptable impossible. Verifiez le mandat actif."))
+    });
+  }
+
+  requestAccountantAdvice(): void {
+    const enterprise = this.enterprise();
+    const result = this.result();
+    if (!enterprise || !result) {
+      this.fail("Lancez une simulation avant de demander l'avis du comptable.");
+      return;
+    }
+
+    this.setLoading("Demande d'avis comptable...");
+    this.api.requestAccountantAdvice(
+      enterprise.id,
+      this.decisionType,
+      this.withdrawalAmount,
+      this.adviceComment || this.defaultAdviceComment(result)
+    ).subscribe({
+      next: () => {
+        this.error.set('');
+        this.loading.set("Demande envoyee. Elle sera visible par le comptable apres mandat actif.");
+        this.refreshAudit();
+      },
+      error: (error) => this.fail(this.apiErrorMessage(error, "Demande d'avis impossible. Verifiez l'entreprise et vos droits."))
     });
   }
 
@@ -954,6 +988,10 @@ export class DashboardComponent implements OnInit {
       next: (requests) => this.clientAccesses.set(requests),
       error: () => this.clientAccesses.set([])
     });
+  }
+
+  private defaultAdviceComment(result: VigilanceResult): string {
+    return `Avis demande pour ${this.decisionType} de ${this.money(this.withdrawalAmount)}. Decision SaveFunds: ${result.globalDecision}. Montant indicatif max: ${this.money(result.maxRecommendedAmount)}.`;
   }
 
   money(value?: number | null): string {
@@ -980,6 +1018,7 @@ export class DashboardComponent implements OnInit {
 
   private toAccountantClient(client: AccountantClientSummary): AccountantClient {
     return {
+      companyId: client.companyId,
       name: client.companyName,
       companyNumber: client.companyNumber,
       status: client.status,

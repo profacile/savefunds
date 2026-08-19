@@ -44,6 +44,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     private final AccountantNoteRepository accountantNoteRepository;
     private final ValidationDecisionRepository validationDecisionRepository;
     private final AccountantClientAccessRepository accountantClientAccessRepository;
+    private final AuditLogRepository auditLogRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -148,6 +149,25 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         note.setContent(request.getContent());
 
         return toNoteResponse(accountantNoteRepository.save(note));
+    }
+
+    @Override
+    public List<AuditLog> companyAuditLogs(User accountant, Long companyId) {
+        assertAccountant(accountant);
+        Company company = findCompany(companyId);
+        assertActiveClientAccess(accountant, company.getId());
+        return auditLogRepository.findTop50ByCompanyIdOrderByCreatedAtDesc(company.getId());
+    }
+
+    @Override
+    public List<ValidationDecisionResponse> validationRequests(User accountant, Long companyId) {
+        assertAccountant(accountant);
+        Company company = findCompany(companyId);
+        assertActiveClientAccess(accountant, company.getId());
+        return validationDecisionRepository.findByCompanyIdOrderByCreatedAtDesc(company.getId())
+                .stream()
+                .map(this::toValidationResponse)
+                .toList();
     }
 
     @Override
