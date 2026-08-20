@@ -160,10 +160,13 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     }
 
     @Override
-    public List<ValidationDecisionResponse> validationRequests(User accountant, Long companyId) {
-        assertAccountant(accountant);
+    public List<ValidationDecisionResponse> validationRequests(User user, Long companyId) {
         Company company = findCompany(companyId);
-        assertActiveClientAccess(accountant, company.getId());
+        if (user.getRole() == Role.COMPTABLE) {
+            assertActiveClientAccess(user, company.getId());
+        } else if (!user.getId().equals(company.getUserId()) && user.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Acces refuse aux demandes de validation de cette entreprise");
+        }
         return validationDecisionRepository.findByCompanyIdOrderByCreatedAtDesc(company.getId())
                 .stream()
                 .map(this::toValidationResponse)
@@ -223,7 +226,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
                 .findByCompanyIdAndStatusOrderByCreatedAtDesc(company.getId(), ValidationDecisionStatus.PENDING)
                 .stream()
                 .findFirst()
-                .map(validation -> validation.getDecisionType() + " " + validation.getRequestedAmount() + " EUR")
+                .map(validation -> decisionTypeLabel(validation.getDecisionType()) + " " + validation.getRequestedAmount() + " EUR")
                 .orElse("Aucune");
         BigDecimal riskScore = riskScore(coverage, debtorDays, dataAge, pendingCount);
         Decision status = statusFromRisk(riskScore);
@@ -321,6 +324,22 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
             return "Surveillance recommandee";
         }
         return "A jour";
+    }
+
+    private String decisionTypeLabel(FinancialDecisionType type) {
+        if (type == FinancialDecisionType.RETRAIT_DIRIGEANT) {
+            return "Retrait dirigeant";
+        }
+        if (type == FinancialDecisionType.PAIEMENT_FOURNISSEUR) {
+            return "Paiement fournisseur";
+        }
+        if (type == FinancialDecisionType.DEPENSE_EXCEPTIONNELLE) {
+            return "Depense exceptionnelle";
+        }
+        if (type == FinancialDecisionType.INVESTISSEMENT) {
+            return "Investissement";
+        }
+        return type.name();
     }
 
     private TreasuryTrend trend(Company company, FinancialSnapshot latestSnapshot) {

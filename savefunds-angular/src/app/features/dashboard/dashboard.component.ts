@@ -64,6 +64,7 @@ export class DashboardComponent implements OnInit {
   selectedClient = signal<AccountantClient | null>(null);
   selectedClientAuditLogs = signal<AuditLog[]>([]);
   selectedClientValidations = signal<ValidationDecision[]>([]);
+  directorValidationRequests = signal<ValidationDecision[]>([]);
   clientAccesses = signal<AccountantClientAccess[]>([]);
   accountantFilter = signal<'ALL' | 'COMPANIES' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'>('ALL');
   accountantSearch = signal('');
@@ -138,6 +139,8 @@ export class DashboardComponent implements OnInit {
   selectedClientPendingValidations = computed(() => this.selectedClientValidations()
     .filter((validation) => validation.status === 'PENDING')
   );
+
+  directorRecentValidationRequests = computed(() => this.directorValidationRequests().slice(0, 6));
 
   sourceIndicators = computed(() => {
     const selected = this.selectedSource();
@@ -584,10 +587,12 @@ export class DashboardComponent implements OnInit {
     this.bnbLookup.set(null);
     this.bankTransactions.set([]);
     this.auditLogs.set([]);
+    this.directorValidationRequests.set([]);
     this.refreshLatest();
     this.refreshBnbLookup();
     this.refreshBankTransactions();
     this.refreshAudit();
+    this.refreshValidationRequests();
   }
 
   createEnterpriseFromRegistry(): void {
@@ -828,9 +833,46 @@ export class DashboardComponent implements OnInit {
   displayEnterpriseName(enterprise?: Enterprise | null): string {
     const name = enterprise?.legalName?.trim() || '';
     if (!name || this.isInvalidEnterpriseName(name)) {
-      return 'Nom de l company a corriger';
+      return "Nom de l'entreprise a corriger";
     }
-    return name;
+    return this.displayText(name);
+  }
+
+  displayText(value?: string | null): string {
+    if (!value) {
+      return '';
+    }
+    return value
+      .replace(/&egrave;/g, 'e')
+      .replace(/&eacute;/g, 'e')
+      .replace(/&ecirc;/g, 'e')
+      .replace(/&agrave;/g, 'a')
+      .replace(/&ccedil;/g, 'c')
+      .replace(/&amp;/g, '&')
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"');
+  }
+
+  decisionTypeLabel(type?: string | null): string {
+    const labels: Record<string, string> = {
+      RETRAIT_DIRIGEANT: 'Retrait dirigeant',
+      PAIEMENT_FOURNISSEUR: 'Paiement fournisseur',
+      DEPENSE_EXCEPTIONNELLE: 'Depense exceptionnelle',
+      INVESTISSEMENT: 'Investissement'
+    };
+    return type ? labels[type] ?? type : '';
+  }
+
+  validationStatusLabel(status?: string | null): string {
+    const labels: Record<string, string> = {
+      PENDING: 'En attente',
+      APPROVED: 'Valide',
+      APPROVED_WITH_CONDITION: 'Valide sous condition',
+      CORRECTION_REQUESTED: 'Correction demandee',
+      POSTPONED: 'Reporte',
+      REJECTED: 'Refuse'
+    };
+    return status ? labels[status] ?? status : '';
   }
 
   registryCompanySubtitle(company: CompanyRegistryCompany): string {
@@ -855,7 +897,7 @@ export class DashboardComponent implements OnInit {
 
   enterpriseInitial(enterprise: Enterprise): string {
     const name = this.displayEnterpriseName(enterprise);
-    if (name === 'Nom de l company a corriger') {
+    if (name === "Nom de l'entreprise a corriger") {
       return 'E';
     }
     return name.charAt(0).toUpperCase();
@@ -864,12 +906,26 @@ export class DashboardComponent implements OnInit {
   refreshAudit(): void {
     const enterprise = this.enterprise();
     if (!enterprise) {
+      this.auditLogs.set([]);
       return;
     }
 
     this.api.getAuditLogs(enterprise.id).subscribe({
       next: (logs) => this.auditLogs.set(logs),
       error: () => this.auditLogs.set([])
+    });
+  }
+
+  refreshValidationRequests(): void {
+    const enterprise = this.enterprise();
+    if (!enterprise || this.isAccountant()) {
+      this.directorValidationRequests.set([]);
+      return;
+    }
+
+    this.api.getCompanyValidationRequests(enterprise.id).subscribe({
+      next: (requests) => this.directorValidationRequests.set(requests),
+      error: () => this.directorValidationRequests.set([])
     });
   }
 
@@ -942,14 +998,30 @@ export class DashboardComponent implements OnInit {
     }
 
     const labels: Record<string, string> = {
-      APPROVED: "Validation comptable accordee.",
-      APPROVED_WITH_CONDITION: "Validation sous condition: respecter les limites de tresorerie et les echeances fiscales.",
+      APPROVED: "Demande validee par le comptable.",
+      APPROVED_WITH_CONDITION: "Validation sous condition.",
       CORRECTION_REQUESTED: "Correction demandee: merci de fournir une source financiere plus recente ou de revoir le montant.",
       POSTPONED: "Decision reportee: attendre la prochaine mise a jour de tresorerie.",
       REJECTED: "Demande refusee au vu des indicateurs actuels."
     };
+    let conditionText = '';
+    let comment = labels[status] ?? '';
+    if (status === 'APPROVED_WITH_CONDITION') {
+      const condition = window.prompt('Condition a communiquer au dirigeant', 'OK sous condition de conserver au moins un mois de charges en tresorerie.');
+      if (!condition?.trim()) {
+        return;
+      }
+      conditionText = condition.trim();
+      comment = 'Validation sous condition communiquee au dirigeant.';
+    }
+    if (status === 'CORRECTION_REQUESTED' || status === 'POSTPONED') {
+      const customComment = window.prompt('Message a communiquer au dirigeant', labels[status] ?? '');
+      if (customComment?.trim()) {
+        comment = customComment.trim();
+      }
+    }
     this.setLoading("Decision comptable en cours...");
-    this.api.decideValidationRequest(validation.id, status, labels[status] ?? '', labels[status] ?? '').subscribe({
+    this.api.decideValidationRequest(validation.id, status, conditionText, comment).subscribe({
       next: () => {
         this.clearLoading();
         this.loadAccountantDashboard();
@@ -978,6 +1050,7 @@ export class DashboardComponent implements OnInit {
         this.error.set('');
         this.loading.set("Demande envoyee. Elle sera visible par le comptable apres mandat actif.");
         this.refreshAudit();
+        this.refreshValidationRequests();
       },
       error: (error) => this.fail(this.apiErrorMessage(error, "Demande d'avis impossible. Verifiez l'entreprise et vos droits."))
     });
@@ -1098,6 +1171,7 @@ export class DashboardComponent implements OnInit {
           this.refreshBnbLookup();
           this.refreshBankTransactions();
           this.refreshAudit();
+          this.refreshValidationRequests();
         }
       },
       error: () => {

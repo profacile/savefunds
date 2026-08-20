@@ -143,7 +143,7 @@
                         @for (access of clientAccesses(); track access.id) {
                             <div class="access-row">
                                 <span>
-                                    <strong>{{ access.companyName }}</strong>
+                                    <strong>{{ displayText(access.companyName) }}</strong>
                                     <small>{{ access.enterpriseNumber }}</small>
                                 </span>
                                 <span class="status-pill">{{ access.status }}</span>
@@ -167,7 +167,7 @@
                             <div class="access-row">
                                 <span>
                                     <strong>{{ access.accountantName }}</strong>
-                                    <small>{{ access.accountantEmail }} demande l'acces a {{ access.companyName }}</small>
+                                    <small>{{ access.accountantEmail }} demande l'acces a {{ displayText(access.companyName) }}</small>
                                 </span>
                                 <span class="status-pill">{{ access.status }}</span>
                                 @if (access.status === 'PENDING') {
@@ -179,6 +179,38 @@
                             </div>
                         } @empty {
                             <p class="muted">Aucune demande comptable recue.</p>
+                        }
+                    </div>
+                </section>
+                <section class="panel access-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">Avis comptables</p>
+                            <h2>Reponses aux demandes de retrait</h2>
+                        </div>
+                    </div>
+                    <div class="access-list">
+                        @for (validation of directorRecentValidationRequests(); track validation.id) {
+                            <div class="access-row validation-response-row">
+                                <span>
+                                    <strong>{{ decisionTypeLabel(validation.decisionType) }} - {{ money(validation.requestedAmount) }}</strong>
+                                    <small>
+                                        {{ validationStatusLabel(validation.status) }}
+                                        @if (validation.decidedAt) {
+                                            - {{ validation.decidedAt | date:'dd/MM/yyyy HH:mm' }}
+                                        }
+                                    </small>
+                                    @if (validation.conditionText) {
+                                        <small>Condition : {{ validation.conditionText }}</small>
+                                    }
+                                    @if (validation.comment) {
+                                        <small>{{ validation.comment }}</small>
+                                    }
+                                </span>
+                                <span class="status-pill">{{ validationStatusLabel(validation.status) }}</span>
+                            </div>
+                        } @empty {
+                            <p class="muted">Aucun avis comptable pour l'entreprise selectionnee.</p>
                         }
                     </div>
                 </section>
@@ -405,19 +437,19 @@
                     <div class="client-table">
                         <div class="client-row table-head">
                             <span>Client</span>
-                            <span>Score</span>
-                            <span>Statut</span>
-                            <span>Echeance</span>
-                            <span>Tendance</span>
-                            <span>Donnees</span>
-                            <span>Validations</span>
+                            <span title="Score de priorite calcule sur 10 selon tresorerie, compte courant, fraicheur des donnees et demandes en attente.">Score risque</span>
+                            <span title="Decision globale actuelle du dossier: vert, orange ou rouge.">Decision</span>
+                            <span title="Prochaine obligation fiscale ou sociale connue pour l'entreprise.">Prochaine echeance</span>
+                            <span title="Evolution recente de la tresorerie par rapport aux donnees precedentes.">Tendance tresorerie</span>
+                            <span title="Age de la derniere source financiere disponible.">Age donnees</span>
+                            <span title="Nombre de demandes d'avis comptable encore en attente.">Avis demandes</span>
                         </div>
                         @for (client of filteredAccountantClients(); track client.companyNumber) {
                             <button class="client-row" type="button"
                                     [class.selected]="selectedClient()?.companyNumber === client.companyNumber"
                                     (click)="selectClient(client)">
                 <span>
-                  <strong>{{ client.name }}</strong>
+                  <strong>{{ displayText(client.name) }}</strong>
                   <small>{{ client.companyNumber }}</small>
                 </span>
                                 <span class="risk-score">{{ client.riskScore }}/10</span>
@@ -450,7 +482,7 @@
                     <div class="panel-head">
                         <div>
                             <p class="eyebrow">Dossier client</p>
-                            <h2>{{ selectedClient()?.name }}</h2>
+                            <h2>{{ displayText(selectedClient()?.name) }}</h2>
                             <span class="dossier-status">{{ selectedClient()?.dossierStatus }}</span>
                         </div>
                         <span class="status-pill decision-{{ selectedClient()?.status }}">{{ selectedClient()?.status }}</span>
@@ -492,8 +524,8 @@
                         @for (validation of selectedClientValidations().slice(0, 5); track validation.id) {
                             <div class="validation-row">
                                 <div>
-                                    <strong>{{ validation.decisionType }} - {{ money(validation.requestedAmount) }}</strong>
-                                    <span>{{ validation.createdAt | date:'dd/MM/yyyy HH:mm' }} - {{ validation.status }}</span>
+                                    <strong>{{ decisionTypeLabel(validation.decisionType) }} - {{ money(validation.requestedAmount) }}</strong>
+                                    <span>{{ validation.createdAt | date:'dd/MM/yyyy HH:mm' }} - {{ validationStatusLabel(validation.status) }}</span>
                                     @if (validation.comment) {
                                         <p>{{ validation.comment }}</p>
                                     }
@@ -573,7 +605,7 @@
                     <div class="accountant-alerts">
                         @for (client of filteredAccountantClients().slice(0, 4); track client.companyNumber) {
                             <div>
-                                <strong>{{ client.name }}</strong>
+                                <strong>{{ displayText(client.name) }}</strong>
                                 <span>{{ client.dossierStatus }} - {{ client.pendingValidation }}</span>
                             </div>
                         } @empty {
@@ -606,7 +638,7 @@
                 <div class="accountant-alerts">
                     @for (client of filteredAccountantClients().slice(0, 6); track client.companyNumber) {
                         <div>
-                            <strong>{{ client.name }}</strong>
+                            <strong>{{ displayText(client.name) }}</strong>
                             <span>{{ client.status }} - {{ client.pendingValidation }}</span>
                         </div>
                     } @empty {

@@ -193,6 +193,10 @@ export class SaveFundsApiService {
     return this.http.get<ValidationDecision[]>(`${API_URL}/api/v1/accountants/companies/${enterpriseId}/validation-requests`);
   }
 
+  getCompanyValidationRequests(enterpriseId: number): Observable<ValidationDecision[]> {
+    return this.http.get<ValidationDecision[]>(`${API_URL}/api/v1/accountants/companies/${enterpriseId}/validation-requests`);
+  }
+
   decideValidationRequest(
     validationId: number,
     status: ValidationDecision['status'],
