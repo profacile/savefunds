@@ -79,6 +79,7 @@ export class DashboardComponent implements OnInit {
   registrySearchMessage = signal('');
   registryAutocompleteLoading = signal(false);
   bceImportMessage = signal('');
+  ownershipDeclarationAccepted = false;
   editingEnterpriseId = signal<number | null>(null);
   pendingEnterpriseLogo = signal<string | null>(null);
   enterpriseLogoVersion = signal(0);
@@ -308,6 +309,7 @@ export class DashboardComponent implements OnInit {
     this.registryResults.set([]);
     this.registrySearchMessage.set('');
     this.selectedRegistryCompany.set(null);
+    this.ownershipDeclarationAccepted = false;
   }
 
   startEditEnterprise(event: Event, enterprise: Enterprise): void {
@@ -517,6 +519,13 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    if (this.isPartialEnterpriseNumberQuery(query)) {
+      this.registryResults.set([]);
+      this.registrySearchMessage.set("Numero BCE incomplet: encodez les 10 chiffres avant de rechercher par numero.");
+      this.registryAutocompleteLoading.set(false);
+      return;
+    }
+
     this.registryAutocompleteLoading.set(true);
     const delay = query.replace(/\D/g, '').length === 10 ? 120 : 450;
     this.registryAutocompleteTimer = setTimeout(() => this.searchRegistry(true), delay);
@@ -527,6 +536,14 @@ export class DashboardComponent implements OnInit {
     if (query.length < 2) {
       this.registryResults.set([]);
       this.registryAutocompleteLoading.set(false);
+      return;
+    }
+    if (this.isPartialEnterpriseNumberQuery(query)) {
+      this.registryResults.set([]);
+      this.selectedRegistryCompany.set(null);
+      this.registrySearchMessage.set("Numero BCE incomplet: encodez les 10 chiffres. Une recherche partielle par numero n'est pas autorisee.");
+      this.registryAutocompleteLoading.set(false);
+      this.clearLoading();
       return;
     }
 
@@ -557,9 +574,9 @@ export class DashboardComponent implements OnInit {
     this.api.searchCompanyRegistry(query).subscribe({
       next: (results) => {
         this.registryResults.set(results);
-        this.selectedRegistryCompany.set(results[0] ?? null);
+        this.selectedRegistryCompany.set(null);
         this.registrySearchMessage.set(results.length
-          ? `${results.length} suggestion(s) BCE trouvee(s) ${results[0]?.source ? '(' + results[0].source + ')' : ''}.`
+          ? `${results.length} suggestion(s) BCE trouvee(s). Selectionnez explicitement votre entreprise.`
           : 'Aucun result dans la base BCE locale ni via le fallback Public Search. Verifiez le numero BCE ou importez un extrait BCE Open Data plus complet.'
         );
         this.registryAutocompleteLoading.set(false);
@@ -601,9 +618,13 @@ export class DashboardComponent implements OnInit {
       this.fail('Selectionnez une entreprise active selon la BCE.');
       return;
     }
+    if (!this.ownershipDeclarationAccepted) {
+      this.fail('Confirmez que vous etes dirigeant ou mandate pour rattacher cette entreprise.');
+      return;
+    }
 
     this.setLoading('Creation depuis la BCE...');
-    this.api.createEnterpriseFromRegistry(company).subscribe({
+    this.api.createEnterpriseFromRegistry(company, this.ownershipDeclarationAccepted).subscribe({
       next: (enterprise) => {
         this.enterprises.update((items) => [enterprise, ...items.filter((item) => item.id !== enterprise.id)]);
         this.savePendingEnterpriseLogo(enterprise);
@@ -873,6 +894,19 @@ export class DashboardComponent implements OnInit {
       REJECTED: 'Refuse'
     };
     return status ? labels[status] ?? status : '';
+  }
+
+  formatAuditDetails(details?: string | null): string {
+    if (!details) {
+      return '';
+    }
+    return details
+      .replace(/type=([A-Z_]+)/g, (_match, type: string) => `type=${this.decisionTypeLabel(type)}`)
+      .replace(/decision=([A-Z_]+)/g, 'decision=$1')
+      .replace(/source=([A-Z_]+)/g, (_match, source: string) => `source=${this.sourceLabel(source)}`)
+      .replace(/montant=([0-9.,-]+)/g, (_match, amount: string) => `montant=${this.money(Number(String(amount).replace(',', '.')))}`)
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   registryCompanySubtitle(company: CompanyRegistryCompany): string {
@@ -1264,6 +1298,12 @@ export class DashboardComponent implements OnInit {
     } catch {
       return null;
     }
+  }
+
+  private isPartialEnterpriseNumberQuery(query: string): boolean {
+    const digits = query.replace(/\D/g, '');
+    const textWithoutNumberSyntax = query.replace(/[\d\s.\-BEbe]/g, '').trim();
+    return digits.length > 0 && digits.length < 10 && !textWithoutNumberSyntax;
   }
 }
 

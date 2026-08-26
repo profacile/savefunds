@@ -24,6 +24,7 @@ public class BcePublicSearchClient {
     private static final Pattern ROW_PATTERN = Pattern.compile("<tr[^>]*>(.*?)</tr>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern CELL_PATTERN = Pattern.compile("<td[^>]*>(.*?)</td>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern ENTERPRISE_NUMBER_PATTERN = Pattern.compile("(\\d{4}\\.\\d{3}\\.\\d{3})");
+    private static final Pattern STATUS_IMAGE_PATTERN = Pattern.compile("(?:actif|actief|active)[^\"']*\\.gif", Pattern.CASE_INSENSITIVE);
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .followRedirects(HttpClient.Redirect.NORMAL)
@@ -95,7 +96,7 @@ public class BcePublicSearchClient {
             String name = cells.size() >= 5 ? cells.get(4) : extractName(rowText, query);
             String address = cells.size() >= 6 ? cells.get(5) : extractAddress(rowText);
             String statusText = cells.size() >= 2 ? cells.get(1) : rowText;
-            RegistryStatus registryStatus = readRegistryStatus(statusText, rowText);
+            RegistryStatus registryStatus = readRegistryStatus(statusText, rowText, row);
             companies.add(CompanyRegistryCompanyResponse.builder()
                     .enterpriseNumber("BE " + numberMatcher.group(1))
                     .name(name)
@@ -126,6 +127,13 @@ public class BcePublicSearchClient {
             return new RegistryStatus("ACTIF", true);
         }
         return new RegistryStatus("A VERIFIER", false);
+    }
+
+    private RegistryStatus readRegistryStatus(String statusText, String rowText, String rowHtml) {
+        if (rowHtml != null && STATUS_IMAGE_PATTERN.matcher(rowHtml).find()) {
+            return new RegistryStatus("ACTIF", true);
+        }
+        return readRegistryStatus(statusText, rowText);
     }
 
     private boolean containsActiveStatus(String value) {

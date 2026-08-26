@@ -26,6 +26,15 @@ public class BceOpenDataCompanyRegistryProvider implements CompanyRegistryProvid
             return List.of();
         }
         String normalizedQuery = query.trim();
+        String digits = normalizedQuery.replaceAll("\\D", "");
+        if (!digits.isEmpty() && digits.length() < 10 && normalizedQuery.replaceAll("[\\d\\s.\\-BEbe]", "").isBlank()) {
+            return List.of();
+        }
+        if (digits.length() == 10) {
+            return findByEnterpriseNumber(normalizedQuery)
+                    .map(List::of)
+                    .orElseGet(List::of);
+        }
 
         List<CompanyRegistryCompanyResponse> liveResults = bcePublicSearchClient.search(normalizedQuery);
         if (!liveResults.isEmpty()) {

@@ -59,7 +59,7 @@ export class SaveFundsApiService {
     return this.http.post<CompanyRegistryImportResult>(`${API_URL}/api/v1/company-registry/import`, formData);
   }
 
-  createEnterpriseFromRegistry(company: CompanyRegistryCompany): Observable<Enterprise> {
+  createEnterpriseFromRegistry(company: CompanyRegistryCompany, ownershipDeclarationAccepted: boolean): Observable<Enterprise> {
     return this.http.post<Enterprise>(`${API_URL}/api/v1/companies/from-registry`, {
       enterpriseNumber: company.enterpriseNumber,
       name: company.name,
@@ -71,7 +71,8 @@ export class SaveFundsApiService {
       naceCode: company.naceCode,
       source: company.source,
       active: company.active,
-      activityLabel: company.activityLabel
+      activityLabel: company.activityLabel,
+      ownershipDeclarationAccepted
     });
   }
 

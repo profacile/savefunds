@@ -18,4 +18,5 @@ public class CreateCompanyFromRegistryRequest {
     private String activityLabel;
     private String source;
     private Boolean active;
+    private Boolean ownershipDeclarationAccepted;
 }

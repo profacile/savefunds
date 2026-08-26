@@ -437,6 +437,28 @@ h2 {
   justify-self: start;
 }
 
+.ownership-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 760px;
+  padding: 12px 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.ownership-check input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: #1a4fa0;
+}
+
 .registry-next-step {
   display: grid;
   gap: 5px;
@@ -1327,15 +1349,22 @@ h2 {
 
 .history-row {
   display: grid;
-  grid-template-columns: minmax(120px, 150px) minmax(0, 1fr) minmax(140px, 190px);
-  gap: 12px;
-  align-items: center;
-  padding: 10px 0;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 0;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .history-row:last-child {
   border-bottom: 0;
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
 }
 
 .history-row time,
@@ -1344,9 +1373,27 @@ h2 {
   color: #64748b;
 }
 
+.history-row time {
+  flex: 0 0 auto;
+}
+
+.history-row small {
+  min-width: 0;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
 .history-row strong {
   color: #0f172a;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  display: block;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
 }
 
 .indicator-list {
@@ -1454,6 +1501,16 @@ h2 {
   .client-row {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .history-meta {
+    display: grid;
+    gap: 3px;
+  }
+
+  .history-row small {
+    max-width: 100%;
+    text-align: left;
   }
 
   .bce-import-box {

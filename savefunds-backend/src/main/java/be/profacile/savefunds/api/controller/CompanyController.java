@@ -85,9 +85,11 @@ public class CompanyController {
         Optional<CompanyRegistryCompanyResponse> registryCompany = companyRegistryProvider
                 .findByEnterpriseNumber(request.getEnterpriseNumber());
 
-        boolean active = request.getActive() != null
-                ? request.getActive()
-                : registryCompany.map(CompanyRegistryCompanyResponse::isActive).orElse(false);
+        if (!Boolean.TRUE.equals(request.getOwnershipDeclarationAccepted())) {
+            throw new IllegalArgumentException("Confirmez que vous etes dirigeant ou mandate pour rattacher cette entreprise.");
+        }
+
+        boolean active = registryCompany.map(CompanyRegistryCompanyResponse::isActive).orElse(false);
 
         if (!active) {
             throw new IllegalArgumentException("Company non active ou status BCE impossible a verifier: " + request.getEnterpriseNumber());

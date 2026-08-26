@@ -364,8 +364,12 @@
                                         </button>
                                     }
                                 </div>
+                                <label class="ownership-check">
+                                    <input type="checkbox" [(ngModel)]="ownershipDeclarationAccepted">
+                                    <span>Je confirme etre dirigeant, administrateur ou mandate pour rattacher cette entreprise a mon compte SaveFunds.</span>
+                                </label>
                                 <button class="btn btn-primary confirm-registry" type="button"
-                                        [disabled]="!selectedRegistryCompany()?.active"
+                                        [disabled]="!selectedRegistryCompany()?.active || !ownershipDeclarationAccepted"
                                         (click)="createEnterpriseFromRegistry()">Confirmer cette company
                                 </button>
                             }
@@ -692,8 +696,12 @@
                             </button>
                         }
                     </div>
+                    <label class="ownership-check">
+                        <input type="checkbox" [(ngModel)]="ownershipDeclarationAccepted">
+                        <span>Je confirme etre dirigeant, administrateur ou mandate pour rattacher cette entreprise a mon compte SaveFunds.</span>
+                    </label>
                     <button class="btn btn-primary confirm-registry" type="button"
-                            [disabled]="!selectedRegistryCompany()?.active" (click)="createEnterpriseFromRegistry()">
+                            [disabled]="!selectedRegistryCompany()?.active || !ownershipDeclarationAccepted" (click)="createEnterpriseFromRegistry()">
                         Confirmer cette company
                     </button>
                 }
@@ -1036,9 +1044,11 @@
                             </div>
                             @for (log of simulationHistory(); track log.id) {
                                 <div class="history-row">
-                                    <time>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</time>
-                                    <strong>{{ log.details }}</strong>
-                                    <small>{{ log.userEmail }}</small>
+                                    <div class="history-meta">
+                                        <time>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</time>
+                                        <small>{{ log.userEmail }}</small>
+                                    </div>
+                                    <strong>{{ formatAuditDetails(log.details) }}</strong>
                                 </div>
                             } @empty {
                                 <p class="muted">Aucune simulation enregistree pour cette entreprise.</p>
