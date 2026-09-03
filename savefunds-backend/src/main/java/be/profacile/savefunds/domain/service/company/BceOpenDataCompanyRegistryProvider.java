@@ -49,6 +49,17 @@ public class BceOpenDataCompanyRegistryProvider implements CompanyRegistryProvid
     public Optional<CompanyRegistryCompanyResponse> findByEnterpriseNumber(String enterpriseNumber) {
         Optional<CompanyRegistryCompanyResponse> liveResult = bcePublicSearchClient.findByEnterpriseNumber(enterpriseNumber);
         if (liveResult.isPresent()) {
+            CompanyRegistryCompanyResponse liveCompany = liveResult.get();
+            if (liveCompany.isActive()) {
+                return liveResult;
+            }
+
+            Optional<CompanyRegistryCompanyResponse> localResult = findLocalByEnterpriseNumber(enterpriseNumber);
+            if (localResult.map(CompanyRegistryCompanyResponse::isActive).orElse(false)) {
+                log.info("Statut BCE live incomplet pour '{}'. Utilisation du cache Open Data local actif.", enterpriseNumber);
+                return localResult;
+            }
+
             return liveResult;
         }
 

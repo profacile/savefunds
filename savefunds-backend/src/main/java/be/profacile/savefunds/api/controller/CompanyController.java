@@ -89,10 +89,12 @@ public class CompanyController {
             throw new IllegalArgumentException("Confirmez que vous etes dirigeant ou mandate pour rattacher cette entreprise.");
         }
 
-        boolean active = registryCompany.map(CompanyRegistryCompanyResponse::isActive).orElse(false);
+        if (registryCompany.isEmpty()) {
+            throw new IllegalArgumentException("Entreprise introuvable dans la BCE: " + request.getEnterpriseNumber());
+        }
 
-        if (!active) {
-            throw new IllegalArgumentException("Company non active ou status BCE impossible a verifier: " + request.getEnterpriseNumber());
+        if (!canAttachRegistryCompany(registryCompany.get())) {
+            throw new IllegalArgumentException("Entreprise inactive selon la BCE: " + request.getEnterpriseNumber());
         }
 
         Company company = new Company();
@@ -119,6 +121,20 @@ public class CompanyController {
         Company created = companyService.create(company);
         bnbAnnualAccountsService.search(created.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(companyMapper.toResponse(created));
+    }
+
+    private boolean canAttachRegistryCompany(CompanyRegistryCompanyResponse registryCompany) {
+        if (registryCompany.isActive()) {
+            return true;
+        }
+
+        String status = Optional.ofNullable(registryCompany.getStatus()).orElse("").toLowerCase();
+        return !status.contains("inactif")
+                && !status.contains("inactief")
+                && !status.contains("radi")
+                && !status.contains("stopgezet")
+                && !status.contains("cess")
+                && !status.contains("supprim");
     }
 
     /**

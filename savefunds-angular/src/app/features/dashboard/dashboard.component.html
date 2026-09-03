@@ -9,7 +9,14 @@
         </div>
 
         <nav>
-            @if (!isAccountant()) {
+            @if (isAdmin()) {
+                <button type="button" [class.active]="currentView() === 'PROFILE'"
+                        (click)="setView('PROFILE')">{{ t('myProfile') }}
+                </button>
+                <button type="button" [class.active]="currentView() === 'ADMIN'"
+                        (click)="setView('ADMIN')">Admin
+                </button>
+            } @else if (!isAccountant()) {
                 <button type="button" [class.active]="currentView() === 'PROFILE'"
                         (click)="setView('PROFILE')">{{ t('myProfile') }}
                 </button>
@@ -101,10 +108,16 @@
                     <div class="panel-head">
                         <div>
                             <p class="eyebrow">Responsabilites</p>
-                            <h2>{{ isAccountant() ? 'Pilotage portefeuille' : 'Pilotage entreprise' }}</h2>
+                            <h2>{{ isAdmin() ? 'Pilotage plateforme' : isAccountant() ? 'Pilotage portefeuille' : 'Pilotage entreprise' }}</h2>
                         </div>
                     </div>
-                    @if (isAccountant()) {
+                    @if (isAdmin()) {
+                        <div class="profile-responsibilities">
+                            <span>Superviser les comptes utilisateurs</span>
+                            <span>Controler les roles et les acces sensibles</span>
+                            <span>Preparer les imports BCE et les evolutions production</span>
+                        </div>
+                    } @else if (isAccountant()) {
                         <div class="profile-responsibilities">
                             <span>Surveiller les clients a risque et les donnees obsoletes</span>
                             <span>Valider ou conditionner les demandes de retrait et paiement</span>
@@ -154,7 +167,7 @@
                     </div>
                 </section>
             }
-            @if (!isAccountant()) {
+            @if (!isAccountant() && !isAdmin()) {
                 <section class="panel access-panel">
                     <div class="panel-head">
                         <div>
@@ -265,7 +278,7 @@
                         <section class="setup-panel edit-company-panel">
                             <div>
                                 <p class="eyebrow">Modifier l'entreprise</p>
-                                <h2>{{ enterpriseEditForm.legalName || 'Company' }}</h2>
+                                <h2>{{ enterpriseEditForm.legalName || 'Entreprise' }}</h2>
                                 <p class="muted">Le dirigeant peut corriger les informations de rattachement. Les
                                     donnees financieres restent gerees dans Sources financieres.</p>
                             </div>
@@ -309,7 +322,7 @@
                             <div>
                                 <p class="eyebrow">Ajouter une entreprise</p>
                                 <h2>Retrouver l'entreprise via la BCE</h2>
-                                <p class="muted">Le dirigeant recherche son company officielle, verifie le status actif,
+                                <p class="muted">Le dirigeant recherche son entreprise officielle, verifie le statut actif,
                                     puis confirme le rattachement dans SaveFunds.</p>
                             </div>
 
@@ -355,7 +368,8 @@
                                                 [class.selected]="selectedRegistryCompany() === company"
                                                 (click)="selectRegistryCompany(company)">
                                             <span class="status-pill" [class.decision-VERT]="company.active"
-                                                  [class.decision-ROUGE]="!company.active">{{ company.status }}</span>
+                                                  [class.decision-ORANGE]="!company.active && !isRegistryCompanyExplicitlyInactive(company)"
+                                                  [class.decision-ROUGE]="isRegistryCompanyExplicitlyInactive(company)">{{ company.status }}</span>
                                             <strong>{{ company.name }}</strong>
                                             <small>{{ registryCompanySubtitle(company) }}</small>
                                             <span>{{ registryCompanyAddress(company) }}</span>
@@ -369,14 +383,108 @@
                                     <span>Je confirme etre dirigeant, administrateur ou mandate pour rattacher cette entreprise a mon compte SaveFunds.</span>
                                 </label>
                                 <button class="btn btn-primary confirm-registry" type="button"
-                                        [disabled]="!selectedRegistryCompany()?.active || !ownershipDeclarationAccepted"
-                                        (click)="createEnterpriseFromRegistry()">Confirmer cette company
+                                        [disabled]="!canConfirmSelectedRegistryCompany()"
+                                        (click)="createEnterpriseFromRegistry()">Confirmer cette entreprise
                                 </button>
                             }
                         </section>
                     }
                 </section>
             }
+        } @else if (isAdmin() && currentView() === 'ADMIN') {
+            <section class="admin-grid">
+                <article class="metric-card">
+                    <small>Utilisateurs</small>
+                    <strong>{{ adminStats().total }}</strong>
+                    <span>Comptes crees</span>
+                </article>
+                <article class="metric-card">
+                    <small>Dirigeants</small>
+                    <strong>{{ adminStats().directors }}</strong>
+                    <span>Entreprises PME/SRL</span>
+                </article>
+                <article class="metric-card">
+                    <small>Comptables</small>
+                    <strong>{{ adminStats().accountants }}</strong>
+                    <span>Portefeuilles clients</span>
+                </article>
+                <article class="metric-card">
+                    <small>Admins</small>
+                    <strong>{{ adminStats().admins }}</strong>
+                    <span>Supervision plateforme</span>
+                </article>
+
+                <article class="panel admin-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">Administration</p>
+                            <h2>Gestion des utilisateurs</h2>
+                        </div>
+                        <button class="btn btn-ghost" type="button" (click)="loadAdminUsers()">Rafraichir</button>
+                    </div>
+
+                    <div class="accountant-search">
+                        <label>Rechercher un utilisateur</label>
+                        <input [ngModel]="adminSearch()" (ngModelChange)="adminSearch.set($event)"
+                               placeholder="Nom, email ou role">
+                    </div>
+
+                    <div class="admin-table">
+                        <div class="admin-row admin-head">
+                            <span>Utilisateur</span>
+                            <span>Role</span>
+                            <span>Email</span>
+                            <span>Actions</span>
+                        </div>
+                        @for (user of filteredAdminUsers(); track user.id) {
+                            <div class="admin-row">
+                                <span>
+                                    <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+                                    <small>{{ user.email }}</small>
+                                </span>
+                                <span>
+                                    <select [ngModel]="user.role" (ngModelChange)="updateAdminUserRole(user, $event)"
+                                            [disabled]="user.id === auth.currentUser()?.id">
+                                        <option value="DIRIGEANT">Dirigeant</option>
+                                        <option value="COMPTABLE">Comptable</option>
+                                        <option value="ADMIN">Admin</option>
+                                    </select>
+                                </span>
+                                <span>
+                                    <button class="status-pill" type="button"
+                                            [class.decision-VERT]="user.emailVerified"
+                                            [class.decision-ORANGE]="!user.emailVerified"
+                                            (click)="toggleAdminUserEmailVerification(user)">
+                                        {{ user.emailVerified ? 'Verifie' : 'A verifier' }}
+                                    </button>
+                                </span>
+                                <span class="admin-actions">
+                                    <button class="mini-action danger" type="button"
+                                            [disabled]="user.id === auth.currentUser()?.id"
+                                            (click)="deleteAdminUser(user)">Supprimer</button>
+                                </span>
+                            </div>
+                        } @empty {
+                            <p class="muted">Aucun utilisateur trouve.</p>
+                        }
+                    </div>
+                </article>
+
+                <article class="panel admin-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">Production</p>
+                            <h2>Supervision prevue</h2>
+                        </div>
+                    </div>
+                    <div class="profile-responsibilities">
+                        <span>Suivi des rattachements entreprise-dirigeant</span>
+                        <span>Controle des mandats comptables sensibles</span>
+                        <span>Import et synchronisation BCE / BNB</span>
+                        <span>Audit securite, support et incidents</span>
+                    </div>
+                </article>
+            </section>
         } @else if (isAccountant() && currentView() === 'DASHBOARD') {
             <section class="accountant-summary-grid">
                 <article class="metric-card">
@@ -687,7 +795,8 @@
                                     [class.selected]="selectedRegistryCompany() === company"
                                     (click)="selectRegistryCompany(company)">
                                 <span class="status-pill" [class.decision-VERT]="company.active"
-                                      [class.decision-ROUGE]="!company.active">{{ company.status }}</span>
+                                      [class.decision-ORANGE]="!company.active && !isRegistryCompanyExplicitlyInactive(company)"
+                                      [class.decision-ROUGE]="isRegistryCompanyExplicitlyInactive(company)">{{ company.status }}</span>
                                 <strong>{{ company.name }}</strong>
                                 <small>{{ registryCompanySubtitle(company) }}</small>
                                 <span>{{ registryCompanyAddress(company) }}</span>
@@ -701,8 +810,8 @@
                         <span>Je confirme etre dirigeant, administrateur ou mandate pour rattacher cette entreprise a mon compte SaveFunds.</span>
                     </label>
                     <button class="btn btn-primary confirm-registry" type="button"
-                            [disabled]="!selectedRegistryCompany()?.active || !ownershipDeclarationAccepted" (click)="createEnterpriseFromRegistry()">
-                        Confirmer cette company
+                            [disabled]="!canConfirmSelectedRegistryCompany()" (click)="createEnterpriseFromRegistry()">
+                        Confirmer cette entreprise
                     </button>
                 }
 

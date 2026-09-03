@@ -214,4 +214,12 @@ export class SaveFundsApiService {
   updateUser(userId: number, request: Partial<User>): Observable<User> {
     return this.http.put<User>(`${API_URL}/api/v1/users/${userId}`, request);
   }
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${API_URL}/api/v1/users`);
+  }
+
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${API_URL}/api/v1/users/${userId}`);
+  }
 }

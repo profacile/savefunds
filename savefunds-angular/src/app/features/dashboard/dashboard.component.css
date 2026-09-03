@@ -845,6 +845,80 @@ h2 {
   border-radius: 8px;
 }
 
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.admin-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-table {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) minmax(160px, 0.8fr) minmax(130px, 0.65fr) minmax(120px, 0.55fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 64px;
+  padding: 12px 14px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-head {
+  min-height: 42px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-row strong,
+.admin-row small {
+  display: block;
+}
+
+.admin-row small {
+  margin-top: 4px;
+  color: #64748b;
+}
+
+.admin-row select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+}
+
+.admin-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-row .status-pill {
+  border: 0;
+  cursor: pointer;
+}
+
 .accountant-filters {
   display: flex;
   flex-wrap: wrap;
@@ -1455,6 +1529,7 @@ h2 {
   .companies-grid,
   .enterprise-list,
   .profile-grid,
+  .admin-grid,
   .accountant-summary-grid,
   .accountant-grid,
   .content-grid {
@@ -1464,6 +1539,7 @@ h2 {
   .ingestion-panel,
   .decision-panel,
   .clients-panel,
+  .admin-panel,
   .client-detail-panel,
   .audit-panel {
     grid-column: 1 / -1;
@@ -1488,14 +1564,24 @@ h2 {
   .enterprise-list,
   .workflow-strip,
   .profile-grid,
+  .admin-grid,
   .accountant-summary-grid,
   .accountant-grid,
   .content-grid,
   .registry-results,
   .result-grid,
   .access-row,
+  .admin-row,
   .audit-row {
     grid-template-columns: 1fr;
+  }
+
+  .admin-head {
+    display: none;
+  }
+
+  .admin-actions {
+    justify-content: flex-start;
   }
 
   .client-row {

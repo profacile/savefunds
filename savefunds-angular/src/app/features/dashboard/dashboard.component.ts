@@ -14,12 +14,13 @@ import {
   CreateEnterpriseRequest,
   Enterprise,
   FinancialSnapshot,
+  User,
   ValidationDecision,
   VigilanceResult
 } from '../../core/models';
 
 type MockSource = 'mock-bank' | 'mock-balance-sheet';
-type DashboardView = 'PROFILE' | 'DETAIL' | 'SOURCES' | 'DASHBOARD' | 'AUDIT';
+type DashboardView = 'PROFILE' | 'DETAIL' | 'SOURCES' | 'DASHBOARD' | 'AUDIT' | 'ADMIN';
 type SourceTab = 'BNB' | 'BALANCE' | 'BANK';
 
 interface AccountantClient {
@@ -66,6 +67,8 @@ export class DashboardComponent implements OnInit {
   selectedClientValidations = signal<ValidationDecision[]>([]);
   directorValidationRequests = signal<ValidationDecision[]>([]);
   clientAccesses = signal<AccountantClientAccess[]>([]);
+  adminUsers = signal<User[]>([]);
+  adminSearch = signal('');
   accountantFilter = signal<'ALL' | 'COMPANIES' | 'ALERTS' | 'VALIDATIONS' | 'DUE_SOON' | 'STALE_DATA'>('ALL');
   accountantSearch = signal('');
   currentView = signal<DashboardView>('PROFILE');
@@ -189,6 +192,24 @@ export class DashboardComponent implements OnInit {
   }));
 
   isAccountant = computed(() => this.auth.currentUser()?.role === 'COMPTABLE');
+  isAdmin = computed(() => this.auth.currentUser()?.role === 'ADMIN');
+
+  filteredAdminUsers = computed(() => {
+    const search = this.adminSearch().trim().toLowerCase();
+    return this.adminUsers().filter((user) => !search
+      || user.email.toLowerCase().includes(search)
+      || user.firstName.toLowerCase().includes(search)
+      || user.lastName.toLowerCase().includes(search)
+      || user.role.toLowerCase().includes(search)
+    );
+  });
+
+  adminStats = computed(() => ({
+    total: this.adminUsers().length,
+    directors: this.adminUsers().filter((user) => user.role === 'DIRIGEANT').length,
+    accountants: this.adminUsers().filter((user) => user.role === 'COMPTABLE').length,
+    admins: this.adminUsers().filter((user) => user.role === 'ADMIN').length
+  }));
 
   enterpriseForm: CreateEnterpriseRequest = {
     userId: 0,
@@ -289,6 +310,10 @@ export class DashboardComponent implements OnInit {
       this.loadClientAccessRequests();
       return;
     }
+    if (user.role === 'ADMIN') {
+      this.loadAdminUsers();
+      return;
+    }
     this.enterpriseForm.userId = user.id;
     this.loadEnterprises();
     this.loadClientAccessRequests();
@@ -301,6 +326,9 @@ export class DashboardComponent implements OnInit {
 
   setView(view: DashboardView): void {
     this.currentView.set(view);
+    if (view === 'ADMIN') {
+      this.loadAdminUsers();
+    }
   }
 
   openAddEnterprise(): void {
@@ -372,7 +400,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Mise a jour company...');
+    this.setLoading('Mise a jour entreprise...');
     this.api.updateEnterprise(id, this.enterpriseEditForm).subscribe({
       next: (updated) => {
         this.enterprises.update((items) => items.map((item) => item.id === updated.id ? updated : item));
@@ -382,7 +410,7 @@ export class DashboardComponent implements OnInit {
         this.editingEnterpriseId.set(null);
         this.clearLoading();
       },
-      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette company.')
+      error: () => this.fail('Mise a jour impossible. Verifiez les champs et vos droits sur cette entreprise.')
     });
   }
 
@@ -393,7 +421,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Suppression company...');
+    this.setLoading('Suppression entreprise...');
     this.api.deleteEnterprise(enterprise.id).subscribe({
       next: () => {
         this.enterprises.update((items) => items.filter((item) => item.id !== enterprise.id));
@@ -614,8 +642,8 @@ export class DashboardComponent implements OnInit {
 
   createEnterpriseFromRegistry(): void {
     const company = this.selectedRegistryCompany();
-    if (!company || !company.active) {
-      this.fail('Selectionnez une entreprise active selon la BCE.');
+    if (!company || this.isRegistryCompanyExplicitlyInactive(company)) {
+      this.fail('Selectionnez une entreprise active ou a verifier selon la BCE.');
       return;
     }
     if (!this.ownershipDeclarationAccepted) {
@@ -640,7 +668,7 @@ export class DashboardComponent implements OnInit {
         this.clearLoading();
         this.currentView.set('DETAIL');
       },
-      error: (error) => this.fail(this.apiErrorMessage(error, 'Creation depuis la BCE impossible. Verifiez que cette company n est pas deja rattachee a votre compte.'))
+      error: (error) => this.fail(this.apiErrorMessage(error, 'Creation depuis la BCE impossible. Verifiez que cette entreprise n est pas deja rattachee a votre compte.'))
     });
   }
 
@@ -654,7 +682,7 @@ export class DashboardComponent implements OnInit {
     this.setLoading('Import BCE Open Data...');
     this.api.importCompanyRegistry(file).subscribe({
       next: (result) => {
-        this.bceImportMessage.set(`${result.importedRows} company(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
+        this.bceImportMessage.set(`${result.importedRows} entreprise(s) importee(s), ${result.skippedRows} ligne(s) ignoree(s).`);
         this.clearLoading();
       },
       error: () => this.fail('Import BCE impossible. Verifiez le format CSV et votre role utilisateur.')
@@ -667,7 +695,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.setLoading('Creation company...');
+    this.setLoading('Creation entreprise...');
     this.api.createEnterprise({ ...this.enterpriseForm, userId: user.id }).subscribe({
       next: (enterprise) => {
         this.enterprises.update((items) => [enterprise, ...items.filter((item) => item.id !== enterprise.id)]);
@@ -675,7 +703,7 @@ export class DashboardComponent implements OnInit {
         this.selectEnterprise(enterprise);
         this.clearLoading();
       },
-      error: () => this.fail('Company non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
+      error: () => this.fail('Entreprise non creee. Elle est peut-etre deja rattachee a cet utilisateur.')
     });
   }
 
@@ -924,6 +952,21 @@ export class DashboardComponent implements OnInit {
     return [company.naceCode, company.activityLabel].filter(Boolean).join(' - ') || 'Activite non renseignee';
   }
 
+  canConfirmSelectedRegistryCompany(): boolean {
+    const company = this.selectedRegistryCompany();
+    return !!company && this.ownershipDeclarationAccepted && !this.isRegistryCompanyExplicitlyInactive(company);
+  }
+
+  isRegistryCompanyExplicitlyInactive(company: CompanyRegistryCompany): boolean {
+    const status = (company.status || '').toLowerCase();
+    return status.includes('inactif')
+      || status.includes('inactief')
+      || status.includes('radi')
+      || status.includes('stopgezet')
+      || status.includes('cess')
+      || status.includes('supprim');
+  }
+
   enterpriseLogo(enterprise: Enterprise): string | null {
     this.enterpriseLogoVersion();
     return localStorage.getItem(this.enterpriseLogoKey(enterprise.id));
@@ -985,6 +1028,54 @@ export class DashboardComponent implements OnInit {
       next: (transactions) => this.bankTransactions.set(transactions),
       error: () => this.bankTransactions.set([])
     });
+  }
+
+  loadAdminUsers(): void {
+    if (!this.isAdmin()) {
+      return;
+    }
+    this.setLoading('Chargement administration...');
+    this.api.getUsers().subscribe({
+      next: (users) => {
+        this.adminUsers.set(users);
+        this.clearLoading();
+      },
+      error: () => this.fail('Administration indisponible. Verifiez que le compte connecte possede le role ADMIN.')
+    });
+  }
+
+  updateAdminUserRole(user: User, role: string): void {
+    this.api.updateUser(user.id, { role }).subscribe({
+      next: (updated) => this.replaceAdminUser(updated),
+      error: () => this.fail('Role non modifie. Seul un administrateur peut effectuer cette action.')
+    });
+  }
+
+  toggleAdminUserEmailVerification(user: User): void {
+    this.api.updateUser(user.id, { emailVerified: !user.emailVerified }).subscribe({
+      next: (updated) => this.replaceAdminUser(updated),
+      error: () => this.fail('Statut email non modifie.')
+    });
+  }
+
+  deleteAdminUser(user: User): void {
+    const currentUserId = this.auth.currentUser()?.id;
+    if (user.id === currentUserId) {
+      this.fail('Vous ne pouvez pas supprimer votre propre compte admin depuis cette interface.');
+      return;
+    }
+    const confirmed = window.confirm(`Supprimer le compte ${user.email} ?`);
+    if (!confirmed) {
+      return;
+    }
+    this.api.deleteUser(user.id).subscribe({
+      next: () => this.adminUsers.update((users) => users.filter((item) => item.id !== user.id)),
+      error: () => this.fail('Suppression impossible pour cet utilisateur.')
+    });
+  }
+
+  private replaceAdminUser(updated: User): void {
+    this.adminUsers.update((users) => users.map((user) => user.id === updated.id ? updated : user));
   }
 
   private loadAccountantDashboard(): void {
@@ -1158,10 +1249,16 @@ export class DashboardComponent implements OnInit {
   }
 
   roleLabel(): string {
+    if (this.isAdmin()) {
+      return 'Admin';
+    }
     return this.isAccountant() ? this.t('accountant') : this.t('director');
   }
 
   viewTitle(): string {
+    if (this.currentView() === 'ADMIN') {
+      return 'Administration';
+    }
     if (this.isAccountant()) {
       if (this.currentView() === 'AUDIT') {
         return this.t('auditPortfolio');
@@ -1176,6 +1273,7 @@ export class DashboardComponent implements OnInit {
       SOURCES: this.t('financialSources'),
       DASHBOARD: this.t('portfolioDashboard'),
       AUDIT: this.t('audit'),
+      ADMIN: 'Administration',
       PROFILE: this.t('myProfile')
     };
     return labels[this.currentView()];
