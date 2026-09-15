@@ -32,7 +32,7 @@ interface AccountantClient {
   riskScore: number;
   cash: number;
   coverageMonths: number;
-  currentAccountDays: number;
+  currentAccountDays: number | null;
   trend: 'UP' | 'DOWN' | 'STABLE';
   dataAgeDays: number;
   nextObligation: string;
@@ -1224,7 +1224,7 @@ export class DashboardComponent implements OnInit {
       riskScore: Number(client.riskScore ?? 0),
       cash: Number(client.cash ?? 0),
       coverageMonths: Number(client.coverageMonths ?? 0),
-      currentAccountDays: client.currentAccountDebtorDays ?? 0,
+      currentAccountDays: client.currentAccountDebtorDays ?? null,
       trend: client.trend,
       dataAgeDays: client.dataAgeDays ?? 999,
       nextObligation: client.nextObligationType,
@@ -1246,6 +1246,14 @@ export class DashboardComponent implements OnInit {
       return 'Baisse';
     }
     return 'Stable';
+  }
+
+  currentAccountDaysLabel(days?: number | null): string {
+    return days === null || days === undefined ? 'A verifier' : `${days} jours`;
+  }
+
+  currentAccountBalanceLabel(value?: number | null): string {
+    return value === null || value === undefined ? 'Aucune donnee disponible' : this.money(value);
   }
 
   roleLabel(): string {

@@ -615,7 +615,7 @@
                         </div>
                         <div>
                             <small>{{ t('currentAccount') }}</small>
-                            <strong>{{ selectedClient()?.currentAccountDays }} jours</strong>
+                            <strong>{{ currentAccountDaysLabel(selectedClient()?.currentAccountDays) }}</strong>
                         </div>
                         <div>
                             <small>Prochaine echeance</small>
@@ -839,8 +839,8 @@
                 </article>
                 <article class="metric-card">
                     <small>{{ t('currentAccount') }}</small>
-                    <strong>{{ money(displayedSnapshot()?.directorCurrentAccountBalance || enterprise()?.directorCurrentAccountBalance) }}</strong>
-                    <span>{{ displayedSnapshot()?.directorCurrentAccountDebtorDays || 0 }} {{ t('debtorDays') }}</span>
+                    <strong>{{ currentAccountBalanceLabel(displayedSnapshot()?.directorCurrentAccountBalance ?? enterprise()?.directorCurrentAccountBalance ?? null) }}</strong>
+                    <span>{{ currentAccountDaysLabel(displayedSnapshot()?.directorCurrentAccountDebtorDays ?? null) }}</span>
                 </article>
                 <article class="metric-card">
                     <small>{{ t('activeSources') }}</small>
@@ -912,7 +912,7 @@
                                 </div>
                                 <div class="indicator-source-row">
                                     <strong>{{ t('directorCurrentAccount') }}</strong>
-                                    <span>{{ displayedSnapshot()?.directorCurrentAccountDebtorDays || 0 }}jour(s)</span>
+                                    <span>{{ currentAccountDaysLabel(displayedSnapshot()?.directorCurrentAccountDebtorDays ?? null) }}</span>
                                     <small [class.warning-text]="sourceIndicators().currentAccount.warning">{{ sourceIndicators().currentAccount.label }} {{ sourceIndicators().currentAccount.date }}</small>
                                     <span>{{ sourceIndicators().currentAccount.confidence }}%</span>
                                 </div>

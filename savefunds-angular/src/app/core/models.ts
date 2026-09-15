@@ -203,7 +203,7 @@ export interface AccountantClientSummary {
   riskScore: number;
   cash: number;
   coverageMonths: number;
-  currentAccountDebtorDays: number;
+  currentAccountDebtorDays: number | null;
   trend: 'UP' | 'DOWN' | 'STABLE';
   dataAgeDays: number;
   nextObligationType: string;

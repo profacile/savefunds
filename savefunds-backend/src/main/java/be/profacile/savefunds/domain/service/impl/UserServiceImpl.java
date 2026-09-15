@@ -2,6 +2,7 @@ package be.profacile.savefunds.domain.service.impl;
 
 import be.profacile.savefunds.api.exception.ResourceNotFoundException;
 import be.profacile.savefunds.domain.entity.User;
+import be.profacile.savefunds.domain.repository.CompanyRepository;
 import be.profacile.savefunds.domain.repository.UserRepository;
 import be.profacile.savefunds.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -127,14 +129,13 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         log.info("Suppression utilisateur ID : {}", id);
 
-        // Vérifier que l'utilisateur existe
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User", "id", id);
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
+        companyRepository.deleteAll(companyRepository.findAllByUserIdOrderByCreatedAtDesc(id));
         userRepository.deleteById(id);
 
-        log.info("Utilisateur supprimé : ID {}", id);
+        log.info("Utilisateur supprimé : ID {}, email {}", id, user.getEmail());
     }
 
     @Override

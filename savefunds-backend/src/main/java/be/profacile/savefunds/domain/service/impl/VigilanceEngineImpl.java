@@ -33,13 +33,13 @@ public class VigilanceEngineImpl implements VigilanceEngine {
         List<VigilanceIndicatorResponse> indicators = new ArrayList<>();
         indicators.add(cashCoverageIndicator(expenses, cashAfter));
         indicators.add(revenueRatioIndicator(revenue, expenses));
-        indicators.add(currentAccountIndicator(snapshot));
+        if (hasCurrentAccountData(snapshot)) {
+            indicators.add(currentAccountIndicator(snapshot));
+        }
         indicators.add(requestedAmountIndicator(requestedAmount, maxRecommendedAmount));
 
-        Decision globalDecision = indicators.stream()
-                .anyMatch(indicator -> indicator.getDecision() == Decision.ROUGE) ? Decision.ROUGE :
-                indicators.stream().anyMatch(indicator -> indicator.getDecision() == Decision.ORANGE) ? Decision.ORANGE :
-                        Decision.VERT;
+        Decision globalDecision = globalDecision(indicators);
+        boolean partialAnalysis = !hasCurrentAccountData(snapshot);
 
         return VigilanceResultResponse.builder()
                 .snapshotId(snapshot.getId())
@@ -50,8 +50,8 @@ public class VigilanceEngineImpl implements VigilanceEngine {
                 .maxRecommendedAmount(maxRecommendedAmount)
                 .coverageMonthsAfterDecision(divide(cashAfter, expenses))
                 .globalDecision(globalDecision)
-                .globalExplanation(globalExplanation(globalDecision))
-                .recommendations(recommendations(globalDecision, maxRecommendedAmount))
+                .globalExplanation(globalExplanation(globalDecision, partialAnalysis))
+                .recommendations(recommendations(globalDecision, maxRecommendedAmount, partialAnalysis))
                 .indicators(indicators)
                 .build();
     }
@@ -85,7 +85,7 @@ public class VigilanceEngineImpl implements VigilanceEngine {
     }
 
     private VigilanceIndicatorResponse currentAccountIndicator(FinancialSnapshot snapshot) {
-        BigDecimal currentAccount = snapshot.getDirectorCurrentAccountBalance() == null ? BigDecimal.ZERO : snapshot.getDirectorCurrentAccountBalance();
+        BigDecimal currentAccount = snapshot.getDirectorCurrentAccountBalance();
         int debtorDays = snapshot.getDirectorCurrentAccountDebtorDays() == null ? 0 : snapshot.getDirectorCurrentAccountDebtorDays();
         Decision decision = currentAccount.signum() >= 0 ? Decision.VERT :
                 debtorDays <= 30 ? Decision.ORANGE : Decision.ROUGE;
@@ -97,6 +97,11 @@ public class VigilanceEngineImpl implements VigilanceEngine {
                 .details("Duree en jours du compte courant debiteur")
                 .recommendation(decision == Decision.ROUGE ? "Faire valider la situation par le comptable." : "Eviter de prolonger une position debitrice.")
                 .build();
+    }
+
+    private boolean hasCurrentAccountData(FinancialSnapshot snapshot) {
+        return snapshot.getDirectorCurrentAccountBalance() != null
+                || snapshot.getDirectorCurrentAccountDebtorDays() != null;
     }
 
     private VigilanceIndicatorResponse requestedAmountIndicator(BigDecimal requestedAmount, BigDecimal maxRecommendedAmount) {
@@ -113,7 +118,17 @@ public class VigilanceEngineImpl implements VigilanceEngine {
                 .build();
     }
 
-    private List<String> recommendations(Decision decision, BigDecimal maxRecommendedAmount) {
+    private Decision globalDecision(List<VigilanceIndicatorResponse> indicators) {
+        if (indicators.stream().anyMatch(indicator -> indicator.getDecision() == Decision.ROUGE)) {
+            return Decision.ROUGE;
+        }
+        if (indicators.stream().anyMatch(indicator -> indicator.getDecision() == Decision.ORANGE)) {
+            return Decision.ORANGE;
+        }
+        return Decision.VERT;
+    }
+
+    private List<String> recommendations(Decision decision, BigDecimal maxRecommendedAmount, boolean partialAnalysis) {
         List<String> recommendations = new ArrayList<>();
         if (decision == Decision.ROUGE) {
             recommendations.add("Ne pas executer la decision sans validation comptable.");
@@ -123,15 +138,21 @@ public class VigilanceEngineImpl implements VigilanceEngine {
         } else {
             recommendations.add("Situation compatible avec la decision simulee.");
         }
+        if (partialAnalysis) {
+            recommendations.add("Analyse partielle: aucune donnee de compte courant dirigeant disponible, a verifier avec le comptable.");
+        }
         return recommendations;
     }
 
-    private String globalExplanation(Decision decision) {
-        return switch (decision) {
+    private String globalExplanation(Decision decision, boolean partialAnalysis) {
+        String explanation = switch (decision) {
             case ROUGE -> "Au moins un indicateur est critique: la decision doit etre reportee ou validee.";
             case ORANGE -> "Aucun indicateur critique, mais au moins un signal demande de la vigilance.";
             case VERT -> "Les indicateurs disponibles sont compatibles avec la decision.";
         };
+        return partialAnalysis
+                ? explanation + " Analyse partielle: le compte courant dirigeant est absent et n'a pas ete evalue."
+                : explanation;
     }
 
     private BigDecimal positive(BigDecimal value) {

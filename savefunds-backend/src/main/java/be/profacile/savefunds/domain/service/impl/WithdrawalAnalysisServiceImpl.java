@@ -179,6 +179,7 @@ public class WithdrawalAnalysisServiceImpl implements WithdrawalAnalysisService 
         BigDecimal cashCoverageMonths = (BigDecimal) indicateurs.get("cashCoverageMonths");
         BigDecimal ratioCACharges = (BigDecimal) indicateurs.get("ratioCACharges");
         Integer directorCurrentAccountDebtorDays = (Integer) indicateurs.get("directorCurrentAccountDebtorDays");
+        boolean currentAccountAvailable = indicateurs.containsKey("directorCurrentAccountDebtorDays");
 
         log.info("───────────────────────────────────────────────────");
         log.info("INDICATEURS CALCULÉS:");
@@ -215,13 +216,14 @@ public class WithdrawalAnalysisServiceImpl implements WithdrawalAnalysisService 
         Decision decisionRatio = grilleTricoloreService
                 .calculateRevenueExpensesRatioDecision(ratioCACharges);
 
-        Decision directorCurrentAccountDecision = grilleTricoloreService
-                .calculateDirectorCurrentAccountDecision(directorCurrentAccountDebtorDays);
+        Decision directorCurrentAccountDecision = currentAccountAvailable
+                ? grilleTricoloreService.calculateDirectorCurrentAccountDecision(directorCurrentAccountDebtorDays)
+                : null;
 
         Decision globalDecision = grilleTricoloreService.calculateGlobalDecision(
                 cashDecision,
                 decisionRatio,
-                directorCurrentAccountDecision,
+                directorCurrentAccountDecision == null ? Decision.VERT : directorCurrentAccountDecision,
                 decisionMontant);
 
         log.info("DÉCISIONS CALCULÉES:");
@@ -239,8 +241,9 @@ public class WithdrawalAnalysisServiceImpl implements WithdrawalAnalysisService 
         String recommendationRatio = grilleTricoloreService
                 .generateRecommendation(decisionRatio, "ratio");
 
-        String directorCurrentAccountRecommendation = grilleTricoloreService
-                .generateRecommendation(directorCurrentAccountDecision, "compte_courant");
+        String directorCurrentAccountRecommendation = directorCurrentAccountDecision == null
+                ? "Aucune donnee de compte courant dirigeant disponible. Analyse partielle a verifier avec le comptable."
+                : grilleTricoloreService.generateRecommendation(directorCurrentAccountDecision, "compte_courant");
 
         String globalRecommendation = generateRecommendationGlobale(globalDecision, requestedAmount, montantMax);
 
@@ -252,8 +255,9 @@ public class WithdrawalAnalysisServiceImpl implements WithdrawalAnalysisService 
         String detailsRatio = generateRatioDetails(
                 ratioCACharges, decisionRatio);
 
-        String directorCurrentAccountDetails = generateDirectorCurrentAccountDetails(
-                directorCurrentAccountDebtorDays, directorCurrentAccountDecision);
+        String directorCurrentAccountDetails = directorCurrentAccountDecision == null
+                ? "Compte courant dirigeant non evalue: aucune donnee disponible dans les sources importees."
+                : generateDirectorCurrentAccountDetails(directorCurrentAccountDebtorDays, directorCurrentAccountDecision);
 
         String detailsGlobale = generateGlobalDetails(
                 globalDecision, cashDecision, decisionRatio, directorCurrentAccountDecision);
@@ -399,19 +403,21 @@ public class WithdrawalAnalysisServiceImpl implements WithdrawalAnalysisService 
         long nbRouges = countDecision(Decision.ROUGE, treso, ratio, cc);
         long nbOranges = countDecision(Decision.ORANGE, treso, ratio, cc);
         long nbVerts = countDecision(Decision.VERT, treso, ratio, cc);
+        int evaluatedIndicators = cc == null ? 2 : 3;
+        String partialSuffix = cc == null ? " Analyse partielle: compte courant non evalue." : "";
 
         if (globale == Decision.VERT) {
             return String.format(
-                    "Tous les indicateurs sont au vert (%d/3). Situation financière excellente.",
-                    nbVerts);
+                    "Tous les indicateurs disponibles sont au vert (%d/%d). Situation financière compatible.%s",
+                    nbVerts, evaluatedIndicators, partialSuffix);
         } else if (globale == Decision.ORANGE) {
             return String.format(
-                    "%d indicateur(s) en ORANGE, %d en VERT. Vigilance recommandée sur les points faibles.",
-                    nbOranges, nbVerts);
+                    "%d indicateur(s) en ORANGE, %d en VERT. Vigilance recommandée sur les points faibles.%s",
+                    nbOranges, nbVerts, partialSuffix);
         } else {
             return String.format(
-                    "%d indicateur(s) en ROUGE ! Situation critique nécessitant une action immédiate.",
-                    nbRouges);
+                    "%d indicateur(s) en ROUGE ! Situation critique nécessitant une action immédiate.%s",
+                    nbRouges, partialSuffix);
         }
     }
 

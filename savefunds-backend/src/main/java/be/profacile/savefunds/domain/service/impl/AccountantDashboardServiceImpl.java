@@ -223,7 +223,7 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         BigDecimal expenses = latestSnapshot.map(FinancialSnapshot::getMonthlyExpenses).orElse(company.getMonthlyExpenses());
         BigDecimal coverage = divide(cash, expenses);
         BigDecimal revenueExpensesRatio = divide(revenue, expenses);
-        Integer debtorDays = latestSnapshot.map(FinancialSnapshot::getDirectorCurrentAccountDebtorDays).orElse(debtorDaysFromCompany(company));
+        Integer debtorDays = currentAccountDebtorDays(company, latestSnapshot.orElse(null));
         int dataAge = latestSnapshot.map(this::dataAgeDays).orElse(999);
         long pendingCount = validationDecisionRepository.countByCompanyIdAndStatus(company.getId(), ValidationDecisionStatus.PENDING);
         String pendingLabel = validationDecisionRepository
@@ -303,7 +303,9 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
     private Decision financialStatus(BigDecimal coverage, BigDecimal revenueExpensesRatio, Integer debtorDays) {
         Decision cashDecision = trafficLightDecisionService.calculateCashDecision(coverage);
         Decision ratioDecision = trafficLightDecisionService.calculateRevenueExpensesRatioDecision(revenueExpensesRatio);
-        Decision currentAccountDecision = trafficLightDecisionService.calculateDirectorCurrentAccountDecision(debtorDays == null ? 0 : debtorDays);
+        Decision currentAccountDecision = debtorDays == null
+                ? Decision.VERT
+                : trafficLightDecisionService.calculateDirectorCurrentAccountDecision(debtorDays);
         return trafficLightDecisionService.calculateGlobalDecision(
                 cashDecision,
                 ratioDecision,
@@ -358,9 +360,23 @@ public class AccountantDashboardServiceImpl implements AccountantDashboardServic
         return TreasuryTrend.STABLE;
     }
 
-    private Integer debtorDaysFromCompany(Company company) {
-        if (company.getDirectorCurrentAccountBalance() == null || company.getDirectorCurrentAccountBalance().signum() >= 0 || company.getDirectorCurrentAccountDebitStartDate() == null) {
+    private Integer currentAccountDebtorDays(Company company, FinancialSnapshot latestSnapshot) {
+        if (latestSnapshot != null && latestSnapshot.getDirectorCurrentAccountBalance() != null) {
+            if (latestSnapshot.getDirectorCurrentAccountBalance().signum() >= 0) {
+                return 0;
+            }
+            return latestSnapshot.getDirectorCurrentAccountDebtorDays() == null
+                    ? 31
+                    : latestSnapshot.getDirectorCurrentAccountDebtorDays();
+        }
+        if (company.getDirectorCurrentAccountBalance() == null) {
+            return null;
+        }
+        if (company.getDirectorCurrentAccountBalance().signum() >= 0) {
             return 0;
+        }
+        if (company.getDirectorCurrentAccountDebitStartDate() == null) {
+            return 31;
         }
         return Math.toIntExact(ChronoUnit.DAYS.between(company.getDirectorCurrentAccountDebitStartDate(), LocalDate.now()));
     }

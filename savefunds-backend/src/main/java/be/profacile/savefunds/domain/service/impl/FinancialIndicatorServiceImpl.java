@@ -140,12 +140,14 @@ public class FinancialIndicatorServiceImpl implements FinancialIndicatorService 
                 indicateurs.put("cashCoverageMonths", cashCoverageMonths);
             }
 
-            // FinancialIndicator 3 : Durée compte courant débiteur
-            int directorCurrentAccountDebtorDays = calculateDirectorCurrentAccountDebtorDays(
-                    company.getDirectorCurrentAccountBalance(),
-                    company.getDirectorCurrentAccountDebitStartDate()
-            );
-            indicateurs.put("directorCurrentAccountDebtorDays", directorCurrentAccountDebtorDays);
+            // FinancialIndicator 3 : Durée compte courant débiteur, uniquement si la source expose le CC.
+            if (company.getDirectorCurrentAccountBalance() != null) {
+                int directorCurrentAccountDebtorDays = calculateDirectorCurrentAccountDebtorDays(
+                        company.getDirectorCurrentAccountBalance(),
+                        company.getDirectorCurrentAccountDebitStartDate()
+                );
+                indicateurs.put("directorCurrentAccountDebtorDays", directorCurrentAccountDebtorDays);
+            }
 
             // FinancialIndicator 4 : Montant maximum prélevable (seuil de 3 mois par défaut)
             if (company.getCashBalance() != null &&
